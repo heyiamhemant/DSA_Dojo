@@ -622,112 +622,276 @@ a:hover { color: var(--gold-bright); }
 /* ═════════════════════════════════════════════════════════════════════════
    PATHWAY (zigzag SVG map)
    ═════════════════════════════════════════════════════════════════════════ */
-/* ─── Pathway: Stone-Altar redesign ─── */
+/* ───────── Pathway: Fortress Diorama ───────── */
 .pathway-shell {
   position: relative;
-  padding: clamp(24px, 3vw, 48px) clamp(16px, 3vw, 40px);
+  padding: clamp(20px, 3vw, 36px) clamp(8px, 2vw, 20px) 60px;
   background:
-    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(232,200,122,0.10), transparent 60%),
-    radial-gradient(ellipse 60% 80% at 50% 100%, rgba(138,26,26,0.10), transparent 60%),
-    linear-gradient(180deg, #14100c 0%, #0b0807 60%, #050403 100%);
+    linear-gradient(180deg, #0e0c1a 0%, #14110d 35%, #0b0807 100%);
   border: 1px solid rgba(232,200,122,0.18);
   border-radius: var(--rad-lg);
   overflow: hidden;
   box-shadow:
     0 40px 100px rgba(0,0,0,0.7),
     inset 0 1px 0 rgba(232,200,122,0.08),
-    inset 0 0 120px rgba(0,0,0,0.6);
-  min-height: 800px;
+    inset 0 0 140px rgba(0,0,0,0.7);
+  min-height: 1000px;
 }
-.pathway-vignette {
-  position: absolute; inset: 0; pointer-events: none; z-index: 1;
-  background: radial-gradient(ellipse 70% 90% at 50% 50%, transparent 30%, rgba(0,0,0,0.85) 100%);
-}
-.pathway-mist {
-  position: absolute; inset: 0; pointer-events: none; z-index: 2; opacity: .25;
+/* Sky → moon glow */
+.fort-sky {
+  position: absolute; inset: 0; pointer-events: none; z-index: 0;
   background:
-    radial-gradient(ellipse 600px 200px at 50% 30%, rgba(232,200,122,0.12), transparent 70%),
-    radial-gradient(ellipse 500px 160px at 50% 70%, rgba(93,138,168,0.10), transparent 70%);
-  filter: blur(10px);
-  animation: mistBreathe 12s ease-in-out infinite;
+    radial-gradient(ellipse 700px 300px at 75% 12%, rgba(255,235,180,0.18), transparent 65%),
+    radial-gradient(ellipse 900px 400px at 30% 5%, rgba(120,90,180,0.10), transparent 70%),
+    linear-gradient(180deg, #1a1730 0%, #14110d 50%, transparent 100%);
 }
-@keyframes mistBreathe { 0%,100% { opacity: .2; } 50% { opacity: .35; } }
+.fort-sky::before {
+  content: ''; position: absolute; top: 6%; right: 18%;
+  width: 70px; height: 70px; border-radius: 50%;
+  background: radial-gradient(circle, #fff5d8 0%, #f0d090 60%, transparent 80%);
+  filter: blur(.5px);
+  box-shadow: 0 0 60px rgba(255,235,180,0.4), 0 0 120px rgba(255,200,100,0.25);
+  animation: moonPulse 8s ease-in-out infinite;
+}
+@keyframes moonPulse { 0%,100% { opacity: .85; } 50% { opacity: 1; } }
+/* Drifting clouds */
+.fort-clouds {
+  position: absolute; inset: 0; pointer-events: none; z-index: 1; opacity: .35;
+  background:
+    radial-gradient(ellipse 240px 50px at 10% 15%, rgba(180,170,200,0.6), transparent 70%),
+    radial-gradient(ellipse 320px 60px at 60% 22%, rgba(160,150,180,0.5), transparent 70%),
+    radial-gradient(ellipse 200px 40px at 90% 8%, rgba(200,190,210,0.4), transparent 70%);
+  background-size: 1600px 600px;
+  animation: cloudDrift 110s linear infinite;
+  filter: blur(2px);
+}
+@keyframes cloudDrift { from { background-position: 0 0; } to { background-position: -1600px 0; } }
+/* Distant mountain silhouettes */
+.fort-mountains {
+  position: absolute; left: 0; right: 0; top: 12%; height: 180px;
+  pointer-events: none; z-index: 2; opacity: .55;
+  background:
+    linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.4) 100%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 180' preserveAspectRatio='none'><polygon points='0,180 0,140 80,90 140,120 220,60 300,110 380,80 480,130 560,70 660,100 760,50 840,110 940,80 1040,120 1140,70 1200,100 1200,180' fill='%23120e1c'/><polygon points='0,180 0,160 60,130 130,150 200,110 290,140 370,120 460,150 550,115 640,135 740,100 830,140 920,120 1020,150 1130,115 1200,135 1200,180' fill='%231a1525' opacity='0.9'/></svg>") center/100% 100% no-repeat;
+}
+/* Ramparts (parallax layers) */
+.fort-ramparts {
+  position: absolute; left: -2%; right: -2%; pointer-events: none;
+  z-index: 3; height: 220px;
+}
+.fort-ramparts.ramparts-far {
+  top: 24%; opacity: .65;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 220' preserveAspectRatio='none'><defs><linearGradient id='g1' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='%23271f18'/><stop offset='1' stop-color='%23120d09'/></linearGradient></defs><path d='M0,220 L0,120 L40,120 L40,90 L80,90 L80,120 L120,120 L120,80 L160,80 L160,120 L200,120 L200,90 L240,90 L240,120 L280,120 L280,60 L320,60 L320,40 L360,40 L360,60 L400,60 L400,120 L440,120 L440,90 L480,90 L480,120 L520,120 L520,80 L560,80 L560,120 L600,120 L600,90 L640,90 L640,120 L680,120 L680,60 L720,60 L720,40 L760,40 L760,60 L800,60 L800,120 L840,120 L840,90 L880,90 L880,120 L920,120 L920,80 L960,80 L960,120 L1000,120 L1000,90 L1040,90 L1040,120 L1080,120 L1080,80 L1120,80 L1120,120 L1160,120 L1160,90 L1200,90 L1200,220 Z' fill='url(%23g1)'/><g fill='%23150f0a' opacity='0.6'><rect x='100' y='120' width='8' height='60'/><rect x='270' y='80' width='8' height='80'/><rect x='480' y='120' width='8' height='60'/><rect x='710' y='80' width='8' height='80'/><rect x='890' y='120' width='8' height='60'/><rect x='1090' y='120' width='8' height='60'/></g></svg>") center/100% 100% no-repeat;
+}
+.fort-ramparts.ramparts-near {
+  top: 32%; opacity: .9;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 220' preserveAspectRatio='none'><defs><linearGradient id='g2' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='%23332821'/><stop offset='1' stop-color='%230a0706'/></linearGradient></defs><path d='M0,220 L0,160 L20,160 L20,130 L60,130 L60,160 L100,160 L100,100 L140,100 L140,80 L180,80 L180,100 L220,100 L220,160 L260,160 L260,130 L300,130 L300,160 L340,160 L340,100 L380,100 L380,80 L420,80 L420,100 L460,100 L460,160 L500,160 L500,130 L540,130 L540,160 L580,160 L580,80 L620,80 L620,60 L660,60 L660,80 L700,80 L700,160 L740,160 L740,130 L780,130 L780,160 L820,160 L820,100 L860,100 L860,80 L900,80 L900,100 L940,100 L940,160 L980,160 L980,130 L1020,130 L1020,160 L1060,160 L1060,100 L1100,100 L1100,80 L1140,80 L1140,100 L1180,100 L1180,160 L1200,160 L1200,220 Z' fill='url(%23g2)'/><g fill='%23080605'><rect x='40' y='160' width='10' height='60'/><rect x='160' y='100' width='10' height='120'/><rect x='320' y='100' width='10' height='120'/><rect x='510' y='160' width='10' height='60'/><rect x='640' y='60' width='10' height='160'/><rect x='820' y='100' width='10' height='120'/><rect x='1100' y='80' width='10' height='140'/></g><g fill='%23ffb04a' opacity='0.85'><circle cx='165' cy='95' r='3'/><circle cx='325' cy='95' r='3'/><circle cx='645' cy='55' r='3.5'/><circle cx='825' cy='95' r='3'/><circle cx='1105' cy='75' r='3'/></g></svg>") center/100% 100% no-repeat;
+  filter: drop-shadow(0 -4px 20px rgba(255,160,60,0.15));
+}
+/* Banners hanging from ramparts */
+.fort-banners { position: absolute; inset: 0; pointer-events: none; z-index: 4; }
+.banner {
+  position: absolute; width: 18px; height: 60px;
+  background: linear-gradient(180deg, #6e1a1a 0%, #3a0a0a 80%);
+  box-shadow: inset -3px 0 0 rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.6);
+  transform-origin: top center;
+  animation: bannerSway 4s ease-in-out infinite;
+  clip-path: polygon(0 0, 100% 0, 100% 80%, 50% 100%, 0 80%);
+}
+.banner::before {
+  content: '✚'; position: absolute; left: 0; right: 0; top: 18px;
+  text-align: center; color: #e8c87a; font-size: 11px;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.6);
+}
+.banner.b1 { top: 31%; left: 12%; animation-delay: -.4s; }
+.banner.b2 { top: 33%; left: 28%; animation-delay: -1.1s; }
+.banner.b3 { top: 30%; left: 46%; animation-delay: -.7s; }
+.banner.b4 { top: 32%; left: 62%; animation-delay: -2.2s; }
+.banner.b5 { top: 31%; left: 78%; animation-delay: -1.6s; }
+.banner.b6 { top: 33%; left: 90%; animation-delay: -.2s; }
+@keyframes bannerSway {
+  0%,100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+/* Drifting fog */
+.fort-fog {
+  position: absolute; inset: 0; pointer-events: none; z-index: 5;
+  background:
+    radial-gradient(ellipse 600px 100px at 30% 55%, rgba(180,180,200,0.15), transparent 70%),
+    radial-gradient(ellipse 800px 120px at 70% 70%, rgba(160,160,180,0.12), transparent 70%);
+  animation: fogShift 18s ease-in-out infinite alternate;
+  mix-blend-mode: screen;
+}
+@keyframes fogShift {
+  from { transform: translateX(-3%); opacity: .7; }
+  to   { transform: translateX(3%);  opacity: 1; }
+}
+/* Header */
 .pathway-header {
-  position: relative; z-index: 3; text-align: center;
-  margin: 0 auto clamp(20px, 3vw, 36px); max-width: 640px;
+  position: relative; z-index: 8; text-align: center;
+  margin: 0 auto clamp(14px, 2vw, 26px); max-width: 720px;
 }
 .pathway-eyebrow {
   font-family: var(--medieval); color: var(--gold); letter-spacing: .35em;
-  font-size: 11px; text-transform: uppercase; opacity: .85; margin-bottom: 8px;
+  font-size: 11px; text-transform: uppercase; opacity: .9; margin-bottom: 8px;
+  text-shadow: 0 0 12px rgba(232,200,122,0.4);
 }
 .pathway-title {
   font-family: var(--serif-display); font-weight: 900;
   font-size: clamp(22px, 3vw, 32px); color: var(--text);
   letter-spacing: .04em; margin: 0 0 8px;
-  text-shadow: 0 2px 12px rgba(0,0,0,0.6), 0 0 30px rgba(232,200,122,0.15);
+  text-shadow: 0 2px 12px rgba(0,0,0,0.7), 0 0 30px rgba(232,200,122,0.2);
 }
 .pathway-sub {
   font-family: var(--ui); color: var(--text-dim); font-size: 13px;
-  font-style: italic; opacity: .8;
+  font-style: italic; opacity: .85;
 }
 .pathway-legend {
-  position: relative; z-index: 4;
-  display: flex; gap: 20px; justify-content: center;
+  position: relative; z-index: 8;
+  display: flex; gap: 22px; justify-content: center;
   margin-bottom: clamp(20px, 3vw, 36px);
   font-family: var(--mono); color: var(--text-dim);
   font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
 }
 .pathway-legend > div { display: flex; align-items: center; gap: 6px; }
 .leg-dot {
-  display: inline-block; width: 8px; height: 8px;
+  display: inline-block; width: 9px; height: 9px;
   transform: rotate(45deg); border: 1px solid rgba(232,200,122,0.4);
   box-shadow: 0 0 8px currentColor;
 }
 .leg-dot.complete { background: var(--gold); color: var(--gold); }
 .leg-dot.active { background: var(--blood); color: var(--blood-bright); }
-.leg-dot.uncharted { background: transparent; color: transparent; opacity: .5; }
+.leg-dot.uncharted { background: transparent; color: transparent; opacity: .55; }
+
+/* Stage — branching map area */
 .pathway-stage {
-  position: relative; z-index: 3;
-  max-width: 560px; margin: 0 auto;
+  position: relative; z-index: 7;
+  margin: 0 auto; max-width: 1000px;
+  border-radius: 16px;
+  background:
+    radial-gradient(ellipse 90% 60% at 50% 30%, rgba(232,200,122,0.04), transparent 70%),
+    linear-gradient(180deg, rgba(20,15,10,0.45), rgba(8,5,4,0.7));
+  border: 1px solid rgba(232,200,122,0.10);
+  box-shadow: inset 0 0 80px rgba(0,0,0,0.6);
+  padding: 30px 0;
 }
-.pathway-svg { display: block; width: 100%; height: auto; overflow: visible; }
-/* Rune-stone nodes */
-.path-node { cursor: pointer; transition: transform .3s cubic-bezier(.4,0,.2,1); }
-.path-node:hover { transform: scale(1.06); transform-origin: center; }
-.rune-base { fill: #1a1410; stroke: rgba(232,200,122,0.35); stroke-width: 1.5; transition: all .3s ease; }
-.rune-base.complete { fill: #2a1f12; stroke: var(--gold); }
-.rune-base.active { fill: #1f1410; stroke: var(--blood-bright); }
-.rune-base.uncharted { fill: #0e0a08; stroke: rgba(110,94,71,0.4); stroke-dasharray: 3 4; }
-.path-node:hover .rune-base {
-  filter: drop-shadow(0 0 16px rgba(232,200,122,0.5));
-  stroke: var(--gold-bright);
+.pathway-svg-canvas {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 1;
 }
-.rune-glow { fill: url(#nodeGlow); opacity: .7; pointer-events: none; }
-.rune-arc { fill: none; stroke-linecap: round; transition: stroke-dashoffset 1.5s cubic-bezier(.4,0,.2,1); }
-.rune-icon { font-size: 28px; text-anchor: middle; pointer-events: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.7)); }
-.rune-label {
-  font-family: var(--serif); font-weight: 600; font-size: 14px;
-  fill: var(--text); text-anchor: middle; letter-spacing: .03em;
-  pointer-events: none; text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+.road-base { fill: none; stroke: rgba(0,0,0,0.5); stroke-width: 1.6; vector-effect: non-scaling-stroke; }
+.road-line { fill: none; stroke: rgba(110,94,71,0.5); stroke-width: 0.9; stroke-linecap: round; stroke-dasharray: 1.2 2.5; vector-effect: non-scaling-stroke; }
+.road-line.active { stroke: rgba(232,200,122,0.65); }
+.road-line.cleared-trail { stroke: var(--gold); stroke-dasharray: 0; stroke-width: 1.1; }
+.road-pulse { fill: none; stroke: var(--gold-bright); stroke-width: 1.4; stroke-linecap: round;
+  stroke-dasharray: 2 30; vector-effect: non-scaling-stroke; opacity: .9; animation: roadFlow 3.2s linear infinite; }
+.road-pulse.active { stroke: var(--ember); }
+@keyframes roadFlow { to { stroke-dashoffset: -100; } }
+.circuit-junction { fill: rgba(110,94,71,0.7); }
+.circuit-junction.active-j { fill: var(--ember); }
+.circuit-junction.cleared-j { fill: var(--gold-bright); filter: drop-shadow(0 0 4px var(--gold)); }
+
+/* Pathway nodes (DOM-positioned) */
+.pn {
+  position: absolute; transform: translate(-50%, -50%);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  cursor: pointer; z-index: 5;
+  transition: transform .25s cubic-bezier(.4,0,.2,1);
 }
-.rune-pct {
-  font-family: var(--mono); font-size: 11px; fill: var(--text-dim);
-  text-anchor: middle; pointer-events: none; letter-spacing: .1em;
+.pn:hover { transform: translate(-50%, -50%) scale(1.06); }
+.pn-glow {
+  position: absolute; left: 50%; top: 38px; transform: translate(-50%, -50%);
+  width: 140px; height: 140px; border-radius: 50%;
+  background: radial-gradient(circle, var(--node-glow, rgba(232,200,122,0.25)) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+  animation: pnPulse 4s ease-in-out infinite;
 }
-.rune-num {
-  font-family: var(--mono); font-size: 9px; fill: var(--text-muted);
-  text-anchor: middle; pointer-events: none; letter-spacing: .25em;
+@keyframes pnPulse { 0%,100% { opacity: .7; transform: translate(-50%, -50%) scale(1); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); } }
+.pn-ring { position: relative; z-index: 1; display: grid; place-items: center; }
+.pn-ring svg { display: block; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.7)); }
+.pn-ring::before {
+  content: ''; position: absolute; inset: -6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(232,200,122,0.08), transparent 70%);
+  pointer-events: none;
 }
-/* Stone bridges between nodes */
-.bridge-line {
-  fill: none; stroke: rgba(232,200,122,0.18); stroke-width: 1.5;
-  stroke-dasharray: 1 6; stroke-linecap: round;
+.pn-icon {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  font-size: 28px; pointer-events: none;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.7));
 }
-.bridge-line.complete { stroke: rgba(232,200,122,0.55); stroke-dasharray: 0; stroke-width: 2; }
-/* Due badge */
-.due-badge { fill: var(--blood-bright); filter: drop-shadow(0 0 6px rgba(201,42,42,0.6)); }
-.due-badge.warn { fill: var(--medium); filter: drop-shadow(0 0 6px rgba(200,156,74,0.6)); }
-.due-badge-text { fill: #fff; font-family: var(--mono); font-size: 10px; font-weight: 700; text-anchor: middle; pointer-events: none; }
+.pn-badge {
+  position: absolute; top: -6px; right: -6px; z-index: 3;
+  background: linear-gradient(180deg, #2a1410, #160808);
+  border: 1px solid var(--blood-bright); color: var(--text);
+  font-family: var(--mono); font-size: 10px; font-weight: 700;
+  padding: 3px 7px; border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(201,42,42,0.4);
+  letter-spacing: .05em;
+}
+.pn-badge.cleared { border-color: var(--gold); background: linear-gradient(180deg, #2a2010, #161008); color: var(--gold-bright); box-shadow: 0 2px 12px rgba(232,200,122,0.5); }
+.pn-name {
+  font-family: var(--serif); font-weight: 700; font-size: 13px;
+  color: var(--text); letter-spacing: .04em; text-align: center;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.85);
+  max-width: 130px;
+}
+.pn-meta {
+  font-family: var(--mono); font-size: 10px; color: var(--text-dim);
+  letter-spacing: .12em; text-transform: uppercase;
+}
+.pn-meta.cleared { color: var(--gold); }
+.pn-meta.active { color: var(--ember); }
+.pn-tooltip {
+  position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%) translateY(-6px);
+  background: rgba(8,5,4,0.95); border: 1px solid rgba(232,200,122,0.3);
+  color: var(--text); padding: 6px 10px; border-radius: 4px;
+  font-family: var(--ui); font-size: 11px; white-space: nowrap;
+  opacity: 0; pointer-events: none; transition: opacity .2s ease;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.7); z-index: 10;
+}
+.pn:hover .pn-tooltip { opacity: 1; }
+/* Torch flame on cleared nodes */
+.pn-torch {
+  position: absolute; left: 50%; top: -12px; transform: translateX(-50%);
+  width: 14px; height: 22px; pointer-events: none; z-index: 4;
+}
+.pn-torch::before {
+  content: ''; position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
+  width: 12px; height: 18px; border-radius: 50% 50% 30% 30%;
+  background: radial-gradient(ellipse at 50% 90%, #fff5d8 0%, #ffb84a 35%, #ff5a1f 65%, transparent 85%);
+  filter: blur(.4px) drop-shadow(0 0 8px rgba(255,160,60,0.7));
+  animation: flameFlick .35s ease-in-out infinite alternate;
+}
+@keyframes flameFlick {
+  from { transform: translateX(-50%) scaleY(1) scaleX(1); opacity: .9; }
+  to   { transform: translateX(-50%) scaleY(1.15) scaleX(.92); opacity: 1; }
+}
+/* Fireflies floating around the map */
+.firefly {
+  position: absolute; width: 4px; height: 4px; border-radius: 50%;
+  background: radial-gradient(circle, #fff5b8 30%, #d4a017 60%, transparent 75%);
+  box-shadow: 0 0 8px rgba(255,200,90,0.7), 0 0 14px rgba(255,160,60,0.45);
+  pointer-events: none; z-index: 6;
+  animation: fireflyFloat var(--ff-dur, 9s) ease-in-out var(--ff-delay, 0s) infinite alternate, fireflyBlink 3s ease-in-out infinite;
+}
+@keyframes fireflyFloat {
+  0% { transform: translate(0,0); }
+  50% { transform: translate(var(--ff-dx, 20px), var(--ff-dy, -30px)); }
+  100% { transform: translate(var(--ff-dx2, -10px), var(--ff-dy2, -55px)); }
+}
+@keyframes fireflyBlink { 0%,100% { opacity: .9; } 40% { opacity: .4; } 70% { opacity: 1; } }
+/* Milestone markers in the margins */
+.milestone {
+  position: absolute; z-index: 4;
+  font-family: var(--medieval); color: var(--gold); font-size: 11px;
+  letter-spacing: .3em; text-transform: uppercase;
+  padding: 4px 10px;
+  background: rgba(20,16,12,0.8); border: 1px solid rgba(232,200,122,0.3);
+  border-radius: 4px;
+  text-shadow: 0 0 8px rgba(232,200,122,0.4);
+  backdrop-filter: blur(4px);
+}
 /* Aged paper texture via SVG noise */
 .pathway-shell::before {
   content: ''; position: absolute; inset: 0; pointer-events: none;
@@ -1562,20 +1726,32 @@ textarea.modal-comment {
         </div>
       </div>
       <div class="pathway-shell">
-        <div class="pathway-vignette"></div>
-        <div class="pathway-mist"></div>
+        <!-- fortress backdrop layers -->
+        <div class="fort-sky"></div>
+        <div class="fort-clouds"></div>
+        <div class="fort-mountains"></div>
+        <div class="fort-ramparts ramparts-far" data-parallax="0.05"></div>
+        <div class="fort-ramparts ramparts-near" data-parallax="0.12"></div>
+        <div class="fort-banners">
+          <div class="banner b1"></div><div class="banner b2"></div>
+          <div class="banner b3"></div><div class="banner b4"></div>
+          <div class="banner b5"></div><div class="banner b6"></div>
+        </div>
+        <div class="fort-fog"></div>
+
         <header class="pathway-header">
-          <div class="pathway-eyebrow">⚜ The Long Road ⚜</div>
-          <h2 class="pathway-title">Path of the Algorithm Slayer</h2>
-          <div class="pathway-sub">Each rune-stone marks a topic. Conquer them in order, or wander as you please.</div>
+          <div class="pathway-eyebrow">⚜ The Long March ⚜</div>
+          <h2 class="pathway-title">Ramparts of the Algorithm Slayer</h2>
+          <div class="pathway-sub">Cross every keep, light every torch. The map remembers your conquests.</div>
         </header>
         <div class="pathway-legend">
           <div><span class="leg-dot complete"></span>Conquered</div>
           <div><span class="leg-dot active"></span>In progress</div>
           <div><span class="leg-dot uncharted"></span>Uncharted</div>
         </div>
-        <div class="pathway-stage">
-          <svg class="pathway-svg" id="pathway-svg" viewBox="0 0 600 1800" preserveAspectRatio="xMidYMid meet"></svg>
+
+        <div class="pathway-stage" id="pathway-stage">
+          <!-- nodes + circuit injected by JS -->
           <div class="path-tooltip" id="path-tooltip"></div>
         </div>
       </div>
@@ -2466,13 +2642,21 @@ function updateBadges() {
 
 /* ═════════ PATHWAY ═════════ */
 function renderPathway() {
-  const svg = document.getElementById('pathway-svg');
-  if (!svg) return;
+  const stage = document.getElementById('pathway-stage');
+  if (!stage) return;
+  // Clear (preserve tooltip)
+  const tip = document.getElementById('path-tooltip');
+  stage.innerHTML = '';
+  if (tip) stage.appendChild(tip);
+
+  // Stats per topic
   const stats = {};
   RAW_PROBLEMS.forEach(p => {
-    if (!stats[p.topic]) stats[p.topic] = { total: 0, solved: 0, due: 0, overdue: 0 };
+    if (!stats[p.topic]) stats[p.topic] = { total: 0, solved: 0, due: 0, overdue: 0, confSum: 0 };
+    const c = getConf(p);
     stats[p.topic].total++;
-    if (getConf(p) > 0) {
+    stats[p.topic].confSum += c;
+    if (c > 0) {
       stats[p.topic].solved++;
       const di = getDueInfo(p);
       if (di.cls !== 'due-new') {
@@ -2481,105 +2665,167 @@ function renderPathway() {
       }
     }
   });
-  const list = Object.entries(stats).sort((a, b) => b[1].total - a[1].total);
-  const N = list.length;
 
-  // Vertical zigzag layout
-  const W = 600;
-  const STEP = 200;
-  const H = 120 + N * STEP + 80;
-  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-  const positions = list.map((_, i) => {
-    const side = i % 2 === 0 ? -1 : 1; // alternate
-    const x = W / 2 + side * 130;
-    const y = 120 + i * STEP;
-    return { x, y };
+  // Order topics
+  const TOPIC_ORDER = ['Array','String','Math','Hashing','Two Pointers','Sliding Window',
+    'Binary Search','Stack','Linked List','Recursion','Matrix','Greedy','Tree','Heap',
+    'Intervals','Backtracking','DP','Graph','Trie','Bit Manip','D&C','Design','Mixed'];
+  const all = Object.entries(stats);
+  const ordered = TOPIC_ORDER.map(n => all.find(([t]) => t === n)).filter(Boolean)
+    .concat(all.filter(([t]) => !TOPIC_ORDER.includes(t)));
+
+  // Branching pattern from v1
+  const PATTERN = [1, 2, 1, 3, 1, 2, 1, 2, 1, 3, 1, 2, 1, 2, 1, 3, 1, 2, 1, 2, 1, 2, 1];
+  const N = ordered.length;
+  const rows = [];
+  let ti = 0, pi = 0;
+  while (ti < N) {
+    const w = Math.min(PATTERN[pi % PATTERN.length], N - ti);
+    rows.push(ordered.slice(ti, ti + w));
+    ti += w; pi++;
+  }
+  const ROW_H = 200;
+  const MAP_H = 80 + rows.length * ROW_H;
+  stage.style.height = MAP_H + 'px';
+
+  // Position each topic at (x%, ypx)
+  const pos = new Map();
+  rows.forEach((row, ri) => {
+    const y = 80 + ri * ROW_H;
+    const spread = row.length === 1 ? [50] : row.length === 2 ? [30, 70] : [20, 50, 80];
+    row.forEach(([t], ci) => pos.set(t, { x: spread[ci], y }));
   });
 
-  // Defs: glow gradient
-  const defs = `<defs>
-    <radialGradient id="nodeGlow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="rgba(232,200,122,0.45)"/>
-      <stop offset="60%" stop-color="rgba(232,200,122,0.12)"/>
-      <stop offset="100%" stop-color="rgba(232,200,122,0)"/>
-    </radialGradient>
-  </defs>`;
+  // Background SVG circuit (paths between rows)
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('class', 'pathway-svg-canvas');
+  svg.setAttribute('viewBox', `0 0 100 ${MAP_H}`);
+  svg.setAttribute('preserveAspectRatio', 'none');
+  let segIdx = 0;
+  const addSeg = (fn, tn) => {
+    const f = pos.get(fn), t = pos.get(tn);
+    const fs = stats[fn];
+    const fpct = fs.total ? (fs.confSum / fs.total) / 5 : 0;
+    const cls = fpct >= 0.8 ? 'cleared-trail' : fpct > 0 ? 'active' : '';
+    const cy = (f.y + t.y) / 2;
+    const c1x = f.x + ((segIdx * 7 % 9) - 4) * 0.6;
+    const c2x = t.x + ((segIdx * 11 % 9) - 4) * 0.6;
+    const d = `M ${f.x} ${f.y} C ${c1x} ${cy - 10}, ${c2x} ${cy + 10}, ${t.x} ${t.y}`;
+    const p1 = document.createElementNS(svgNS, 'path'); p1.setAttribute('d', d); p1.setAttribute('class', 'road-base'); svg.appendChild(p1);
+    const p2 = document.createElementNS(svgNS, 'path'); p2.setAttribute('d', d); p2.setAttribute('class', `road-line ${cls}`); svg.appendChild(p2);
+    if (cls) {
+      const p3 = document.createElementNS(svgNS, 'path'); p3.setAttribute('d', d); p3.setAttribute('class', `road-pulse ${cls === 'active' ? 'active' : ''}`);
+      p3.style.animationDelay = (-segIdx * 0.4).toFixed(1) + 's';
+      svg.appendChild(p3);
+    }
+    segIdx++;
+  };
+  for (let ri = 0; ri < rows.length - 1; ri++) {
+    const fr = rows[ri], tr = rows[ri + 1];
+    if (fr.length === 1 && tr.length === 1) addSeg(fr[0][0], tr[0][0]);
+    else if (fr.length === 1) tr.forEach(([tn]) => addSeg(fr[0][0], tn));
+    else if (tr.length === 1) fr.forEach(([fn]) => addSeg(fn, tr[0][0]));
+    else for (let i = 0; i < Math.max(fr.length, tr.length); i++) addSeg(fr[i % fr.length][0], tr[i % tr.length][0]);
+  }
+  // Junction dots
+  ordered.forEach(([t]) => {
+    const p = pos.get(t);
+    const td = stats[t];
+    const pct = td.total ? Math.round((td.confSum / td.total) / 5 * 100) : 0;
+    const jc = pct >= 80 ? 'cleared-j' : pct > 0 ? 'active-j' : '';
+    const c = document.createElementNS(svgNS, 'circle');
+    c.setAttribute('cx', p.x); c.setAttribute('cy', p.y); c.setAttribute('r', '0.6');
+    c.setAttribute('class', `circuit-junction ${jc}`);
+    svg.appendChild(c);
+  });
+  stage.appendChild(svg);
 
-  // Bridges: smooth S-curve between consecutive nodes
-  let bridges = '';
-  for (let i = 1; i < positions.length; i++) {
-    const a = positions[i - 1], b = positions[i];
-    const mx = (a.x + b.x) / 2;
-    const my = (a.y + b.y) / 2;
-    const c1x = a.x, c1y = my;
-    const c2x = b.x, c2y = my;
-    const isDone = (list[i - 1][1].solved / Math.max(1, list[i - 1][1].total)) >= 1;
-    bridges += `<path class="bridge-line ${isDone ? 'complete' : ''}" d="M ${a.x} ${a.y + 56} C ${c1x} ${c1y} ${c2x} ${c2y} ${b.x} ${b.y - 56}"/>`;
+  // Milestone labels in margins
+  const MILESTONES = ['Outer Bailey', 'Drawbridge', 'Curtain Wall', 'Inner Keep', 'High Tower'];
+  const step = Math.max(3, Math.floor(rows.length / MILESTONES.length));
+  for (let m = 0, ix = 0; m < rows.length; m += step, ix++) {
+    if (ix >= MILESTONES.length) break;
+    const firstY = 80 + m * ROW_H;
+    const side = m % 2 === 0 ? 'left:2%;' : 'right:2%;';
+    const ms = document.createElement('div');
+    ms.className = 'milestone';
+    ms.style.cssText = `top:${firstY - 12}px; ${side}`;
+    ms.textContent = '⚜ ' + MILESTONES[ix];
+    stage.appendChild(ms);
   }
 
-  // Hex helper
-  const hexPath = (r) => {
-    const pts = [];
-    for (let k = 0; k < 6; k++) {
-      const ang = Math.PI / 6 + k * Math.PI / 3;
-      pts.push(`${(r * Math.cos(ang)).toFixed(2)} ${(r * Math.sin(ang)).toFixed(2)}`);
-    }
-    return `M ${pts[0]} L ${pts.slice(1).join(' L ')} Z`;
-  };
+  // Fireflies
+  for (let f = 0; f < 8; f++) {
+    const el = document.createElement('div');
+    el.className = 'firefly';
+    el.style.cssText = `left:${10 + (f * 41) % 80}%; top:${60 + (f * 137) % (MAP_H - 80)}px; --ff-dur:${7 + f * 2}s; --ff-delay:${-f * 1.5}s; --ff-dx:${-25 + f * 8}px; --ff-dy:${-30 - f * 8}px; --ff-dx2:${15 - f * 5}px; --ff-dy2:${-55 - f * 10}px;`;
+    stage.appendChild(el);
+  }
 
   // Nodes
-  let nodes = '';
-  list.forEach(([t, d], i) => {
+  ordered.forEach(([t, d]) => {
     const v = visualOf(t);
-    const pp = d.total ? d.solved / d.total : 0;
-    const cls = pp >= 1 ? 'complete' : (pp <= 0 ? 'uncharted' : 'active');
-    const pos = positions[i];
-    const C = 2 * Math.PI * 50;
-    const off = C - C * pp;
-    const arcCol = pp >= 1 ? 'var(--gold)' : (pp <= 0 ? 'rgba(110,94,71,0.4)' : 'var(--blood-bright)');
+    const p = pos.get(t);
+    const pct = d.total ? Math.round(d.solved / d.total * 100) : 0;
+    const conf = d.total ? Math.round((d.confSum / d.total) / 5 * 100) : 0;
+    const isCleared = pct >= 95;
+    const level = pct >= 80 ? 'Cleared' : pct >= 60 ? 'Conquering' : pct >= 40 ? 'Battling' : pct >= 20 ? 'Entered' : 'Uncharted';
+    const sizeR = d.total > 12 ? 50 : d.total > 5 ? 42 : 36;
+    const ring = sizeR * 2;
+    const C = 2 * Math.PI * (sizeR - 4);
+    const off = C - C * pct / 100;
+    const arcCol = conf >= 80 ? 'var(--gold)' : conf >= 50 ? 'var(--ember)' : conf > 0 ? 'var(--medium)' : 'rgba(110,94,71,0.5)';
+    const glowCol = conf >= 80 ? 'rgba(232,200,122,0.35)' : conf >= 50 ? 'rgba(255,138,58,0.30)' : conf > 0 ? 'rgba(200,156,74,0.25)' : 'rgba(110,94,71,0.18)';
     const dueCount = d.due + d.overdue;
-    const dueBadge = dueCount > 0
-      ? `<g transform="translate(45, -45)">
-          <circle class="due-badge ${d.overdue ? '' : 'warn'}" r="13"/>
-          <text class="due-badge-text" y="4">${dueCount}</text>
-        </g>`
-      : '';
-    const labelText = t.length > 18 ? t.slice(0, 16) + '…' : t;
-    nodes += `<g class="path-node" data-topic="${t.replace(/"/g, '&quot;')}" transform="translate(${pos.x}, ${pos.y})" onclick="filterByTopic('${t.replace(/'/g, "\\'")}')">
-      <circle class="rune-glow" r="68"/>
-      <path class="rune-base ${cls}" d="${hexPath(56)}"/>
-      <circle class="rune-arc" r="50" stroke="${arcCol}" stroke-width="3" stroke-dasharray="${C}" stroke-dashoffset="${off}" transform="rotate(-90)"/>
-      <text class="rune-icon" y="-6">${v.icon}</text>
-      <text class="rune-pct" y="22">${d.solved}/${d.total}</text>
-      <text class="rune-num" y="-78">${String(i + 1).padStart(2, '0')}</text>
-      <text class="rune-label" y="92">${labelText}</text>
-      ${dueBadge}
-    </g>`;
+    const node = document.createElement('div');
+    node.className = 'pn';
+    node.style.left = p.x + '%'; node.style.top = p.y + 'px';
+    node.style.setProperty('--node-glow', glowCol);
+    node.dataset.topic = t;
+    const torch = isCleared ? '<div class="pn-torch"></div>' : '';
+    const badge = dueCount > 0 ? `<div class="pn-badge ${isCleared ? 'cleared' : ''}">${dueCount}!</div>` : '';
+    const tipText = (d.due ? `${d.due} due` : '') + (d.overdue ? ` · ${d.overdue} overdue` : '') + ` · ${d.total - d.solved} unseen`;
+    node.innerHTML = `
+      <div class="pn-glow"></div>
+      ${torch}
+      ${badge}
+      <div class="pn-ring" style="width:${ring}px;height:${ring}px">
+        <svg width="${ring}" height="${ring}" viewBox="0 0 ${ring} ${ring}">
+          <circle cx="${ring/2}" cy="${ring/2}" r="${sizeR - 4}" fill="rgba(20,15,10,0.95)" stroke="rgba(232,200,122,0.35)" stroke-width="2"/>
+          <circle cx="${ring/2}" cy="${ring/2}" r="${sizeR - 4}" fill="none" stroke="${arcCol}" stroke-width="3.5"
+            stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}" stroke-linecap="round"
+            transform="rotate(-90 ${ring/2} ${ring/2})" style="transition:stroke-dashoffset 1.4s ease"/>
+        </svg>
+        <div class="pn-icon">${v.icon}</div>
+      </div>
+      <div class="pn-name">${t}</div>
+      <div class="pn-meta ${isCleared ? 'cleared' : (conf > 0 ? 'active' : '')}">${level} · ${pct}%</div>
+      <div class="pn-tooltip">${d.solved}/${d.total} slain${tipText.trim() ? ' · ' + tipText.replace(/^\s*·\s*/, '') : ''}</div>
+    `;
+    node.onclick = () => filterByTopic(t);
+    stage.appendChild(node);
   });
 
-  svg.innerHTML = `${defs}${bridges}${nodes}`;
+  // Tooltip wiring (using built-in pn-tooltip CSS now); we also keep dynamic tooltip for advanced data
+  if (tip) tip.classList.remove('show'); // disable separate tooltip; handled by .pn-tooltip
 
-  // Tooltip
-  const tip = document.getElementById('path-tooltip');
-  const stage = document.querySelector('.pathway-stage');
-  svg.querySelectorAll('.path-node').forEach(n => {
-    n.addEventListener('pointerenter', () => {
-      const t = n.dataset.topic;
-      const s = stats[t]; if (!s) return;
-      const unseen = s.total - s.solved;
-      tip.innerHTML = `<h5>${visualOf(t).icon} ${t}</h5>
-        <div>${s.solved} / ${s.total} slain</div>
-        <div style="color:${s.due || s.overdue ? 'var(--medium)' : 'var(--text-muted)'}">${s.due} due · ${s.overdue} overdue</div>
-        <div style="color:var(--text-muted)">${unseen} uncharted</div>`;
-      tip.classList.add('show');
-    });
-    n.addEventListener('pointermove', e => {
-      const r = stage.getBoundingClientRect();
-      tip.style.left = (e.clientX - r.left + 16) + 'px';
-      tip.style.top = (e.clientY - r.top + 16) + 'px';
-    });
-    n.addEventListener('pointerleave', () => tip.classList.remove('show'));
-  });
+  // Parallax binding
+  const layers = document.querySelectorAll('.pathway-shell [data-parallax]');
+  if (!window._fortParallax) {
+    window._fortParallax = true;
+    window.addEventListener('scroll', () => {
+      const shell = document.querySelector('.pathway-shell');
+      if (!shell) return;
+      const rect = shell.getBoundingClientRect();
+      if (rect.bottom < 0 || rect.top > window.innerHeight) return;
+      const offset = -rect.top;
+      layers.forEach(l => {
+        const r = parseFloat(l.dataset.parallax) || 0;
+        l.style.transform = `translateY(${offset * r}px)`;
+      });
+    }, { passive: true });
+  }
 }
 
 /* ═════════ BESTIARY ═════════ */
