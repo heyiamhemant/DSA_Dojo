@@ -622,276 +622,250 @@ a:hover { color: var(--gold-bright); }
 /* ═════════════════════════════════════════════════════════════════════════
    PATHWAY (zigzag SVG map)
    ═════════════════════════════════════════════════════════════════════════ */
-/* ───────── Pathway: Fortress Diorama ───────── */
-.pathway-shell {
+/* ───────── Pathway: Codex Atlas ───────── */
+.codex {
   position: relative;
-  padding: clamp(20px, 3vw, 36px) clamp(8px, 2vw, 20px) 60px;
+  padding: clamp(28px, 3vw, 56px) clamp(20px, 3vw, 56px) clamp(20px, 2.4vw, 36px);
   background:
-    linear-gradient(180deg, #0e0c1a 0%, #14110d 35%, #0b0807 100%);
-  border: 1px solid rgba(232,200,122,0.18);
-  border-radius: var(--rad-lg);
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(232,200,122,0.06), transparent 70%),
+    linear-gradient(180deg, #100b07 0%, #07050300 60%),
+    repeating-linear-gradient(0deg, rgba(0,0,0,0.04) 0 2px, transparent 2px 4px),
+    #060403;
+  border: 1px solid rgba(232,200,122,0.15);
+  border-radius: 8px;
   overflow: hidden;
   box-shadow:
-    0 40px 100px rgba(0,0,0,0.7),
+    0 50px 140px rgba(0,0,0,0.85),
+    inset 0 1px 0 rgba(232,200,122,0.10),
+    inset 0 0 200px rgba(0,0,0,0.7);
+  min-height: 1100px;
+}
+.codex-frame {
+  position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;
+}
+.codex::before, .codex::after {
+  content: ''; position: absolute; left: 24px; right: 24px; height: 14px;
+  background: linear-gradient(180deg, #1a130d, #0a0706);
+  border-top: 1px solid rgba(232,200,122,0.18);
+  border-bottom: 1px solid rgba(0,0,0,0.6);
+  box-shadow:
     inset 0 1px 0 rgba(232,200,122,0.08),
-    inset 0 0 140px rgba(0,0,0,0.7);
-  min-height: 1000px;
+    0 4px 14px rgba(0,0,0,0.6);
+  z-index: 1;
 }
-/* Sky → moon glow */
-.fort-sky {
-  position: absolute; inset: 0; pointer-events: none; z-index: 0;
-  background:
-    radial-gradient(ellipse 700px 300px at 75% 12%, rgba(255,235,180,0.18), transparent 65%),
-    radial-gradient(ellipse 900px 400px at 30% 5%, rgba(120,90,180,0.10), transparent 70%),
-    linear-gradient(180deg, #1a1730 0%, #14110d 50%, transparent 100%);
-}
-.fort-sky::before {
-  content: ''; position: absolute; top: 6%; right: 18%;
-  width: 70px; height: 70px; border-radius: 50%;
-  background: radial-gradient(circle, #fff5d8 0%, #f0d090 60%, transparent 80%);
-  filter: blur(.5px);
-  box-shadow: 0 0 60px rgba(255,235,180,0.4), 0 0 120px rgba(255,200,100,0.25);
-  animation: moonPulse 8s ease-in-out infinite;
-}
-@keyframes moonPulse { 0%,100% { opacity: .85; } 50% { opacity: 1; } }
-/* Drifting clouds */
-.fort-clouds {
-  position: absolute; inset: 0; pointer-events: none; z-index: 1; opacity: .35;
-  background:
-    radial-gradient(ellipse 240px 50px at 10% 15%, rgba(180,170,200,0.6), transparent 70%),
-    radial-gradient(ellipse 320px 60px at 60% 22%, rgba(160,150,180,0.5), transparent 70%),
-    radial-gradient(ellipse 200px 40px at 90% 8%, rgba(200,190,210,0.4), transparent 70%);
-  background-size: 1600px 600px;
-  animation: cloudDrift 110s linear infinite;
-  filter: blur(2px);
-}
-@keyframes cloudDrift { from { background-position: 0 0; } to { background-position: -1600px 0; } }
-/* Distant mountain silhouettes */
-.fort-mountains {
-  position: absolute; left: 0; right: 0; top: 12%; height: 180px;
-  pointer-events: none; z-index: 2; opacity: .55;
-  background:
-    linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.4) 100%),
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 180' preserveAspectRatio='none'><polygon points='0,180 0,140 80,90 140,120 220,60 300,110 380,80 480,130 560,70 660,100 760,50 840,110 940,80 1040,120 1140,70 1200,100 1200,180' fill='%23120e1c'/><polygon points='0,180 0,160 60,130 130,150 200,110 290,140 370,120 460,150 550,115 640,135 740,100 830,140 920,120 1020,150 1130,115 1200,135 1200,180' fill='%231a1525' opacity='0.9'/></svg>") center/100% 100% no-repeat;
-}
-/* Ramparts (parallax layers) */
-.fort-ramparts {
-  position: absolute; left: -2%; right: -2%; pointer-events: none;
-  z-index: 3; height: 220px;
-}
-.fort-ramparts.ramparts-far {
-  top: 24%; opacity: .65;
-  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 220' preserveAspectRatio='none'><defs><linearGradient id='g1' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='%23271f18'/><stop offset='1' stop-color='%23120d09'/></linearGradient></defs><path d='M0,220 L0,120 L40,120 L40,90 L80,90 L80,120 L120,120 L120,80 L160,80 L160,120 L200,120 L200,90 L240,90 L240,120 L280,120 L280,60 L320,60 L320,40 L360,40 L360,60 L400,60 L400,120 L440,120 L440,90 L480,90 L480,120 L520,120 L520,80 L560,80 L560,120 L600,120 L600,90 L640,90 L640,120 L680,120 L680,60 L720,60 L720,40 L760,40 L760,60 L800,60 L800,120 L840,120 L840,90 L880,90 L880,120 L920,120 L920,80 L960,80 L960,120 L1000,120 L1000,90 L1040,90 L1040,120 L1080,120 L1080,80 L1120,80 L1120,120 L1160,120 L1160,90 L1200,90 L1200,220 Z' fill='url(%23g1)'/><g fill='%23150f0a' opacity='0.6'><rect x='100' y='120' width='8' height='60'/><rect x='270' y='80' width='8' height='80'/><rect x='480' y='120' width='8' height='60'/><rect x='710' y='80' width='8' height='80'/><rect x='890' y='120' width='8' height='60'/><rect x='1090' y='120' width='8' height='60'/></g></svg>") center/100% 100% no-repeat;
-}
-.fort-ramparts.ramparts-near {
-  top: 32%; opacity: .9;
-  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 220' preserveAspectRatio='none'><defs><linearGradient id='g2' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='%23332821'/><stop offset='1' stop-color='%230a0706'/></linearGradient></defs><path d='M0,220 L0,160 L20,160 L20,130 L60,130 L60,160 L100,160 L100,100 L140,100 L140,80 L180,80 L180,100 L220,100 L220,160 L260,160 L260,130 L300,130 L300,160 L340,160 L340,100 L380,100 L380,80 L420,80 L420,100 L460,100 L460,160 L500,160 L500,130 L540,130 L540,160 L580,160 L580,80 L620,80 L620,60 L660,60 L660,80 L700,80 L700,160 L740,160 L740,130 L780,130 L780,160 L820,160 L820,100 L860,100 L860,80 L900,80 L900,100 L940,100 L940,160 L980,160 L980,130 L1020,130 L1020,160 L1060,160 L1060,100 L1100,100 L1100,80 L1140,80 L1140,100 L1180,100 L1180,160 L1200,160 L1200,220 Z' fill='url(%23g2)'/><g fill='%23080605'><rect x='40' y='160' width='10' height='60'/><rect x='160' y='100' width='10' height='120'/><rect x='320' y='100' width='10' height='120'/><rect x='510' y='160' width='10' height='60'/><rect x='640' y='60' width='10' height='160'/><rect x='820' y='100' width='10' height='120'/><rect x='1100' y='80' width='10' height='140'/></g><g fill='%23ffb04a' opacity='0.85'><circle cx='165' cy='95' r='3'/><circle cx='325' cy='95' r='3'/><circle cx='645' cy='55' r='3.5'/><circle cx='825' cy='95' r='3'/><circle cx='1105' cy='75' r='3'/></g></svg>") center/100% 100% no-repeat;
-  filter: drop-shadow(0 -4px 20px rgba(255,160,60,0.15));
-}
-/* Banners hanging from ramparts */
-.fort-banners { position: absolute; inset: 0; pointer-events: none; z-index: 4; }
-.banner {
-  position: absolute; width: 18px; height: 60px;
-  background: linear-gradient(180deg, #6e1a1a 0%, #3a0a0a 80%);
-  box-shadow: inset -3px 0 0 rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.6);
-  transform-origin: top center;
-  animation: bannerSway 4s ease-in-out infinite;
-  clip-path: polygon(0 0, 100% 0, 100% 80%, 50% 100%, 0 80%);
-}
-.banner::before {
-  content: '✚'; position: absolute; left: 0; right: 0; top: 18px;
-  text-align: center; color: #e8c87a; font-size: 11px;
-  text-shadow: 0 1px 1px rgba(0,0,0,0.6);
-}
-.banner.b1 { top: 31%; left: 12%; animation-delay: -.4s; }
-.banner.b2 { top: 33%; left: 28%; animation-delay: -1.1s; }
-.banner.b3 { top: 30%; left: 46%; animation-delay: -.7s; }
-.banner.b4 { top: 32%; left: 62%; animation-delay: -2.2s; }
-.banner.b5 { top: 31%; left: 78%; animation-delay: -1.6s; }
-.banner.b6 { top: 33%; left: 90%; animation-delay: -.2s; }
-@keyframes bannerSway {
-  0%,100% { transform: rotate(-3deg); }
-  50% { transform: rotate(3deg); }
-}
-/* Drifting fog */
-.fort-fog {
-  position: absolute; inset: 0; pointer-events: none; z-index: 5;
-  background:
-    radial-gradient(ellipse 600px 100px at 30% 55%, rgba(180,180,200,0.15), transparent 70%),
-    radial-gradient(ellipse 800px 120px at 70% 70%, rgba(160,160,180,0.12), transparent 70%);
-  animation: fogShift 18s ease-in-out infinite alternate;
-  mix-blend-mode: screen;
-}
-@keyframes fogShift {
-  from { transform: translateX(-3%); opacity: .7; }
-  to   { transform: translateX(3%);  opacity: 1; }
-}
+.codex::before { top: 16px; }
+.codex::after { bottom: 16px; }
+
 /* Header */
-.pathway-header {
-  position: relative; z-index: 8; text-align: center;
-  margin: 0 auto clamp(14px, 2vw, 26px); max-width: 720px;
+.codex-head { position: relative; z-index: 3; text-align: center; max-width: 760px; margin: 30px auto clamp(18px, 2.4vw, 28px); }
+.codex-rule {
+  height: 1px; background: linear-gradient(90deg, transparent, rgba(232,200,122,0.45), transparent);
+  margin: 14px auto; max-width: 520px;
 }
-.pathway-eyebrow {
-  font-family: var(--medieval); color: var(--gold); letter-spacing: .35em;
-  font-size: 11px; text-transform: uppercase; opacity: .9; margin-bottom: 8px;
-  text-shadow: 0 0 12px rgba(232,200,122,0.4);
+.codex-eyebrow {
+  font-family: var(--medieval); color: var(--gold); font-size: 11px; letter-spacing: .4em;
+  text-transform: uppercase; opacity: .9;
 }
-.pathway-title {
+.codex-title {
   font-family: var(--serif-display); font-weight: 900;
-  font-size: clamp(22px, 3vw, 32px); color: var(--text);
-  letter-spacing: .04em; margin: 0 0 8px;
-  text-shadow: 0 2px 12px rgba(0,0,0,0.7), 0 0 30px rgba(232,200,122,0.2);
+  font-size: clamp(26px, 3.4vw, 40px); color: var(--text);
+  letter-spacing: .06em; margin: 6px 0;
+  text-shadow: 0 2px 14px rgba(0,0,0,0.7), 0 0 36px rgba(232,200,122,0.18);
 }
-.pathway-sub {
-  font-family: var(--ui); color: var(--text-dim); font-size: 13px;
-  font-style: italic; opacity: .85;
+.codex-sub {
+  font-family: var(--serif); font-style: italic; color: var(--text-dim); font-size: 14px; letter-spacing: .04em;
 }
-.pathway-legend {
-  position: relative; z-index: 8;
-  display: flex; gap: 22px; justify-content: center;
-  margin-bottom: clamp(20px, 3vw, 36px);
+.codex-legend {
+  position: relative; z-index: 3;
+  display: flex; gap: 26px; justify-content: center;
+  margin-bottom: clamp(18px, 2.4vw, 28px);
   font-family: var(--mono); color: var(--text-dim);
-  font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
+  font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
 }
-.pathway-legend > div { display: flex; align-items: center; gap: 6px; }
-.leg-dot {
-  display: inline-block; width: 9px; height: 9px;
-  transform: rotate(45deg); border: 1px solid rgba(232,200,122,0.4);
-  box-shadow: 0 0 8px currentColor;
-}
+.codex-legend > span { display: flex; align-items: center; gap: 8px; }
+.leg-dot { display: inline-block; width: 9px; height: 9px; transform: rotate(45deg); border: 1px solid rgba(232,200,122,0.45); box-shadow: 0 0 10px currentColor; }
 .leg-dot.complete { background: var(--gold); color: var(--gold); }
-.leg-dot.active { background: var(--blood); color: var(--blood-bright); }
+.leg-dot.active { background: #c9501f; color: #c9501f; }
 .leg-dot.uncharted { background: transparent; color: transparent; opacity: .55; }
 
-/* Stage — branching map area */
-.pathway-stage {
-  position: relative; z-index: 7;
-  margin: 0 auto; max-width: 1000px;
-  border-radius: 16px;
-  background:
-    radial-gradient(ellipse 90% 60% at 50% 30%, rgba(232,200,122,0.04), transparent 70%),
-    linear-gradient(180deg, rgba(20,15,10,0.45), rgba(8,5,4,0.7));
-  border: 1px solid rgba(232,200,122,0.10);
-  box-shadow: inset 0 0 80px rgba(0,0,0,0.6);
-  padding: 30px 0;
-}
-.pathway-svg-canvas {
-  position: absolute; inset: 0; width: 100%; height: 100%;
-  pointer-events: none; z-index: 1;
-}
-.road-base { fill: none; stroke: rgba(0,0,0,0.5); stroke-width: 1.6; vector-effect: non-scaling-stroke; }
-.road-line { fill: none; stroke: rgba(110,94,71,0.5); stroke-width: 0.9; stroke-linecap: round; stroke-dasharray: 1.2 2.5; vector-effect: non-scaling-stroke; }
-.road-line.active { stroke: rgba(232,200,122,0.65); }
-.road-line.cleared-trail { stroke: var(--gold); stroke-dasharray: 0; stroke-width: 1.1; }
-.road-pulse { fill: none; stroke: var(--gold-bright); stroke-width: 1.4; stroke-linecap: round;
-  stroke-dasharray: 2 30; vector-effect: non-scaling-stroke; opacity: .9; animation: roadFlow 3.2s linear infinite; }
-.road-pulse.active { stroke: var(--ember); }
-@keyframes roadFlow { to { stroke-dashoffset: -100; } }
-.circuit-junction { fill: rgba(110,94,71,0.7); }
-.circuit-junction.active-j { fill: var(--ember); }
-.circuit-junction.cleared-j { fill: var(--gold-bright); filter: drop-shadow(0 0 4px var(--gold)); }
-
-/* Pathway nodes (DOM-positioned) */
-.pn {
-  position: absolute; transform: translate(-50%, -50%);
-  display: flex; flex-direction: column; align-items: center; gap: 6px;
-  cursor: pointer; z-index: 5;
-  transition: transform .25s cubic-bezier(.4,0,.2,1);
-}
-.pn:hover { transform: translate(-50%, -50%) scale(1.06); }
-.pn-glow {
-  position: absolute; left: 50%; top: 38px; transform: translate(-50%, -50%);
-  width: 140px; height: 140px; border-radius: 50%;
-  background: radial-gradient(circle, var(--node-glow, rgba(232,200,122,0.25)) 0%, transparent 70%);
-  pointer-events: none; z-index: 0;
-  animation: pnPulse 4s ease-in-out infinite;
-}
-@keyframes pnPulse { 0%,100% { opacity: .7; transform: translate(-50%, -50%) scale(1); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); } }
-.pn-ring { position: relative; z-index: 1; display: grid; place-items: center; }
-.pn-ring svg { display: block; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.7)); }
-.pn-ring::before {
-  content: ''; position: absolute; inset: -6px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(232,200,122,0.08), transparent 70%);
-  pointer-events: none;
-}
-.pn-icon {
-  position: absolute; inset: 0; display: grid; place-items: center;
-  font-size: 28px; pointer-events: none;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.7));
-}
-.pn-badge {
-  position: absolute; top: -6px; right: -6px; z-index: 3;
-  background: linear-gradient(180deg, #2a1410, #160808);
-  border: 1px solid var(--blood-bright); color: var(--text);
-  font-family: var(--mono); font-size: 10px; font-weight: 700;
-  padding: 3px 7px; border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(201,42,42,0.4);
-  letter-spacing: .05em;
-}
-.pn-badge.cleared { border-color: var(--gold); background: linear-gradient(180deg, #2a2010, #161008); color: var(--gold-bright); box-shadow: 0 2px 12px rgba(232,200,122,0.5); }
-.pn-name {
-  font-family: var(--serif); font-weight: 700; font-size: 13px;
-  color: var(--text); letter-spacing: .04em; text-align: center;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.85);
-  max-width: 130px;
-}
-.pn-meta {
-  font-family: var(--mono); font-size: 10px; color: var(--text-dim);
-  letter-spacing: .12em; text-transform: uppercase;
-}
-.pn-meta.cleared { color: var(--gold); }
-.pn-meta.active { color: var(--ember); }
-.pn-tooltip {
-  position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%) translateY(-6px);
-  background: rgba(8,5,4,0.95); border: 1px solid rgba(232,200,122,0.3);
-  color: var(--text); padding: 6px 10px; border-radius: 4px;
-  font-family: var(--ui); font-size: 11px; white-space: nowrap;
-  opacity: 0; pointer-events: none; transition: opacity .2s ease;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.7); z-index: 10;
-}
-.pn:hover .pn-tooltip { opacity: 1; }
-/* Torch flame on cleared nodes */
-.pn-torch {
-  position: absolute; left: 50%; top: -12px; transform: translateX(-50%);
-  width: 14px; height: 22px; pointer-events: none; z-index: 4;
-}
-.pn-torch::before {
-  content: ''; position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
-  width: 12px; height: 18px; border-radius: 50% 50% 30% 30%;
-  background: radial-gradient(ellipse at 50% 90%, #fff5d8 0%, #ffb84a 35%, #ff5a1f 65%, transparent 85%);
-  filter: blur(.4px) drop-shadow(0 0 8px rgba(255,160,60,0.7));
-  animation: flameFlick .35s ease-in-out infinite alternate;
-}
-@keyframes flameFlick {
-  from { transform: translateX(-50%) scaleY(1) scaleX(1); opacity: .9; }
-  to   { transform: translateX(-50%) scaleY(1.15) scaleX(.92); opacity: 1; }
-}
-/* Fireflies floating around the map */
-.firefly {
-  position: absolute; width: 4px; height: 4px; border-radius: 50%;
-  background: radial-gradient(circle, #fff5b8 30%, #d4a017 60%, transparent 75%);
-  box-shadow: 0 0 8px rgba(255,200,90,0.7), 0 0 14px rgba(255,160,60,0.45);
-  pointer-events: none; z-index: 6;
-  animation: fireflyFloat var(--ff-dur, 9s) ease-in-out var(--ff-delay, 0s) infinite alternate, fireflyBlink 3s ease-in-out infinite;
-}
-@keyframes fireflyFloat {
-  0% { transform: translate(0,0); }
-  50% { transform: translate(var(--ff-dx, 20px), var(--ff-dy, -30px)); }
-  100% { transform: translate(var(--ff-dx2, -10px), var(--ff-dy2, -55px)); }
-}
-@keyframes fireflyBlink { 0%,100% { opacity: .9; } 40% { opacity: .4; } 70% { opacity: 1; } }
-/* Milestone markers in the margins */
-.milestone {
-  position: absolute; z-index: 4;
-  font-family: var(--medieval); color: var(--gold); font-size: 11px;
-  letter-spacing: .3em; text-transform: uppercase;
-  padding: 4px 10px;
-  background: rgba(20,16,12,0.8); border: 1px solid rgba(232,200,122,0.3);
+/* The vellum stage */
+.codex-stage {
+  position: relative; z-index: 2;
+  margin: 0 clamp(8px, 2vw, 28px);
   border-radius: 4px;
-  text-shadow: 0 0 8px rgba(232,200,122,0.4);
-  backdrop-filter: blur(4px);
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 30%, rgba(232,200,122,0.06), transparent 70%),
+    linear-gradient(180deg, rgba(20,15,10,0.72), rgba(8,5,4,0.85));
+  border: 1px solid rgba(232,200,122,0.18);
+  box-shadow:
+    inset 0 0 80px rgba(0,0,0,0.7),
+    inset 0 0 0 1px rgba(0,0,0,0.5),
+    0 30px 80px rgba(0,0,0,0.7);
+  padding: clamp(40px, 4vw, 72px) 0 clamp(40px, 4vw, 72px);
+  overflow: hidden;
 }
+/* Aged paper warm overlay */
+.codex-paper {
+  position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(ellipse 70% 70% at 50% 50%, rgba(180,140,80,0.08), transparent 75%),
+    radial-gradient(ellipse 40% 30% at 20% 80%, rgba(120,80,40,0.06), transparent 70%),
+    radial-gradient(ellipse 40% 30% at 80% 20%, rgba(120,80,40,0.06), transparent 70%);
+}
+/* Noise via SVG turbulence (sharp grain feel) */
+.codex-noise {
+  position: absolute; inset: 0; pointer-events: none; z-index: 0; opacity: .35;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .35 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
+  mix-blend-mode: overlay;
+}
+/* Burnt edge vignette inside the paper */
+.codex-burn {
+  position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(ellipse 90% 100% at 50% 50%, transparent 60%, rgba(40,18,8,0.55) 90%, rgba(20,8,4,0.85) 100%);
+}
+
+/* Ink road network */
+.codex-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: visible; }
+.ink-base { fill: none; stroke: rgba(0,0,0,0.55); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+.ink-line { fill: none; stroke: #2a1a10; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ink-line.active { stroke: #b8651a; }
+.ink-line.cleared { stroke: var(--gold); }
+.ink-pulse { fill: none; stroke: var(--gold-bright); stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 2 30; opacity: .9; animation: inkFlow 3.6s linear infinite; }
+.ink-pulse.active { stroke: var(--ember); }
+@keyframes inkFlow { to { stroke-dashoffset: -120; } }
+.ink-station { fill: rgba(0,0,0,0.85); stroke: rgba(232,200,122,0.5); stroke-width: 0.8; }
+.ink-station.cleared { fill: var(--gold-deep); stroke: var(--gold); }
+
+/* Keep (node) — heavy stone seal */
+.keep {
+  position: absolute; transform: translate(-50%, -50%);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  cursor: pointer; z-index: 4;
+  transition: transform .3s cubic-bezier(.4,0,.2,1);
+}
+.keep:hover { transform: translate(-50%, -50%) scale(1.04); }
+.keep-medallion {
+  position: relative;
+  width: 96px; height: 96px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 30%, #2a2018 0%, #0e0805 70%),
+    #0a0806;
+  border: 2px solid var(--seal-col, rgba(232,200,122,0.35));
+  box-shadow:
+    inset 0 2px 0 rgba(255,235,180,0.06),
+    inset 0 -8px 16px rgba(0,0,0,0.8),
+    0 8px 28px rgba(0,0,0,0.8),
+    0 0 0 6px rgba(20,14,10,0.7),
+    0 0 0 7px var(--seal-rim, rgba(232,200,122,0.14)),
+    0 0 32px var(--seal-glow, rgba(232,200,122,0.18));
+  display: grid; place-items: center;
+  transition: box-shadow .35s ease, border-color .35s ease;
+}
+.keep:hover .keep-medallion {
+  box-shadow:
+    inset 0 2px 0 rgba(255,235,180,0.08),
+    inset 0 -8px 16px rgba(0,0,0,0.85),
+    0 12px 38px rgba(0,0,0,0.85),
+    0 0 0 6px rgba(20,14,10,0.7),
+    0 0 0 7px rgba(232,200,122,0.5),
+    0 0 56px var(--seal-glow, rgba(232,200,122,0.45));
+  border-color: var(--gold-bright);
+}
+.keep-medallion.lg { width: 110px; height: 110px; }
+.keep-medallion.sm { width: 84px; height: 84px; }
+.keep-arc { position: absolute; inset: -2px; pointer-events: none; transform: rotate(-90deg); }
+.keep-arc circle { fill: none; stroke-linecap: round; transition: stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1); }
+.keep-icon {
+  font-size: 32px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.85));
+  letter-spacing: 0;
+}
+.keep-medallion.lg .keep-icon { font-size: 38px; }
+.keep-medallion.sm .keep-icon { font-size: 26px; }
+.keep-num {
+  position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(180deg, #1a130d, #0a0706);
+  border: 1px solid var(--seal-col, rgba(232,200,122,0.35));
+  font-family: var(--medieval); color: var(--gold);
+  font-size: 10px; letter-spacing: .15em;
+  padding: 2px 8px; border-radius: 2px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.7);
+}
+.keep-due {
+  position: absolute; top: -8px; right: -8px;
+  background: linear-gradient(180deg, #c9421a, #6b1a08);
+  color: #fff5d8; font-family: var(--mono); font-size: 11px; font-weight: 700;
+  width: 22px; height: 22px; border-radius: 50%;
+  display: grid; place-items: center;
+  box-shadow: 0 0 14px rgba(255,90,30,0.7), 0 4px 10px rgba(0,0,0,0.6);
+  border: 1px solid #ff8a3a;
+  animation: dueThrob 1.6s ease-in-out infinite;
+}
+@keyframes dueThrob { 0%,100% { transform: scale(1); box-shadow: 0 0 14px rgba(255,90,30,0.7), 0 4px 10px rgba(0,0,0,0.6); } 50% { transform: scale(1.08); box-shadow: 0 0 22px rgba(255,140,60,0.9), 0 4px 14px rgba(0,0,0,0.7); } }
+.keep-name {
+  font-family: var(--serif); font-weight: 700; font-size: 14px; color: var(--text);
+  letter-spacing: .04em; text-align: center; max-width: 140px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+}
+.keep-meta {
+  font-family: var(--mono); font-size: 9.5px; color: var(--text-muted);
+  letter-spacing: .22em; text-transform: uppercase;
+}
+.keep-meta.cleared { color: var(--gold); }
+.keep-meta.active { color: var(--ember); }
+.keep-tooltip {
+  position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+  background: rgba(8,5,4,0.97); border: 1px solid rgba(232,200,122,0.35);
+  color: var(--text); padding: 8px 12px; border-radius: 4px;
+  font-family: var(--ui); font-size: 11px; line-height: 1.5; white-space: nowrap;
+  opacity: 0; pointer-events: none; transition: opacity .2s ease;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.8); z-index: 20;
+}
+.keep:hover .keep-tooltip { opacity: 1; }
+.keep-tooltip strong { color: var(--gold); font-family: var(--serif); font-weight: 700; display: block; margin-bottom: 4px; letter-spacing: .04em; }
+
+/* Section banners between rows */
+.codex-marker {
+  position: absolute; z-index: 3; pointer-events: none;
+  left: 50%; transform: translateX(-50%);
+  font-family: var(--medieval); color: var(--gold); font-size: 11px;
+  letter-spacing: .35em; text-transform: uppercase;
+  opacity: .55;
+  display: flex; align-items: center; gap: 16px;
+  white-space: nowrap;
+}
+.codex-marker::before, .codex-marker::after {
+  content: ''; width: clamp(60px, 10vw, 140px); height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(232,200,122,0.45), transparent);
+}
+
+/* Ambient embers (subtle, not cartoon) */
+.codex-ember {
+  position: absolute; width: 2px; height: 2px; border-radius: 50%;
+  background: #ffb86a; box-shadow: 0 0 4px rgba(255,160,80,0.7), 0 0 10px rgba(255,120,40,0.4);
+  pointer-events: none; z-index: 5; opacity: 0;
+  animation: emberRise var(--er-dur, 9s) linear var(--er-delay, 0s) infinite;
+}
+@keyframes emberRise {
+  0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
+  10% { opacity: 1; }
+  85% { opacity: .8; }
+  100% { transform: translate(var(--er-dx, 20px), var(--er-dy, -200px)) scale(1.1); opacity: 0; }
+}
+
+/* Footer */
+.codex-foot {
+  position: relative; z-index: 3; text-align: center;
+  margin-top: clamp(20px, 2.4vw, 32px); padding-top: clamp(16px, 1.8vw, 22px);
+  border-top: 1px solid rgba(232,200,122,0.12);
+  display: flex; justify-content: center; align-items: center; gap: 18px;
+  font-family: var(--serif); color: var(--text-dim); font-size: 12px; font-style: italic; letter-spacing: .04em;
+}
+.codex-foot-orn { color: var(--gold); font-size: 14px; }
+
+
 /* Aged paper texture via SVG noise */
 .pathway-shell::before {
   content: ''; position: absolute; inset: 0; pointer-events: none;
@@ -1151,12 +1125,63 @@ textarea.modal-comment {
   margin-top: clamp(20px, 2.4vw, 36px);
 }
 .bento-cell { min-width: 0; }
-/* Dashboard breathing room */
+/* ── Dashboard: gilt framing + breathing room ── */
 .page.is-dashboard { max-width: 1480px; margin: 0 auto; padding-block: clamp(8px, 1.4vw, 18px); }
-.page.is-dashboard .panel { padding: clamp(20px, 2.2vw, 32px); }
+.page.is-dashboard .panel {
+  padding: clamp(22px, 2.4vw, 36px);
+  background:
+    linear-gradient(180deg, rgba(34,26,18,0.62), rgba(12,9,7,0.85)),
+    radial-gradient(ellipse 80% 40% at 50% 0%, rgba(232,200,122,0.05), transparent 70%);
+  border: 1px solid rgba(232,200,122,0.16);
+  border-radius: 4px;
+  box-shadow:
+    0 22px 48px rgba(0,0,0,0.55),
+    inset 0 1px 0 rgba(232,200,122,0.06),
+    inset 0 0 60px rgba(0,0,0,0.4);
+  position: relative;
+}
+.page.is-dashboard .panel::before, .page.is-dashboard .panel::after {
+  content: ''; position: absolute; width: 22px; height: 22px;
+  border: 1px solid rgba(232,200,122,0.45); pointer-events: none;
+}
+.page.is-dashboard .panel::before { top: 8px; left: 8px; border-right: 0; border-bottom: 0; }
+.page.is-dashboard .panel::after { bottom: 8px; right: 8px; border-left: 0; border-top: 0; }
 .page.is-dashboard .panel + .panel { margin-top: clamp(18px, 2vw, 28px); }
-.page.is-dashboard .panel-title { font-size: clamp(15px, 1.2vw, 17px); margin-bottom: clamp(14px, 1.4vw, 20px); }
-.page.is-dashboard .hero { padding: clamp(28px, 3vw, 44px); margin-bottom: clamp(20px, 2.4vw, 32px); }
+.page.is-dashboard .panel-title {
+  font-family: var(--serif-display); font-weight: 700;
+  font-size: clamp(15px, 1.2vw, 18px);
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: clamp(16px, 1.6vw, 22px);
+  padding-bottom: clamp(10px, 1.1vw, 14px);
+  text-shadow: 0 2px 6px rgba(0,0,0,0.6), 0 0 18px rgba(232,200,122,0.18);
+}
+.page.is-dashboard .panel-title::after {
+  background: linear-gradient(90deg, rgba(232,200,122,0.6), rgba(232,200,122,0.15) 40%, transparent);
+  height: 1px;
+  margin-left: 14px;
+}
+.page.is-dashboard .hero {
+  padding: clamp(32px, 3.2vw, 52px);
+  margin-bottom: clamp(24px, 2.8vw, 36px);
+  background:
+    radial-gradient(ellipse 60% 80% at 12% 50%, rgba(232,200,122,0.10), transparent 60%),
+    radial-gradient(ellipse 50% 80% at 85% 50%, rgba(138,26,26,0.10), transparent 60%),
+    linear-gradient(180deg, rgba(40,28,18,0.6), rgba(8,5,4,0.92));
+  border: 1px solid rgba(232,200,122,0.22);
+  border-radius: 6px;
+  box-shadow:
+    0 30px 80px rgba(0,0,0,0.7),
+    inset 0 1px 0 rgba(232,200,122,0.10),
+    inset 0 0 100px rgba(0,0,0,0.5);
+  position: relative; overflow: hidden;
+}
+.page.is-dashboard .hero::before, .page.is-dashboard .hero::after {
+  content: ''; position: absolute; width: 36px; height: 36px;
+  border: 1.5px solid rgba(232,200,122,0.55); pointer-events: none;
+}
+.page.is-dashboard .hero::before { top: 12px; left: 12px; border-right: 0; border-bottom: 0; }
+.page.is-dashboard .hero::after { bottom: 12px; right: 12px; border-left: 0; border-top: 0; }
 .page.is-dashboard .kpi-grid { gap: clamp(14px, 1.6vw, 22px); }
 .page.is-dashboard .power-rows { gap: clamp(10px, 1.2vw, 16px); display: flex; flex-direction: column; }
 .page.is-dashboard .mastery-grid { gap: clamp(10px, 1.2vw, 16px); }
@@ -1737,37 +1762,30 @@ textarea.modal-comment {
           <div class="page-subtitle">Through the forest of unknowns</div>
         </div>
       </div>
-      <div class="pathway-shell">
-        <!-- fortress backdrop layers -->
-        <div class="fort-sky"></div>
-        <div class="fort-clouds"></div>
-        <div class="fort-mountains"></div>
-        <div class="fort-mountains" data-parallax="0.18"></div>
-        <div class="fort-clouds" data-parallax="0.30"></div>
-        <div class="fort-ramparts ramparts-far" data-parallax="0.45"></div>
-        <div class="fort-ramparts ramparts-near" data-parallax="0.70"></div>
-        <div class="fort-banners" data-parallax="0.85">
-          <div class="banner b1"></div><div class="banner b2"></div>
-          <div class="banner b3"></div><div class="banner b4"></div>
-          <div class="banner b5"></div><div class="banner b6"></div>
-        </div>
-        <div class="fort-fog" data-parallax="0.55"></div>
-
-        <header class="pathway-header">
-          <div class="pathway-eyebrow">⚜ The Long March ⚜</div>
-          <h2 class="pathway-title">Ramparts of the Algorithm Slayer</h2>
-          <div class="pathway-sub">Cross every keep, light every torch. The map remembers your conquests.</div>
+      <div class="codex">
+        <header class="codex-head">
+          <div class="codex-rule"></div>
+          <div class="codex-eyebrow">— Codex of the Slayer —</div>
+          <h2 class="codex-title">Atlas of Conquests</h2>
+          <div class="codex-sub">Twenty-three realms. One slayer. The vellum remembers all.</div>
+          <div class="codex-rule"></div>
         </header>
-        <div class="pathway-legend">
-          <div><span class="leg-dot complete"></span>Conquered</div>
-          <div><span class="leg-dot active"></span>In progress</div>
-          <div><span class="leg-dot uncharted"></span>Uncharted</div>
+        <div class="codex-legend">
+          <span><i class="leg-dot complete"></i>Conquered</span>
+          <span><i class="leg-dot active"></i>In progress</span>
+          <span><i class="leg-dot uncharted"></i>Uncharted</span>
         </div>
-
-        <div class="pathway-stage" id="pathway-stage">
-          <!-- nodes + circuit injected by JS -->
+        <div class="codex-stage" id="pathway-stage">
+          <div class="codex-paper"></div>
+          <div class="codex-noise"></div>
+          <div class="codex-burn"></div>
           <div class="path-tooltip" id="path-tooltip"></div>
         </div>
+        <footer class="codex-foot">
+          <span class="codex-foot-orn">❦</span>
+          <span class="codex-foot-text">Hic itinera militis · here lie the slayer's roads</span>
+          <span class="codex-foot-orn">❦</span>
+        </footer>
       </div>
     </section>
 
@@ -2658,18 +2676,19 @@ function updateBadges() {
 function renderPathway() {
   const stage = document.getElementById('pathway-stage');
   if (!stage) return;
-  // Clear (preserve tooltip)
   const tip = document.getElementById('path-tooltip');
+  // Clear (preserve overlays + tooltip)
+  const overlays = ['codex-paper', 'codex-noise', 'codex-burn'].map(c => stage.querySelector('.' + c));
   stage.innerHTML = '';
+  overlays.forEach(o => o && stage.appendChild(o));
   if (tip) stage.appendChild(tip);
 
-  // Stats per topic
+  // Stats
   const stats = {};
   RAW_PROBLEMS.forEach(p => {
     if (!stats[p.topic]) stats[p.topic] = { total: 0, solved: 0, due: 0, overdue: 0, confSum: 0 };
     const c = getConf(p);
-    stats[p.topic].total++;
-    stats[p.topic].confSum += c;
+    stats[p.topic].total++; stats[p.topic].confSum += c;
     if (c > 0) {
       stats[p.topic].solved++;
       const di = getDueInfo(p);
@@ -2680,7 +2699,6 @@ function renderPathway() {
     }
   });
 
-  // Order topics
   const TOPIC_ORDER = ['Array','String','Math','Hashing','Two Pointers','Sliding Window',
     'Binary Search','Stack','Linked List','Recursion','Matrix','Greedy','Tree','Heap',
     'Intervals','Backtracking','DP','Graph','Trie','Bit Manip','D&C','Design','Mixed'];
@@ -2688,50 +2706,51 @@ function renderPathway() {
   const ordered = TOPIC_ORDER.map(n => all.find(([t]) => t === n)).filter(Boolean)
     .concat(all.filter(([t]) => !TOPIC_ORDER.includes(t)));
 
-  // Branching pattern from v1
+  // Branching pattern
   const PATTERN = [1, 2, 1, 3, 1, 2, 1, 2, 1, 3, 1, 2, 1, 2, 1, 3, 1, 2, 1, 2, 1, 2, 1];
   const N = ordered.length;
   const rows = [];
   let ti = 0, pi = 0;
   while (ti < N) {
     const w = Math.min(PATTERN[pi % PATTERN.length], N - ti);
-    rows.push(ordered.slice(ti, ti + w));
-    ti += w; pi++;
+    rows.push(ordered.slice(ti, ti + w)); ti += w; pi++;
   }
-  const ROW_H = 200;
-  const MAP_H = 80 + rows.length * ROW_H;
+  const ROW_H = 220;
+  const PAD_TOP = 90;
+  const MAP_H = PAD_TOP + rows.length * ROW_H + 40;
   stage.style.height = MAP_H + 'px';
 
-  // Position each topic at (x%, ypx)
+  // Position by % x, px y
   const pos = new Map();
   rows.forEach((row, ri) => {
-    const y = 80 + ri * ROW_H;
+    const y = PAD_TOP + ri * ROW_H;
     const spread = row.length === 1 ? [50] : row.length === 2 ? [30, 70] : [20, 50, 80];
     row.forEach(([t], ci) => pos.set(t, { x: spread[ci], y }));
   });
 
-  // Background SVG circuit (paths between rows)
+  // SVG ink network
   const svgNS = 'http://www.w3.org/2000/svg';
   const svg = document.createElementNS(svgNS, 'svg');
-  svg.setAttribute('class', 'pathway-svg-canvas');
+  svg.setAttribute('class', 'codex-svg');
   svg.setAttribute('viewBox', `0 0 100 ${MAP_H}`);
   svg.setAttribute('preserveAspectRatio', 'none');
   let segIdx = 0;
   const addSeg = (fn, tn) => {
     const f = pos.get(fn), t = pos.get(tn);
     const fs = stats[fn];
-    const fpct = fs.total ? (fs.confSum / fs.total) / 5 : 0;
-    const cls = fpct >= 0.8 ? 'cleared-trail' : fpct > 0 ? 'active' : '';
+    const conf = fs.total ? (fs.confSum / fs.total) / 5 : 0;
+    const cls = conf >= 0.8 ? 'cleared' : conf > 0 ? 'active' : '';
     const cy = (f.y + t.y) / 2;
-    const c1x = f.x + ((segIdx * 7 % 9) - 4) * 0.6;
-    const c2x = t.x + ((segIdx * 11 % 9) - 4) * 0.6;
-    const d = `M ${f.x} ${f.y} C ${c1x} ${cy - 10}, ${c2x} ${cy + 10}, ${t.x} ${t.y}`;
-    const p1 = document.createElementNS(svgNS, 'path'); p1.setAttribute('d', d); p1.setAttribute('class', 'road-base'); svg.appendChild(p1);
-    const p2 = document.createElementNS(svgNS, 'path'); p2.setAttribute('d', d); p2.setAttribute('class', `road-line ${cls}`); svg.appendChild(p2);
+    // Slight S-curve via two control points
+    const c1x = f.x + ((segIdx * 11 % 7) - 3) * 0.8;
+    const c2x = t.x + ((segIdx * 13 % 7) - 3) * 0.8;
+    const d = `M ${f.x} ${f.y} C ${c1x} ${cy - 18}, ${c2x} ${cy + 18}, ${t.x} ${t.y}`;
+    const base = document.createElementNS(svgNS, 'path'); base.setAttribute('d', d); base.setAttribute('class', 'ink-base'); base.setAttribute('vector-effect', 'non-scaling-stroke'); svg.appendChild(base);
+    const line = document.createElementNS(svgNS, 'path'); line.setAttribute('d', d); line.setAttribute('class', `ink-line ${cls}`); line.setAttribute('vector-effect', 'non-scaling-stroke'); svg.appendChild(line);
     if (cls) {
-      const p3 = document.createElementNS(svgNS, 'path'); p3.setAttribute('d', d); p3.setAttribute('class', `road-pulse ${cls === 'active' ? 'active' : ''}`);
-      p3.style.animationDelay = (-segIdx * 0.4).toFixed(1) + 's';
-      svg.appendChild(p3);
+      const pulse = document.createElementNS(svgNS, 'path'); pulse.setAttribute('d', d); pulse.setAttribute('class', `ink-pulse ${cls === 'active' ? 'active' : ''}`); pulse.setAttribute('vector-effect', 'non-scaling-stroke');
+      pulse.style.animationDelay = (-segIdx * 0.5).toFixed(2) + 's';
+      svg.appendChild(pulse);
     }
     segIdx++;
   };
@@ -2742,123 +2761,92 @@ function renderPathway() {
     else if (tr.length === 1) fr.forEach(([fn]) => addSeg(fn, tr[0][0]));
     else for (let i = 0; i < Math.max(fr.length, tr.length); i++) addSeg(fr[i % fr.length][0], tr[i % tr.length][0]);
   }
-  // Junction dots
+  // Station dots
   ordered.forEach(([t]) => {
     const p = pos.get(t);
     const td = stats[t];
-    const pct = td.total ? Math.round((td.confSum / td.total) / 5 * 100) : 0;
-    const jc = pct >= 80 ? 'cleared-j' : pct > 0 ? 'active-j' : '';
+    const conf = td.total ? (td.confSum / td.total) / 5 : 0;
     const c = document.createElementNS(svgNS, 'circle');
-    c.setAttribute('cx', p.x); c.setAttribute('cy', p.y); c.setAttribute('r', '0.6');
-    c.setAttribute('class', `circuit-junction ${jc}`);
+    c.setAttribute('cx', p.x); c.setAttribute('cy', p.y); c.setAttribute('r', '0.8');
+    c.setAttribute('class', `ink-station ${conf >= 0.8 ? 'cleared' : ''}`);
+    c.setAttribute('vector-effect', 'non-scaling-stroke');
     svg.appendChild(c);
   });
   stage.appendChild(svg);
 
-  // Milestone labels in margins
-  const MILESTONES = ['Outer Bailey', 'Drawbridge', 'Curtain Wall', 'Inner Keep', 'High Tower'];
-  const step = Math.max(3, Math.floor(rows.length / MILESTONES.length));
-  for (let m = 0, ix = 0; m < rows.length; m += step, ix++) {
-    if (ix >= MILESTONES.length) break;
-    const firstY = 80 + m * ROW_H;
-    const side = m % 2 === 0 ? 'left:2%;' : 'right:2%;';
-    const ms = document.createElement('div');
-    ms.className = 'milestone';
-    ms.style.cssText = `top:${firstY - 12}px; ${side}`;
-    ms.textContent = '⚜ ' + MILESTONES[ix];
-    stage.appendChild(ms);
+  // Section markers (between rows, every 4-5 rows)
+  const SECTIONS = ['I · The Lowlands', 'II · The Marches', 'III · The Highlands', 'IV · The Sanctum'];
+  const stride = Math.max(3, Math.ceil(rows.length / SECTIONS.length));
+  for (let s = 0; s < SECTIONS.length; s++) {
+    const rowIx = s * stride;
+    if (rowIx >= rows.length) break;
+    const y = PAD_TOP + rowIx * ROW_H - 60;
+    if (y < 30) continue;
+    const m = document.createElement('div');
+    m.className = 'codex-marker';
+    m.style.top = y + 'px';
+    m.textContent = SECTIONS[s];
+    stage.appendChild(m);
   }
 
-  // Fireflies — denser swarm with varied scales
-  const FF_COUNT = 22;
-  for (let f = 0; f < FF_COUNT; f++) {
+  // Subtle ambient embers (12, slow, drifting up)
+  for (let e = 0; e < 12; e++) {
     const el = document.createElement('div');
-    el.className = 'firefly';
-    const scale = 0.6 + ((f * 17) % 100) / 100 * 1.1;
-    const dur = 6 + (f * 1.7) % 9;
-    const dx = -40 + (f * 13) % 80;
-    const dy = -25 - (f * 11) % 60;
-    const dx2 = 30 - (f * 19) % 70;
-    const dy2 = -55 - (f * 23) % 80;
-    el.style.cssText = `left:${5 + (f * 43) % 92}%; top:${40 + (f * 137) % (MAP_H - 80)}px; transform:scale(${scale.toFixed(2)}); --ff-dur:${dur.toFixed(1)}s; --ff-delay:${-f * 0.7}s; --ff-dx:${dx}px; --ff-dy:${dy}px; --ff-dx2:${dx2}px; --ff-dy2:${dy2}px;`;
+    el.className = 'codex-ember';
+    el.style.left = (5 + (e * 47) % 90) + '%';
+    el.style.top = (60 + (e * 137) % (MAP_H - 80)) + 'px';
+    el.style.setProperty('--er-dur', (10 + e * 1.3) + 's');
+    el.style.setProperty('--er-delay', (-e * 1.7) + 's');
+    el.style.setProperty('--er-dx', ((e * 11 % 21) - 10) + 'px');
+    el.style.setProperty('--er-dy', (-180 - (e * 13 % 80)) + 'px');
     stage.appendChild(el);
   }
 
-  // Nodes
-  ordered.forEach(([t, d]) => {
+  // Keeps (DOM nodes)
+  ordered.forEach(([t, d], ix) => {
     const v = visualOf(t);
     const p = pos.get(t);
     const pct = d.total ? Math.round(d.solved / d.total * 100) : 0;
     const conf = d.total ? Math.round((d.confSum / d.total) / 5 * 100) : 0;
     const isCleared = pct >= 95;
     const level = pct >= 80 ? 'Cleared' : pct >= 60 ? 'Conquering' : pct >= 40 ? 'Battling' : pct >= 20 ? 'Entered' : 'Uncharted';
-    const sizeR = d.total > 12 ? 50 : d.total > 5 ? 42 : 36;
-    const ring = sizeR * 2;
-    const C = 2 * Math.PI * (sizeR - 4);
+    const sizeClass = d.total > 12 ? 'lg' : d.total > 5 ? '' : 'sm';
+    const ring = sizeClass === 'lg' ? 110 : sizeClass === 'sm' ? 84 : 96;
+    const r = ring / 2 - 4;
+    const C = 2 * Math.PI * r;
     const off = C - C * pct / 100;
-    const arcCol = conf >= 80 ? 'var(--gold)' : conf >= 50 ? 'var(--ember)' : conf > 0 ? 'var(--medium)' : 'rgba(110,94,71,0.5)';
-    const glowCol = conf >= 80 ? 'rgba(232,200,122,0.35)' : conf >= 50 ? 'rgba(255,138,58,0.30)' : conf > 0 ? 'rgba(200,156,74,0.25)' : 'rgba(110,94,71,0.18)';
+    let arcCol, sealCol, sealGlow, sealRim;
+    if (conf >= 80) { arcCol = '#e8c87a'; sealCol = '#e8c87a'; sealGlow = 'rgba(232,200,122,0.45)'; sealRim = 'rgba(232,200,122,0.4)'; }
+    else if (conf >= 50) { arcCol = '#ff8a3a'; sealCol = 'rgba(255,138,58,0.65)'; sealGlow = 'rgba(255,138,58,0.35)'; sealRim = 'rgba(255,138,58,0.3)'; }
+    else if (conf > 0) { arcCol = '#c89c4a'; sealCol = 'rgba(200,156,74,0.55)'; sealGlow = 'rgba(200,156,74,0.25)'; sealRim = 'rgba(200,156,74,0.22)'; }
+    else { arcCol = 'rgba(110,94,71,0.55)'; sealCol = 'rgba(110,94,71,0.4)'; sealGlow = 'rgba(110,94,71,0.12)'; sealRim = 'rgba(110,94,71,0.18)'; }
     const dueCount = d.due + d.overdue;
+    const dueBadge = dueCount > 0 ? `<div class="keep-due">${dueCount}</div>` : '';
     const node = document.createElement('div');
-    node.className = 'pn';
+    node.className = 'keep';
     node.style.left = p.x + '%'; node.style.top = p.y + 'px';
-    node.style.setProperty('--node-glow', glowCol);
     node.dataset.topic = t;
-    const torch = isCleared ? '<div class="pn-torch"></div>' : '';
-    const badge = dueCount > 0 ? `<div class="pn-badge ${isCleared ? 'cleared' : ''}">${dueCount}!</div>` : '';
-    const tipText = (d.due ? `${d.due} due` : '') + (d.overdue ? ` · ${d.overdue} overdue` : '') + ` · ${d.total - d.solved} unseen`;
     node.innerHTML = `
-      <div class="pn-glow"></div>
-      ${torch}
-      ${badge}
-      <div class="pn-ring" style="width:${ring}px;height:${ring}px">
-        <svg width="${ring}" height="${ring}" viewBox="0 0 ${ring} ${ring}">
-          <circle cx="${ring/2}" cy="${ring/2}" r="${sizeR - 4}" fill="rgba(20,15,10,0.95)" stroke="rgba(232,200,122,0.35)" stroke-width="2"/>
-          <circle cx="${ring/2}" cy="${ring/2}" r="${sizeR - 4}" fill="none" stroke="${arcCol}" stroke-width="3.5"
-            stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}" stroke-linecap="round"
-            transform="rotate(-90 ${ring/2} ${ring/2})" style="transition:stroke-dashoffset 1.4s ease"/>
+      <div class="keep-medallion ${sizeClass}" style="--seal-col:${sealCol};--seal-glow:${sealGlow};--seal-rim:${sealRim};">
+        <svg class="keep-arc" viewBox="0 0 ${ring} ${ring}">
+          <circle cx="${ring/2}" cy="${ring/2}" r="${r}" stroke="${arcCol}" stroke-width="3" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"/>
         </svg>
-        <div class="pn-icon">${v.icon}</div>
+        <div class="keep-icon">${v.icon}</div>
+        <div class="keep-num">${String(ix + 1).padStart(2, '0')}</div>
+        ${dueBadge}
       </div>
-      <div class="pn-name">${t}</div>
-      <div class="pn-meta ${isCleared ? 'cleared' : (conf > 0 ? 'active' : '')}">${level} · ${pct}%</div>
-      <div class="pn-tooltip">${d.solved}/${d.total} slain${tipText.trim() ? ' · ' + tipText.replace(/^\s*·\s*/, '') : ''}</div>
+      <div class="keep-name">${t}</div>
+      <div class="keep-meta ${isCleared ? 'cleared' : (conf > 0 ? 'active' : '')}">${level} · ${pct}%</div>
+      <div class="keep-tooltip">
+        <strong>${t}</strong>
+        ${d.solved} / ${d.total} slain · ${pct}%<br>
+        ${dueCount > 0 ? `<span style="color:var(--ember)">${d.due} due${d.overdue ? ` · ${d.overdue} overdue` : ''}</span><br>` : ''}
+        <span style="color:var(--text-muted)">${d.total - d.solved} unseen</span>
+      </div>
     `;
     node.onclick = () => filterByTopic(t);
     stage.appendChild(node);
   });
-
-  // Tooltip wiring (using built-in pn-tooltip CSS now); we also keep dynamic tooltip for advanced data
-  if (tip) tip.classList.remove('show'); // disable separate tooltip; handled by .pn-tooltip
-
-  // Parallax — scroll + mouse drift for cinematic depth
-  const layers = document.querySelectorAll('.pathway-shell [data-parallax]');
-  const shell = document.querySelector('.pathway-shell');
-  if (shell && !shell.dataset.parallaxBound) {
-    shell.dataset.parallaxBound = '1';
-    let mouseX = 0, mouseY = 0, scrollOff = 0;
-    const apply = () => {
-      layers.forEach(l => {
-        const r = parseFloat(l.dataset.parallax) || 0;
-        const tx = mouseX * r * 30;
-        const ty = scrollOff * r + mouseY * r * 18;
-        l.style.transform = `translate3d(${tx.toFixed(1)}px, ${ty.toFixed(1)}px, 0)`;
-      });
-    };
-    window.addEventListener('scroll', () => {
-      const rect = shell.getBoundingClientRect();
-      if (rect.bottom < 0 || rect.top > window.innerHeight) return;
-      scrollOff = -rect.top * 0.6;
-      apply();
-    }, { passive: true });
-    shell.addEventListener('pointermove', e => {
-      const r = shell.getBoundingClientRect();
-      mouseX = ((e.clientX - r.left) / r.width - 0.5) * 2;
-      mouseY = ((e.clientY - r.top) / r.height - 0.5) * 2;
-      apply();
-    });
-    shell.addEventListener('pointerleave', () => { mouseX = 0; mouseY = 0; apply(); });
-  }
 }
 
 /* ═════════ BESTIARY ═════════ */
