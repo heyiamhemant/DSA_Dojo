@@ -340,7 +340,14 @@ a:hover { color: var(--gold-bright); }
   display: flex; align-items: flex-end; justify-content: space-between;
   flex-wrap: wrap; gap: var(--space); margin-bottom: var(--space-lg);
   padding-bottom: var(--space-md); border-bottom: 1px solid rgba(232,200,122,0.12);
-  position: relative;
+  position: sticky; top: 0; z-index: 10;
+  background:
+    linear-gradient(180deg, rgba(11,8,7,0.92) 60%, rgba(11,8,7,0.4) 100%);
+  backdrop-filter: blur(8px);
+  margin-left: calc(var(--space-lg) * -1);
+  margin-right: calc(var(--space-lg) * -1);
+  padding-left: var(--space-lg); padding-right: var(--space-lg);
+  padding-top: var(--space-md);
 }
 .page-header::after {
   content: ''; position: absolute; bottom: -1px; left: 0; width: 80px; height: 1px;
@@ -359,12 +366,19 @@ a:hover { color: var(--gold-bright); }
 
 /* ─── Common card / panel ─── */
 .panel {
-  background: linear-gradient(180deg, rgba(31,24,18,0.75), rgba(11,8,7,0.85));
-  border: 1px solid rgba(232,200,122,0.15);
-  border-radius: var(--rad);
-  padding: var(--space-md);
+  background: linear-gradient(180deg, rgba(31,24,18,0.78), rgba(11,8,7,0.92));
+  border: 1px solid rgba(232,200,122,0.18);
+  border-radius: var(--rad-lg);
+  padding: var(--space-lg);
   box-shadow: var(--shadow-deep), var(--inset-stroke);
   position: relative; overflow: hidden;
+}
+.panel + .panel { margin-top: 0; }
+.panel-title { display: flex; align-items: center; gap: 10px; }
+.panel-title::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(90deg, rgba(232,200,122,0.3), transparent);
+  margin-left: 8px;
 }
 .panel::before {
   content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
@@ -441,8 +455,10 @@ a:hover { color: var(--gold-bright); }
 }
 .streak-flame { font-size: 36px; animation: flameFlicker 1.2s ease-in-out infinite; filter: drop-shadow(0 0 8px var(--ember)); }
 @keyframes flameFlicker { 0%,100% { transform: scale(1) rotate(-1deg); } 25% { transform: scale(1.05) rotate(2deg); } 50% { transform: scale(.97) rotate(-2deg); } 75% { transform: scale(1.03) rotate(1deg); } }
-.streak-num { font-family: var(--serif-display); font-size: 28px; font-weight: 900; color: var(--ember); }
+.streak-num { font-family: var(--serif-display); font-size: 32px; font-weight: 900; color: var(--ember); line-height: 1; }
 .streak-label { font-family: var(--mono); font-size: 10px; color: var(--text-dim); letter-spacing: .15em; text-transform: uppercase; }
+.streak-best { font-family: var(--mono); font-size: 10px; color: var(--gold); margin-top: 6px; padding-top: 6px; border-top: 1px dashed rgba(232,200,122,0.2); width: 100%; text-align: center; letter-spacing: .12em; }
+.streak-best span { color: var(--gold-bright); font-weight: 700; }
 
 .kpi-grid {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -516,6 +532,9 @@ a:hover { color: var(--gold-bright); }
 .dungeon-progress { font-family: var(--mono); font-size: 11px; color: var(--text-dim); margin-bottom: 8px; }
 .dungeon-bar { height: 4px; background: rgba(0,0,0,0.4); border-radius: 2px; overflow: hidden; border: 1px solid rgba(232,200,122,0.1); }
 .dungeon-bar-fill { height: 100%; background: linear-gradient(90deg, var(--col-bar, var(--gold-deep)), var(--col-bar2, var(--gold))); transition: width 1s ease; border-radius: 2px; }
+.dungeon-subbars { display: flex; flex-direction: column; gap: 3px; margin-top: 8px; }
+.dsb { height: 3px; background: rgba(0,0,0,0.4); border-radius: 2px; overflow: hidden; }
+.dsb-fill { height: 100%; transition: width 1s ease; opacity: .85; }
 
 /* ═════════════════════════════════════════════════════════════════════════
    QUEST BOARD
@@ -604,17 +623,87 @@ a:hover { color: var(--gold-bright); }
    PATHWAY (zigzag SVG map)
    ═════════════════════════════════════════════════════════════════════════ */
 .pathway-shell {
-  position: relative; padding: 28px;
+  position: relative; padding: clamp(20px, 3vw, 44px);
   background:
-    radial-gradient(ellipse at center, rgba(214,195,154,0.92) 0%, rgba(180,150,100,0.85) 60%, rgba(120,90,60,0.7) 100%),
-    linear-gradient(180deg, rgba(214,195,154,0.95), rgba(180,150,100,0.85));
-  border: 1px solid rgba(120,90,60,0.4); border-radius: var(--rad-lg);
+    radial-gradient(ellipse at 30% 20%, rgba(245,225,180,0.6) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, rgba(120,80,40,0.4) 0%, transparent 50%),
+    radial-gradient(ellipse at center, rgba(214,195,154,0.95) 0%, rgba(180,150,100,0.88) 60%, rgba(120,90,60,0.78) 100%),
+    linear-gradient(180deg, rgba(214,195,154,0.97), rgba(180,150,100,0.88));
+  border: 1px solid rgba(120,90,60,0.5); border-radius: var(--rad-lg);
   overflow: hidden;
   box-shadow:
-    0 30px 80px rgba(0,0,0,0.6),
-    inset 0 0 80px rgba(120,80,40,0.6),
-    inset 0 0 200px rgba(80,50,20,0.45),
-    inset 0 0 0 12px rgba(80,50,20,0.15);
+    0 30px 80px rgba(0,0,0,0.65),
+    inset 0 0 80px rgba(120,80,40,0.65),
+    inset 0 0 200px rgba(80,50,20,0.5),
+    inset 0 0 0 14px rgba(80,50,20,0.18);
+  min-height: 800px;
+}
+.pathway-clouds {
+  position: absolute; inset: -10%; pointer-events: none; z-index: 1;
+  background-repeat: repeat;
+  opacity: .35; mix-blend-mode: screen;
+}
+.pathway-clouds.layer-a {
+  background-image:
+    radial-gradient(ellipse 200px 60px at 20% 30%, rgba(255,255,255,0.5), transparent 70%),
+    radial-gradient(ellipse 280px 80px at 70% 60%, rgba(255,255,255,0.4), transparent 70%),
+    radial-gradient(ellipse 220px 70px at 90% 20%, rgba(255,255,255,0.45), transparent 70%);
+  background-size: 1200px 600px;
+  animation: cloudDriftA 90s linear infinite;
+}
+.pathway-clouds.layer-b {
+  background-image:
+    radial-gradient(ellipse 160px 40px at 40% 80%, rgba(255,255,255,0.35), transparent 70%),
+    radial-gradient(ellipse 220px 60px at 80% 30%, rgba(255,255,255,0.3), transparent 70%);
+  background-size: 1400px 700px;
+  animation: cloudDriftB 140s linear infinite reverse;
+  opacity: .25;
+}
+@keyframes cloudDriftA { from { background-position: 0 0; } to { background-position: -1200px 0; } }
+@keyframes cloudDriftB { from { background-position: 0 0; } to { background-position: -1400px 0; } }
+.pathway-ravens { position: absolute; inset: 0; pointer-events: none; z-index: 2; overflow: hidden; }
+.raven {
+  position: absolute; width: 24px; height: 14px;
+  background:
+    radial-gradient(ellipse 12px 5px at 50% 50%, #1a1208 60%, transparent 70%);
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
+  animation: ravenFly 25s linear infinite;
+}
+.raven::before { content: ''; position: absolute; left: 50%; top: 30%; width: 14px; height: 8px; transform: translateX(-50%); background: radial-gradient(ellipse 7px 4px at 50% 50%, #1a1208 60%, transparent 70%); animation: wingFlap 0.6s ease-in-out infinite; }
+@keyframes wingFlap { 0%,100% { transform: translateX(-50%) scaleY(1); } 50% { transform: translateX(-50%) scaleY(0.4); } }
+@keyframes ravenFly {
+  0% { transform: translate3d(-30px, 20vh, 0); opacity: 0; }
+  10% { opacity: .85; }
+  90% { opacity: .85; }
+  100% { transform: translate3d(110vw, -10vh, 0); opacity: 0; }
+}
+.pathway-cartouche {
+  position: relative; z-index: 4; display: block; margin: 0 auto var(--space-md);
+  max-width: 600px;
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,0.5));
+}
+.pathway-cartouche svg { width: 100%; height: auto; display: block; }
+.pathway-legend {
+  position: absolute; bottom: 18px; left: 24px; z-index: 6;
+  display: flex; gap: 16px; padding: 8px 14px;
+  background: rgba(40,20,10,0.7); border: 1px solid rgba(232,200,122,0.3); border-radius: 4px;
+  font-family: var(--medieval); color: var(--gold); font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+  backdrop-filter: blur(4px);
+}
+.pathway-legend > div { display: flex; align-items: center; gap: 6px; }
+.leg-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.5); }
+.leg-dot.complete { background: #7a2a1a; }
+.leg-dot.active { background: #5a1a1a; }
+.leg-dot.uncharted { background: #3a2410; }
+.pathway-svg { position: relative; z-index: 3; }
+.path-node { transition: transform .25s ease; }
+.path-node:hover { transform: scale(1.08); transform-origin: center; }
+/* Wax drip on hover */
+.path-node:hover .wax-drip { opacity: 1; transform: translateY(0); }
+.wax-drip {
+  opacity: 0; transform: translateY(-4px);
+  transition: opacity .3s ease .15s, transform .4s cubic-bezier(.4,0,.2,1) .15s;
+  fill: #5a1a1a; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
 }
 /* Aged paper texture via SVG noise */
 .pathway-shell::before {
@@ -900,8 +989,9 @@ textarea.modal-comment {
 
 /* ─── Bento Grid ─── */
 .bento {
-  display: grid; gap: var(--space-md);
+  display: grid; gap: clamp(16px, 2vw, 28px);
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: var(--space-md);
 }
 .bento-cell { min-width: 0; }
 .bento-cell.span-2 { grid-column: span 2; }
@@ -1123,19 +1213,7 @@ textarea.modal-comment {
 }
 
 
-.pathway-scroll {
-  position: sticky; top: 8px; z-index: 5; margin: 0 auto 16px; width: max-content; max-width: 90%;
-  padding: 10px 30px; font-family: var(--serif-display); letter-spacing: .3em;
-  color: #2a1808; font-size: clamp(13px, 1.6vw, 18px); text-transform: uppercase;
-  background:
-    linear-gradient(90deg, transparent 0%, rgba(40,15,5,0.05) 5%, rgba(40,15,5,0.1) 50%, rgba(40,15,5,0.05) 95%, transparent 100%);
-  border-top: 1px solid rgba(80,40,15,0.35); border-bottom: 1px solid rgba(80,40,15,0.35);
-  font-weight: 700;
-  text-shadow: 0 1px 0 rgba(255,240,200,0.4);
-}
-.pathway-scroll::before, .pathway-scroll::after {
-  content: '✦'; padding: 0 18px; color: #5a1a1a;
-}
+.pathway-scroll { display: none; }
 
 .path-stone {
   fill: #2a221a; stroke: #1a1208; stroke-width: 2;
@@ -1378,6 +1456,7 @@ textarea.modal-comment {
           <div class="streak-flame">🔥</div>
           <div class="streak-num" id="streak-num">0</div>
           <div class="streak-label">Day Streak</div>
+          <div class="streak-best">Best: <span id="streak-best">0</span></div>
         </div>
       </div>
 
@@ -1496,10 +1575,27 @@ textarea.modal-comment {
         <svg class="fc tr" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
         <svg class="fc bl" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
         <svg class="fc br" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
-        <div class="pathway-bg"></div>
-        <div class="pathway-scroll" id="pathway-scroll">⚜ Atlas of Lordran ⚜</div>
+        <div class="pathway-clouds layer-a"></div>
+        <div class="pathway-clouds layer-b"></div>
+        <div class="pathway-ravens" id="pathway-ravens"></div>
+        <div class="pathway-cartouche">
+          <svg viewBox="0 0 600 80" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <filter id="parchInk"><feTurbulence baseFrequency="0.9" numOctaves="2"/><feDisplacementMap in="SourceGraphic" scale="0.6"/></filter>
+            </defs>
+            <path d="M 50 40 Q 30 10 60 10 L 540 10 Q 570 10 550 40 L 540 70 Q 570 70 540 70 L 60 70 Q 30 70 60 70 Z"
+              fill="rgba(245,225,180,0.4)" stroke="#3a2410" stroke-width="2" filter="url(#parchInk)"/>
+            <text x="300" y="45" text-anchor="middle" font-family="Cinzel Decorative, serif" font-weight="900" font-size="22" fill="#3a1410" letter-spacing="6">ATLAS · OF · LORDRAN</text>
+            <text x="300" y="62" text-anchor="middle" font-family="MedievalSharp, serif" font-size="10" fill="#5a3a1a" letter-spacing="4" font-style="italic">— a chronicle of the slayer —</text>
+          </svg>
+        </div>
         <svg class="pathway-svg" id="pathway-svg" viewBox="0 0 1000 1800" preserveAspectRatio="xMidYMid meet"></svg>
         <div class="path-tooltip" id="path-tooltip"></div>
+        <div class="pathway-legend">
+          <div><span class="leg-dot complete"></span>Conquered</div>
+          <div><span class="leg-dot active"></span>In progress</div>
+          <div><span class="leg-dot uncharted"></span>Uncharted</div>
+        </div>
       </div>
     </section>
 
@@ -1532,6 +1628,32 @@ textarea.modal-comment {
         <button class="filter-pill" data-filter="unsolved" onclick="setFilter('unsolved')">Uncharted</button>
       </div>
       <div class="bestiary-grid" id="bestiary-grid"></div>
+    </section>
+
+    <!-- ═════════ TOPIC DEEP DIVE ═════════ -->
+    <section class="page" id="page-topic">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title" id="topic-title">Topic</h1>
+          <div class="page-subtitle" id="topic-subtitle">Deep dive</div>
+        </div>
+        <button class="btn-secondary" onclick="navigate('dashboard')">← Back to Map</button>
+      </div>
+      <div class="bento">
+        <div class="bento-cell panel">
+          <h3 class="panel-title">⚔ Mastery</h3>
+          <div id="topic-mastery-block"></div>
+        </div>
+        <div class="bento-cell span-2 panel">
+          <h3 class="panel-title">📈 Recent Activity</h3>
+          <div class="mini-bars" id="topic-activity"></div>
+          <div class="mini-readout" id="topic-activity-readout">Reviews per day, last 30 days</div>
+        </div>
+        <div class="bento-cell span-3 panel">
+          <h3 class="panel-title">🐉 Encounters</h3>
+          <div class="bestiary-grid" id="topic-problems"></div>
+        </div>
+      </div>
     </section>
 
     <!-- ═════════ BOSS RAIDS ═════════ -->
@@ -1755,6 +1877,7 @@ const PAGE_BG = {
   pathway: './assets/pathway_darkroot2.jpg',
   bestiary: './assets/dungeon_catacombs.jpg',
   boss: './assets/dungeon_londo.jpg',
+  topic: './assets/dungeon_parish.jpg',
 };
 
 function navigate(page) {
@@ -1770,6 +1893,7 @@ function navigate(page) {
   else if (page === 'pathway') renderPathway();
   else if (page === 'bestiary') renderBestiary();
   else if (page === 'boss') renderBoss();
+  else if (page === 'topic') renderTopicDeepDive();
   toggleDrawer(false);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -1856,6 +1980,13 @@ const RANK_TITLES = [
   'Mythic Sovereign','Eternal Archon'
 ];
 
+function getBestStreak() {
+  try { return parseInt(localStorage.getItem('dsa_dojo_best_streak') || '0', 10) || 0; } catch (e) { return 0; }
+}
+function saveBestStreak(v) {
+  try { localStorage.setItem('dsa_dojo_best_streak', String(v)); } catch (e) {}
+}
+
 function getStreakDays() {
   const dates = new Set();
   Object.values(userData).forEach(ud => {
@@ -1921,7 +2052,12 @@ function renderDashboard() {
   ring.setAttribute('stroke-dasharray', C);
   ring.setAttribute('stroke-dashoffset', C - (C * pct / 100));
 
-  document.getElementById('streak-num').textContent = getStreakDays();
+  const cur = getStreakDays();
+  const best = Math.max(getBestStreak(), cur);
+  if (cur > getBestStreak()) saveBestStreak(cur);
+  document.getElementById('streak-num').textContent = cur;
+  const bestEl = document.getElementById('streak-best');
+  if (bestEl) bestEl.textContent = best;
 
   // KPIs
   const total = RAW_PROBLEMS.length;
@@ -1955,10 +2091,22 @@ function renderDashboard() {
     .map(([t, d]) => {
       const v = visualOf(t);
       const pp = d.total ? Math.round(d.solved / d.total * 100) : 0;
+      // Per-difficulty sub-bars
+      const probsT = RAW_PROBLEMS.filter(p => p.topic === t);
+      const e = probsT.filter(p => p.diff === 'Easy'), em = probsT.filter(p => p.diff === 'Medium'), eh = probsT.filter(p => p.diff === 'Hard');
+      const eD = (e.filter(p=>getConf(p)>0).length / Math.max(1, e.length)) * 100;
+      const mD = (em.filter(p=>getConf(p)>0).length / Math.max(1, em.length)) * 100;
+      const hD = (eh.filter(p=>getConf(p)>0).length / Math.max(1, eh.length)) * 100;
+      const subBars = `<div class="dungeon-subbars">
+        ${e.length ? `<div class="dsb"><div class="dsb-fill" style="width:${eD}%;background:var(--easy)"></div></div>` : ''}
+        ${em.length ? `<div class="dsb"><div class="dsb-fill" style="width:${mD}%;background:var(--medium)"></div></div>` : ''}
+        ${eh.length ? `<div class="dsb"><div class="dsb-fill" style="width:${hD}%;background:var(--hard)"></div></div>` : ''}
+      </div>`;
       return `<div class="dungeon-card" onclick="filterByTopic('${t.replace(/'/g,"\\'")}')" style="--col:${v.color}30;--col-bar:${v.color}80;--col-bar2:${v.color};--bg-img:url('${sceneFor(t)}')">
         <div class="dungeon-card-head"><span class="dungeon-icon" style="color:${v.color}">${v.icon}</span><span class="dungeon-name">${t}</span></div>
         <div class="dungeon-progress">${d.solved} / ${d.total} slain · ${pp}%</div>
         <div class="dungeon-bar"><div class="dungeon-bar-fill" style="width:${pp}%"></div></div>
+        ${subBars}
       </div>`;
     }).join('');
 
@@ -2188,9 +2336,67 @@ function setAnalytics(kind, idx) {
 }
 
 function filterByTopic(t) {
-  bestiaryFilter = 'all';
-  document.getElementById('best-search').value = t;
-  navigate('bestiary');
+  currentTopic = t;
+  navigate('topic');
+}
+let currentTopic = null;
+function renderTopicDeepDive() {
+  if (!currentTopic) return;
+  const t = currentTopic;
+  const v = visualOf(t);
+  document.getElementById('topic-title').textContent = `${v.icon} ${t}`;
+  const probs = RAW_PROBLEMS.filter(p => p.topic === t);
+  const solved = probs.filter(p => getConf(p) > 0).length;
+  const pct = probs.length ? Math.round(solved / probs.length * 100) : 0;
+  document.getElementById('topic-subtitle').textContent = `${solved} / ${probs.length} slain · ${pct}% mastery`;
+  // Mastery block
+  const easy = probs.filter(p => p.diff === 'Easy');
+  const med = probs.filter(p => p.diff === 'Medium');
+  const hard = probs.filter(p => p.diff === 'Hard');
+  const slainE = easy.filter(p => getConf(p) > 0).length;
+  const slainM = med.filter(p => getConf(p) > 0).length;
+  const slainH = hard.filter(p => getConf(p) > 0).length;
+  document.getElementById('topic-mastery-block').innerHTML = `
+    <div class="hpb-row"><div class="hpb-label">Easy</div>
+      <div class="hpb-track"><div class="hpb-fill easy" style="width:${easy.length ? slainE/easy.length*100 : 0}%"></div></div>
+      <div class="hpb-stats">${slainE} / ${easy.length}</div></div>
+    <div class="hpb-row"><div class="hpb-label">Medium</div>
+      <div class="hpb-track"><div class="hpb-fill medium" style="width:${med.length ? slainM/med.length*100 : 0}%"></div></div>
+      <div class="hpb-stats">${slainM} / ${med.length}</div></div>
+    <div class="hpb-row"><div class="hpb-label">Hard</div>
+      <div class="hpb-track"><div class="hpb-fill hard" style="width:${hard.length ? slainH/hard.length*100 : 0}%"></div></div>
+      <div class="hpb-stats">${slainH} / ${hard.length}</div></div>`;
+  // Activity (last 30 days)
+  const DAY = 86400000;
+  const days = [];
+  const today = new Date(); today.setHours(0,0,0,0);
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(today.getTime() - i * DAY); d.setHours(0,0,0,0);
+    days.push({ d, count: 0 });
+  }
+  probs.forEach(p => {
+    const ms = getLastReviewMsLocal(p); if (!ms) return;
+    const dd = new Date(ms); dd.setHours(0,0,0,0);
+    const slot = days.find(x => x.d.getTime() === dd.getTime());
+    if (slot) slot.count++;
+  });
+  const maxC = Math.max(1, ...days.map(d => d.count));
+  document.getElementById('topic-activity').innerHTML = days.map(d =>
+    `<div class="mini-bar" style="height:${(d.count/maxC*100) || 2}%" title="${d.d.toLocaleDateString()}: ${d.count}"></div>`
+  ).join('');
+  // Problems list
+  document.getElementById('topic-problems').innerHTML = probs.map(p => {
+    const conf = getConf(p);
+    const diffCol = p.diff === 'Easy' ? 'var(--easy)' : p.diff === 'Medium' ? 'var(--medium)' : 'var(--hard)';
+    return `<div class="monster-card ${conf > 0 ? 'solved' : ''}" onclick="openModal(${p.id})" style="--diff-col:${diffCol}">
+      <div class="mc-head"><div class="mc-sprite">${monsterFor(p)}</div>
+        <div><h4 class="mc-name">${p.name}</h4><div class="mc-num">#${p.num} · ${p.diff}</div></div></div>
+      <div class="mc-hint">${(p.hint||'').slice(0,110)}${(p.hint||'').length>110?'…':''}</div>
+      <div class="mc-foot">
+        <span class="mc-stars">${'★'.repeat(conf)}${'☆'.repeat(5-conf)}</span>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 /* ═════════ QUEST BOARD ═════════ */
@@ -2399,8 +2605,14 @@ function renderPathway() {
       <text class="region-num">REGION ${String(i + 1).padStart(2, '0')}</text>
       <text class="region-name" y="20">${t.length > 18 ? t.slice(0, 16) + '…' : t}</text>
     </g>`;
+    // Wax drip — appears on hover
+    const drip = `<g class="wax-drip">
+      <path d="M -4 38 Q -3 48 0 56 Q 3 48 4 38 Z"/>
+      <circle cx="0" cy="58" r="3"/>
+    </g>`;
     nodes += `<g class="path-node" data-topic="${t.replace(/"/g,'&quot;')}" transform="translate(${pos.x},${pos.y})" onclick="filterByTopic('${t.replace(/'/g,"\\'")}')">
       ${sealRing}
+      ${drip}
       <circle class="outer ${cls}" r="42"/>
       <circle class="progress" r="38" stroke="${v.color}" stroke-dasharray="${C}" stroke-dashoffset="${off}" stroke-width="5"/>
       <text class="icon" y="-2">${v.icon}</text>
@@ -2409,6 +2621,20 @@ function renderPathway() {
       ${regionLabel}
     </g>`;
   });
+
+  // Spawn ravens
+  const ravenWrap = document.getElementById('pathway-ravens');
+  if (ravenWrap && !ravenWrap.dataset.populated) {
+    for (let i = 0; i < 3; i++) {
+      const r = document.createElement('div');
+      r.className = 'raven';
+      r.style.top = (10 + Math.random() * 60) + '%';
+      r.style.animationDelay = (Math.random() * 25) + 's';
+      r.style.animationDuration = (20 + Math.random() * 15) + 's';
+      ravenWrap.appendChild(r);
+    }
+    ravenWrap.dataset.populated = '1';
+  }
 
   svg.innerHTML = `${flourishes}${trails}${weather}${nodes}${compass}`;
 
