@@ -1144,11 +1144,23 @@ textarea.modal-comment {
 
 /* ─── Bento Grid ─── */
 .bento {
-  display: grid; gap: clamp(16px, 2vw, 28px);
+  display: grid;
+  column-gap: clamp(20px, 2.4vw, 36px);
+  row-gap: clamp(24px, 3vw, 44px);
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-top: var(--space-md);
+  margin-top: clamp(20px, 2.4vw, 36px);
 }
 .bento-cell { min-width: 0; }
+/* Dashboard breathing room */
+.page.is-dashboard { max-width: 1480px; margin: 0 auto; padding-block: clamp(8px, 1.4vw, 18px); }
+.page.is-dashboard .panel { padding: clamp(20px, 2.2vw, 32px); }
+.page.is-dashboard .panel + .panel { margin-top: clamp(18px, 2vw, 28px); }
+.page.is-dashboard .panel-title { font-size: clamp(15px, 1.2vw, 17px); margin-bottom: clamp(14px, 1.4vw, 20px); }
+.page.is-dashboard .hero { padding: clamp(28px, 3vw, 44px); margin-bottom: clamp(20px, 2.4vw, 32px); }
+.page.is-dashboard .kpi-grid { gap: clamp(14px, 1.6vw, 22px); }
+.page.is-dashboard .power-rows { gap: clamp(10px, 1.2vw, 16px); display: flex; flex-direction: column; }
+.page.is-dashboard .mastery-grid { gap: clamp(10px, 1.2vw, 16px); }
+.page.is-dashboard .dungeon-grid { gap: clamp(16px, 2vw, 26px); }
 .bento-cell.span-2 { grid-column: span 2; }
 .bento-cell.span-3 { grid-column: span 3; }
 @media (max-width: 1100px) {
@@ -1580,7 +1592,7 @@ textarea.modal-comment {
   <main class="main">
 
     <!-- ═════════ DASHBOARD ═════════ -->
-    <section class="page active" id="page-dashboard">
+    <section class="page active is-dashboard" id="page-dashboard">
       <div class="page-header">
         <div>
           <h1 class="page-title">Dungeon Map</h1>
@@ -1730,14 +1742,16 @@ textarea.modal-comment {
         <div class="fort-sky"></div>
         <div class="fort-clouds"></div>
         <div class="fort-mountains"></div>
-        <div class="fort-ramparts ramparts-far" data-parallax="0.05"></div>
-        <div class="fort-ramparts ramparts-near" data-parallax="0.12"></div>
-        <div class="fort-banners">
+        <div class="fort-mountains" data-parallax="0.18"></div>
+        <div class="fort-clouds" data-parallax="0.30"></div>
+        <div class="fort-ramparts ramparts-far" data-parallax="0.45"></div>
+        <div class="fort-ramparts ramparts-near" data-parallax="0.70"></div>
+        <div class="fort-banners" data-parallax="0.85">
           <div class="banner b1"></div><div class="banner b2"></div>
           <div class="banner b3"></div><div class="banner b4"></div>
           <div class="banner b5"></div><div class="banner b6"></div>
         </div>
-        <div class="fort-fog"></div>
+        <div class="fort-fog" data-parallax="0.55"></div>
 
         <header class="pathway-header">
           <div class="pathway-eyebrow">⚜ The Long March ⚜</div>
@@ -2755,11 +2769,18 @@ function renderPathway() {
     stage.appendChild(ms);
   }
 
-  // Fireflies
-  for (let f = 0; f < 8; f++) {
+  // Fireflies — denser swarm with varied scales
+  const FF_COUNT = 22;
+  for (let f = 0; f < FF_COUNT; f++) {
     const el = document.createElement('div');
     el.className = 'firefly';
-    el.style.cssText = `left:${10 + (f * 41) % 80}%; top:${60 + (f * 137) % (MAP_H - 80)}px; --ff-dur:${7 + f * 2}s; --ff-delay:${-f * 1.5}s; --ff-dx:${-25 + f * 8}px; --ff-dy:${-30 - f * 8}px; --ff-dx2:${15 - f * 5}px; --ff-dy2:${-55 - f * 10}px;`;
+    const scale = 0.6 + ((f * 17) % 100) / 100 * 1.1;
+    const dur = 6 + (f * 1.7) % 9;
+    const dx = -40 + (f * 13) % 80;
+    const dy = -25 - (f * 11) % 60;
+    const dx2 = 30 - (f * 19) % 70;
+    const dy2 = -55 - (f * 23) % 80;
+    el.style.cssText = `left:${5 + (f * 43) % 92}%; top:${40 + (f * 137) % (MAP_H - 80)}px; transform:scale(${scale.toFixed(2)}); --ff-dur:${dur.toFixed(1)}s; --ff-delay:${-f * 0.7}s; --ff-dx:${dx}px; --ff-dy:${dy}px; --ff-dx2:${dx2}px; --ff-dy2:${dy2}px;`;
     stage.appendChild(el);
   }
 
@@ -2810,21 +2831,33 @@ function renderPathway() {
   // Tooltip wiring (using built-in pn-tooltip CSS now); we also keep dynamic tooltip for advanced data
   if (tip) tip.classList.remove('show'); // disable separate tooltip; handled by .pn-tooltip
 
-  // Parallax binding
+  // Parallax — scroll + mouse drift for cinematic depth
   const layers = document.querySelectorAll('.pathway-shell [data-parallax]');
-  if (!window._fortParallax) {
-    window._fortParallax = true;
-    window.addEventListener('scroll', () => {
-      const shell = document.querySelector('.pathway-shell');
-      if (!shell) return;
-      const rect = shell.getBoundingClientRect();
-      if (rect.bottom < 0 || rect.top > window.innerHeight) return;
-      const offset = -rect.top;
+  const shell = document.querySelector('.pathway-shell');
+  if (shell && !shell.dataset.parallaxBound) {
+    shell.dataset.parallaxBound = '1';
+    let mouseX = 0, mouseY = 0, scrollOff = 0;
+    const apply = () => {
       layers.forEach(l => {
         const r = parseFloat(l.dataset.parallax) || 0;
-        l.style.transform = `translateY(${offset * r}px)`;
+        const tx = mouseX * r * 30;
+        const ty = scrollOff * r + mouseY * r * 18;
+        l.style.transform = `translate3d(${tx.toFixed(1)}px, ${ty.toFixed(1)}px, 0)`;
       });
+    };
+    window.addEventListener('scroll', () => {
+      const rect = shell.getBoundingClientRect();
+      if (rect.bottom < 0 || rect.top > window.innerHeight) return;
+      scrollOff = -rect.top * 0.6;
+      apply();
     }, { passive: true });
+    shell.addEventListener('pointermove', e => {
+      const r = shell.getBoundingClientRect();
+      mouseX = ((e.clientX - r.left) / r.width - 0.5) * 2;
+      mouseY = ((e.clientY - r.top) / r.height - 0.5) * 2;
+      apply();
+    });
+    shell.addEventListener('pointerleave', () => { mouseX = 0; mouseY = 0; apply(); });
   }
 }
 
