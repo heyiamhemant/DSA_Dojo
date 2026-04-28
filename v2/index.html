@@ -1378,6 +1378,54 @@ textarea.modal-comment {
   margin-top: clamp(20px, 2.4vw, 36px);
 }
 .bento-cell { min-width: 0; }
+/* ── Collapsible bento panels ── */
+.bento-cell.panel { padding: 0; }
+.bento-cell.panel > details { padding: clamp(20px, 2.2vw, 32px); }
+.bento-cell.panel > details > summary {
+  list-style: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  margin: calc(clamp(20px, 2.2vw, 32px) * -1);
+  margin-bottom: 0;
+  padding: clamp(18px, 2vw, 26px) clamp(20px, 2.2vw, 32px);
+  border-bottom: 1px solid transparent;
+  transition: border-color .25s ease, background .25s ease;
+  user-select: none;
+}
+.bento-cell.panel > details > summary::-webkit-details-marker { display: none; }
+.bento-cell.panel > details[open] > summary {
+  border-bottom-color: rgba(232,200,122,0.18);
+  margin-bottom: clamp(14px, 1.6vw, 22px);
+  background: linear-gradient(180deg, rgba(232,200,122,0.04), transparent);
+}
+.bento-cell.panel > details > summary:hover { background: rgba(232,200,122,0.04); }
+.bento-cell.panel > details > summary .panel-title {
+  margin: 0; padding: 0; flex: 1;
+  font-family: var(--serif-display); font-weight: 700;
+  font-size: clamp(15px, 1.2vw, 18px);
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--gold);
+  text-shadow: 0 2px 6px rgba(0,0,0,0.6), 0 0 18px rgba(232,200,122,0.18);
+}
+.bento-cell.panel > details > summary .panel-title::after { display: none; }
+.summary-chev {
+  font-family: var(--mono); color: var(--gold);
+  font-size: 14px; transition: transform .3s cubic-bezier(.4,0,.2,1);
+  flex-shrink: 0; width: 24px; text-align: center;
+}
+.bento-cell.panel > details[open] > summary .summary-chev { transform: rotate(90deg); }
+.summary-meta {
+  font-family: var(--mono); font-size: 11px; color: var(--text-dim);
+  letter-spacing: .12em; text-transform: uppercase;
+  flex-shrink: 0;
+}
+.bento-cell.panel > details[open] > summary .summary-meta { color: var(--gold-bright); }
+.bento-cell.panel > details:not([open]) > summary { border-bottom-color: transparent; }
+.bento-cell.panel > details > .details-body { animation: detailsFade .35s ease; }
+@keyframes detailsFade { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+/* Minimal panel inner (no double-padding from .panel) */
+.page.is-dashboard .bento-cell.panel > details {
+  background: transparent; border: 0; box-shadow: none;
+}
 /* ── Dashboard background art (subtle) ── */
 .dash-bg-art {
   position: absolute; inset: 0; pointer-events: none; z-index: -1;
@@ -1389,6 +1437,34 @@ textarea.modal-comment {
   border-radius: 8px;
   mask-image: linear-gradient(180deg, #000 0%, #000 70%, transparent 100%);
 }
+/* ── Dashboard tabs ── */
+.dash-tabs {
+  display: inline-flex; gap: 0;
+  background: linear-gradient(180deg, rgba(40,28,18,0.6), rgba(15,10,6,0.85));
+  border: 1px solid rgba(232,200,122,0.22);
+  border-radius: 4px; padding: 4px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.5), inset 0 1px 0 rgba(232,200,122,0.08);
+}
+.dash-tab {
+  padding: 8px 14px; background: transparent; border: 0;
+  font-family: var(--serif); font-weight: 600; font-size: 12px;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--text-dim); border-radius: 3px;
+  transition: all .2s ease; cursor: pointer;
+}
+.dash-tab:hover { color: var(--gold); background: rgba(232,200,122,0.06); }
+.dash-tab.active {
+  color: var(--gold-bright);
+  background: linear-gradient(180deg, rgba(232,200,122,0.18), rgba(122,31,31,0.15));
+  box-shadow: inset 0 1px 0 rgba(232,200,122,0.2), 0 0 12px rgba(232,200,122,0.15);
+  text-shadow: 0 0 10px rgba(232,200,122,0.4);
+}
+@media (max-width: 720px) { .dash-tab { padding: 6px 10px; font-size: 11px; } }
+/* Tab visibility on bento cells */
+.page.is-dashboard.tab-overview .bento-cell[data-tab]:not([data-tab~="overview"]):not([data-tab~="all"]) { display: none; }
+.page.is-dashboard.tab-progress .bento-cell[data-tab]:not([data-tab~="progress"]):not([data-tab~="all"]) { display: none; }
+.page.is-dashboard.tab-map .bento-cell[data-tab]:not([data-tab~="map"]):not([data-tab~="all"]) { display: none; }
+
 /* ── Utility strip: glass chips beneath page header ── */
 .dash-utility { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .util-chip {
@@ -1949,6 +2025,11 @@ textarea.modal-comment {
           <h1 class="page-title">Dungeon Map</h1>
           <div class="page-subtitle">Your realm, your conquest</div>
         </div>
+        <div class="dash-tabs">
+          <button class="dash-tab active" data-tab="overview" onclick="setDashTab('overview')">⚔ Overview</button>
+          <button class="dash-tab" data-tab="progress" onclick="setDashTab('progress')">📈 Progress</button>
+          <button class="dash-tab" data-tab="map" onclick="setDashTab('map')">⚜ Realms</button>
+        </div>
         <div class="dash-utility">
           <div class="util-chip"><span class="uc-label">Level</span><span class="uc-val" id="util-level">1</span></div>
           <div class="util-chip"><span class="uc-label">Today</span><span class="uc-val" id="util-today-xp">0 XP</span></div>
@@ -1995,61 +2076,116 @@ textarea.modal-comment {
       </button>
 
       <div class="bento">
-        <div class="bento-cell span-2 panel">
-          <h3 class="panel-title">⏳ Today's Command Center</h3>
-          <div class="tcc-grid" id="tcc-grid"></div>
-          <div class="streak-track" id="streak-track"></div>
-        </div>
-
-        <div class="bento-cell span-4 panel">
-          <h3 class="panel-title">⚜ Slain by Difficulty</h3>
-          <div class="kpi-grid" id="kpi-grid"></div>
-        </div>
-
-        <div class="bento-cell span-4 panel">
-          <h3 class="panel-title">📅 Chronicle Heatmap — Last 180 Days</h3>
-          <div class="heatmap-wrap" id="heatmap-wrap"></div>
-          <div class="heatmap-legend">
-            <span>Less</span>
-            <span class="hm-cell hm-0"></span>
-            <span class="hm-cell hm-1"></span>
-            <span class="hm-cell hm-2"></span>
-            <span class="hm-cell hm-3"></span>
-            <span class="hm-cell hm-4"></span>
-            <span>More</span>
-          </div>
-        </div>
-
-        <div class="bento-cell span-2 panel">
-          <h3 class="panel-title">⚔ Power Levels — Click to Reveal Conquests</h3>
-          <div class="power-rows" id="power-rows"></div>
-        </div>
-
-        <div class="bento-cell panel">
-          <h3 class="panel-title">📜 Topic Mastery</h3>
-          <div class="panel-sub">recent reviews · last 180 days</div>
-          <div class="mastery-grid" id="mastery-grid"></div>
-        </div>
-
-        <div class="bento-cell span-4 panel">
-          <h3 class="panel-title">📈 Chronicle of Battle — Last 14 Days</h3>
-          <div class="analytics-grid">
-            <div>
-              <div class="panel-sub">REVIEWS</div>
-              <div class="mini-bars" id="reviews-trend"></div>
-              <div class="mini-readout" id="reviews-readout">Click any bar to see details</div>
+        <div class="bento-cell span-2 panel" data-tab="overview">
+          <details open data-pkey="today">
+            <summary>
+              <span class="summary-chev">▶</span>
+              <h3 class="panel-title">⏳ Today's Command Center</h3>
+              <span class="summary-meta" id="meta-today"></span>
+            </summary>
+            <div class="details-body">
+              <div class="tcc-grid" id="tcc-grid"></div>
+              <div class="streak-track" id="streak-track"></div>
             </div>
-            <div>
-              <div class="panel-sub">XP EARNED</div>
-              <div class="mini-bars" id="xp-trend"></div>
-              <div class="mini-readout" id="xp-readout">Click any bar to see details</div>
-            </div>
-          </div>
+          </details>
         </div>
 
-        <div class="bento-cell span-4 panel">
-          <h3 class="panel-title">⚜ Dungeon Mastery</h3>
-          <div class="dungeon-grid" id="dungeon-grid"></div>
+        <div class="bento-cell span-4 panel" data-tab="overview">
+          <details open data-pkey="slain">
+            <summary>
+              <span class="summary-chev">▶</span>
+              <h3 class="panel-title">⚜ Slain by Difficulty</h3>
+              <span class="summary-meta" id="meta-slain"></span>
+            </summary>
+            <div class="details-body">
+              <div class="kpi-grid" id="kpi-grid"></div>
+            </div>
+          </details>
+        </div>
+
+        <div class="bento-cell span-4 panel" data-tab="progress">
+          <details data-pkey="heatmap">
+            <summary>
+              <span class="summary-chev">▶</span>
+              <h3 class="panel-title">📅 Chronicle Heatmap — Last 180 Days</h3>
+              <span class="summary-meta" id="meta-heatmap"></span>
+            </summary>
+            <div class="details-body">
+              <div class="heatmap-wrap" id="heatmap-wrap"></div>
+              <div class="heatmap-legend">
+              <span>Less</span>
+              <span class="hm-cell hm-0"></span>
+              <span class="hm-cell hm-1"></span>
+              <span class="hm-cell hm-2"></span>
+              <span class="hm-cell hm-3"></span>
+              <span class="hm-cell hm-4"></span>
+              <span>More</span>
+            </div>
+            </div>
+          </details>
+        </div>
+
+        <div class="bento-cell span-2 panel" data-tab="overview">
+          <details open data-pkey="power">
+            <summary>
+              <span class="summary-chev">▶</span>
+              <h3 class="panel-title">⚔ Power Levels</h3>
+              <span class="summary-meta" id="meta-power"></span>
+            </summary>
+            <div class="details-body">
+              <div class="power-rows" id="power-rows"></div>
+            </div>
+          </details>
+        </div>
+
+        <div class="bento-cell panel" data-tab="map">
+          <details open data-pkey="mastery">
+            <summary>
+              <span class="summary-chev">▶</span>
+              <h3 class="panel-title">📜 Topic Mastery</h3>
+              <span class="summary-meta">last 180 days</span>
+            </summary>
+            <div class="details-body">
+              <div class="mastery-grid" id="mastery-grid"></div>
+            </div>
+          </details>
+        </div>
+
+        <div class="bento-cell span-4 panel" data-tab="progress">
+          <details data-pkey="analytics">
+            <summary>
+              <span class="summary-chev">▶</span>
+              <h3 class="panel-title">📈 Chronicle of Battle — Last 14 Days</h3>
+              <span class="summary-meta">click bars for details</span>
+            </summary>
+            <div class="details-body">
+              <div class="analytics-grid">
+                <div>
+                  <div class="panel-sub">REVIEWS</div>
+                  <div class="mini-bars" id="reviews-trend"></div>
+                  <div class="mini-readout" id="reviews-readout">Click any bar to see details</div>
+                </div>
+              <div>
+                <div class="panel-sub">XP EARNED</div>
+                <div class="mini-bars" id="xp-trend"></div>
+                <div class="mini-readout" id="xp-readout">Click any bar to see details</div>
+              </div>
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <div class="bento-cell span-4 panel" data-tab="map">
+          <details open data-pkey="dungeon">
+            <summary>
+              <span class="summary-chev">▶</span>
+              <h3 class="panel-title">⚜ Dungeon Mastery</h3>
+              <span class="summary-meta" id="meta-dungeon"></span>
+            </summary>
+            <div class="details-body">
+              <div class="dungeon-grid" id="dungeon-grid"></div>
+            </div>
+          </details>
         </div>
       </div>
     </section>
@@ -2580,6 +2716,58 @@ function getStreakMultiplierLocal(streak) {
   return bonus;
 }
 
+function setDashTab(tab) {
+  const page = document.getElementById('page-dashboard');
+  if (!page) return;
+  page.classList.remove('tab-overview', 'tab-progress', 'tab-map');
+  page.classList.add('tab-' + tab);
+  document.querySelectorAll('.dash-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  try { localStorage.setItem('dsa_dojo_dash_tab', tab); } catch (e) {}
+}
+
+function bindDetailsPersistence() {
+  document.querySelectorAll('details[data-pkey]').forEach(d => {
+    if (d.dataset.bound) return;
+    d.dataset.bound = '1';
+    const k = 'dsa_dojo_pop_' + d.dataset.pkey;
+    let saved;
+    try { saved = localStorage.getItem(k); } catch (e) {}
+    if (saved === '1') d.open = true;
+    else if (saved === '0') d.open = false;
+    d.addEventListener('toggle', () => {
+      try { localStorage.setItem(k, d.open ? '1' : '0'); } catch (e) {}
+    });
+  });
+}
+
+function renderSummaryMetas() {
+  try {
+    const setM = (id, txt) => { const e = document.getElementById(id); if (e) e.textContent = txt; };
+    // Today: pending vs total quests
+    const pending = (todayPlan || []).filter(q => !q.done).length;
+    const total = (todayPlan || []).length;
+    setM('meta-today', total ? `${total - pending} / ${total} done` : 'no quest');
+    // Slain: total slain / grand total
+    const slain = RAW_PROBLEMS.filter(p => getConf(p) > 0).length;
+    setM('meta-slain', `${slain} / ${RAW_PROBLEMS.length}`);
+    // Power: top % difficulty
+    const ds = ['Easy', 'Medium', 'Hard'].map(d => {
+      const all = RAW_PROBLEMS.filter(p => p.diff === d);
+      const s = all.filter(p => getConf(p) > 0).length;
+      return { d, pct: all.length ? Math.round(s / all.length * 100) : 0 };
+    });
+    setM('meta-power', ds.map(x => `${x.d[0]} ${x.pct}%`).join(' · '));
+    // Heatmap: today's count + 30-day avg
+    const days = (typeof getDailyHistory === 'function') ? getDailyHistory() : [];
+    if (days.length) setM('meta-heatmap', `${days[days.length-1].reviews} today · ${Math.round(days.reduce((a,b)=>a+b.reviews,0)/days.length)} avg/day`);
+    // Dungeon: cleared/total topics
+    const topics = {};
+    RAW_PROBLEMS.forEach(p => { topics[p.topic] = (topics[p.topic] || { t: 0, s: 0 }); topics[p.topic].t++; if (getConf(p) > 0) topics[p.topic].s++; });
+    const cleared = Object.values(topics).filter(x => x.t && x.s / x.t >= 1).length;
+    setM('meta-dungeon', `${cleared} / ${Object.keys(topics).length} cleared`);
+  } catch (e) {}
+}
+
 function renderUtilityStrip() {
   try {
     const lv = document.getElementById('util-level');
@@ -2686,6 +2874,13 @@ function renderDashboard() {
     }).join('');
 
   renderHeroPowerBars();
+  renderSummaryMetas();
+  bindDetailsPersistence();
+  // Restore tab
+  try {
+    const saved = localStorage.getItem('dsa_dojo_dash_tab') || 'overview';
+    setDashTab(saved);
+  } catch (e) { setDashTab('overview'); }
   renderTodayCommandCenter();
   renderStreakTrack();
   renderPowerLevels();
@@ -2840,6 +3035,15 @@ function togglePower(d) {
   _powerOpen[d] = !_powerOpen[d];
   renderPowerLevels();
 }
+window.togglePower = togglePower;
+// Delegated fallback for power-head clicks (defends against inline-handler scope quirks)
+document.addEventListener('click', (e) => {
+  const head = e.target.closest('.power-head');
+  if (!head) return;
+  const row = head.closest('.power-row');
+  const d = row && row.dataset.diff;
+  if (d) { _powerOpen[d] = !_powerOpen[d]; renderPowerLevels(); }
+});
 
 /* ═════════ TOPIC MASTERY (recent reviews) ═════════ */
 function renderTopicMastery() {
