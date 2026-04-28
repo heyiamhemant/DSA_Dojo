@@ -145,6 +145,13 @@
   background:
     radial-gradient(ellipse at center, rgba(122,31,31,0.5) 0%, rgba(20,16,12,0.95) 70%) padding-box,
     linear-gradient(135deg, var(--gold-bright), var(--gold-deep), var(--gold)) border-box !important;
+
+  background-image:
+    linear-gradient(180deg, rgba(11,8,7,0.55), rgba(11,8,7,0.85)),
+    url('./assets/pathway_darkroot2.jpg') !important;
+  background-size: cover, cover;
+  background-position: center, center;
+  background-repeat: no-repeat, no-repeat;
 }
 .cta-enter::after {
   content: ''; position: absolute; inset: 6px; pointer-events: none;
@@ -584,14 +591,14 @@ a:hover { color: var(--gold-bright); }
   gap: var(--space); margin-top: var(--space);
 }
 .dungeon-card {
-  padding: var(--space); border: 1px solid rgba(232,200,122,0.15);
+  padding: var(--space); border: 1px solid rgba(232,200,122,0.2);
   background:
-    linear-gradient(180deg, rgba(11,8,7,0.45) 0%, rgba(11,8,7,0.92) 75%),
+    linear-gradient(180deg, rgba(11,8,7,0.22) 0%, rgba(11,8,7,0.6) 55%, rgba(11,8,7,0.92) 100%),
     var(--bg-img, none) center/cover no-repeat,
     linear-gradient(180deg, rgba(31,24,18,0.7), rgba(11,8,7,0.9));
   border-radius: var(--rad); cursor: pointer;
   transition: all .3s ease; position: relative; overflow: hidden;
-  min-height: 140px;
+  min-height: 170px;
 }
 .dungeon-card > * { position: relative; }
 .dungeon-card::before {
@@ -629,15 +636,15 @@ a:hover { color: var(--gold-bright); }
 
 .realm-card {
   position: relative; padding: clamp(16px, 1.6vw, 22px);
-  border: 1px solid rgba(232,200,122,0.18); border-radius: 6px;
+  border: 1px solid rgba(232,200,122,0.22); border-radius: 6px;
   background:
-    linear-gradient(180deg, rgba(11,8,7,0.55) 0%, rgba(11,8,7,0.95) 80%),
+    linear-gradient(180deg, rgba(11,8,7,0.25) 0%, rgba(11,8,7,0.6) 55%, rgba(11,8,7,0.92) 100%),
     var(--bg-img, none) center/cover no-repeat,
     linear-gradient(180deg, rgba(31,24,18,0.85), rgba(11,8,7,0.95));
   cursor: pointer; transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
   overflow: hidden;
   display: flex; flex-direction: column; gap: 14px;
-  min-height: 220px;
+  min-height: 240px;
 }
 .realm-card::before {
   content: ''; position: absolute; inset: 0; pointer-events: none;
@@ -863,8 +870,15 @@ a:hover { color: var(--gold-bright); }
   border: 1px solid rgba(232,200,122,0.15);
   border-radius: var(--rad); position: relative; overflow: hidden;
   transition: all .3s ease;
+
+  background:
+    linear-gradient(180deg, rgba(11,8,7,0.55) 0%, rgba(11,8,7,0.92) 75%),
+    var(--bg-img, none) center/cover no-repeat,
+    linear-gradient(180deg, rgba(31,24,18,0.85), rgba(11,8,7,0.95));
+  position: relative; overflow: hidden;
 }
 .quest-card:hover { border-color: rgba(232,200,122,0.4); transform: translateX(2px); }
+.quest-card > * { position: relative; z-index: 1; }
 .quest-card.done { opacity: .85; border-color: rgba(111,168,107,0.4); background: linear-gradient(180deg, rgba(74,103,65,0.15), rgba(11,8,7,0.9)); }
 .quest-card.done .quest-name { text-decoration: line-through; color: var(--text-dim); }
 .quest-card.done::after {
@@ -1011,6 +1025,9 @@ a:hover { color: var(--gold-bright); }
     0 0 24px var(--seal-glow, rgba(232,200,122,0.18));
   display: grid; place-items: center;
   transition: box-shadow .35s ease, border-color .35s ease;
+
+  background-image: var(--keep-bg, none);
+  background-size: cover; background-position: center;
 }
 .keep:hover .keep-medallion {
   box-shadow:
@@ -1254,10 +1271,15 @@ a:hover { color: var(--gold-bright); }
 }
 .monster-card {
   padding: var(--space); border: 1px solid rgba(232,200,122,0.12);
-  background: linear-gradient(180deg, rgba(31,24,18,0.7), rgba(11,8,7,0.9));
+  background:
+    linear-gradient(180deg, rgba(11,8,7,0.5) 0%, rgba(11,8,7,0.92) 80%),
+    var(--bg-img, none) center/cover no-repeat,
+    linear-gradient(180deg, rgba(31,24,18,0.7), rgba(11,8,7,0.9));
   border-radius: var(--rad); cursor: pointer;
   transition: all .3s ease; position: relative; overflow: hidden;
+  min-height: 150px;
 }
+.monster-card > * { position: relative; z-index: 1; }
 .monster-card::before {
   content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
   background: var(--diff-col, var(--gold-deep));
@@ -1750,8 +1772,9 @@ textarea.modal-comment {
 
 /* ─── Hero power bars ─── */
 .hero-powerbars { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; max-width: 480px; }
-.hpb-row { display: grid; grid-template-columns: 60px 1fr auto; gap: 10px; align-items: center; font-family: var(--mono); font-size: 11px; }
-.hpb-label { color: var(--text-dim); letter-spacing: .12em; text-transform: uppercase; }
+.hpb-row { display: grid; grid-template-columns: 80px 1fr auto; gap: 10px; align-items: center; font-family: var(--mono); font-size: 11px; }
+.hpb-label { color: var(--text-dim); letter-spacing: .12em; text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
+.hpb-ico { font-size: 14px; filter: drop-shadow(0 0 4px currentColor); }
 .hpb-track { height: 6px; background: rgba(0,0,0,0.5); border: 1px solid rgba(232,200,122,0.12); border-radius: 99px; overflow: hidden; position: relative; }
 .hpb-fill { height: 100%; border-radius: 99px; transition: width 1.4s cubic-bezier(.4,0,.2,1); position: relative; }
 .hpb-fill::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); animation: shimmer 2.4s linear infinite; }
@@ -3123,9 +3146,10 @@ function renderHeroPowerBars() {
   });
   wrap.innerHTML = ['Easy', 'Medium', 'Hard'].map(d => {
     const x = data[d];
+    const tier = MONSTER_TIER[d];
     const pct = x.t ? Math.round(x.s / x.t * 100) : 0;
-    return `<div class="hpb-row">
-      <div class="hpb-label">${d}</div>
+    return `<div class="hpb-row" title="${tier.plural} slain">
+      <div class="hpb-label"><span class="hpb-ico">${tier.icon}</span>${tier.plural}</div>
       <div class="hpb-track"><div class="hpb-fill ${x.c}" style="width:${pct}%"></div></div>
       <div class="hpb-stats">${x.s} / ${x.t} · ${pct}%</div>
     </div>`;
@@ -3448,7 +3472,7 @@ function renderTopicDeepDive() {
   document.getElementById('topic-problems').innerHTML = probs.map(p => {
     const conf = getConf(p);
     const diffCol = p.diff === 'Easy' ? 'var(--easy)' : p.diff === 'Medium' ? 'var(--medium)' : 'var(--hard)';
-    return `<div class="monster-card ${conf > 0 ? 'solved' : ''}" onclick="openModal(${p.id})" style="--diff-col:${diffCol}">
+    return `<div class="monster-card ${conf > 0 ? 'solved' : ''}" onclick="openModal(${p.id})" style="--diff-col:${diffCol};--bg-img:url('${sceneFor(p.topic)}')">
       <div class="mc-head"><div class="mc-sprite">${monsterFor(p)}</div>
         <div><h4 class="mc-name">${p.name}</h4><div class="mc-num">#${p.num} · ${tierNameOf(p)} · ${p.diff}</div></div></div>
       <div class="mc-hint">${(p.hint||'').slice(0,110)}${(p.hint||'').length>110?'…':''}</div>
@@ -3514,7 +3538,7 @@ function renderQuests() {
     const rateRow = q.done ? '' : `<div class="quest-rate" onclick="event.stopPropagation()">
       ${[1,2,3,4,5].map(c => `<button class="quest-rate-btn c${c} ${curRating === c ? 'sel' : ''}" title="Rate ${c}/5 and log victory" onclick="event.stopPropagation();quickRate(${p.id}, ${c})">${c}</button>`).join('')}
     </div>`;
-    return `<div class="quest-card ${q.done ? 'done' : ''}" data-id="${p.id}" style="--mc:${v.color}40">
+    return `<div class="quest-card ${q.done ? 'done' : ''}" data-id="${p.id}" style="--mc:${v.color}40;--bg-img:url('${sceneFor(p.topic)}')">
       <div class="quest-monster" onclick="openModal(${p.id})" title="${tierNameOf(p)}">${monsterFor(p)}</div>
       <div class="quest-info" onclick="openModal(${p.id})">
         <h4 class="quest-name">${p.name}</h4>
@@ -3742,7 +3766,7 @@ function renderPathway() {
     node.style.left = p.x + '%'; node.style.top = p.y + 'px';
     node.dataset.topic = t;
     node.innerHTML = `
-      <div class="keep-medallion ${sizeClass}" style="--seal-col:${sealCol};--seal-glow:${sealGlow};--seal-rim:${sealRim};">
+      <div class="keep-medallion ${sizeClass}" style="--seal-col:${sealCol};--seal-glow:${sealGlow};--seal-rim:${sealRim};--keep-bg:url('${sceneFor(t)}');">
         <svg class="keep-arc" viewBox="0 0 ${ring} ${ring}">
           <circle cx="${ring/2}" cy="${ring/2}" r="${r}" stroke="${arcCol}" stroke-width="3" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"/>
         </svg>
