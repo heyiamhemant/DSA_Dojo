@@ -1098,10 +1098,10 @@ a:hover { color: var(--gold-bright); }
   animation: emberRise var(--er-dur, 9s) linear var(--er-delay, 0s) infinite;
 }
 @keyframes emberRise {
-  0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
-  10% { opacity: 1; }
-  85% { opacity: .8; }
-  100% { transform: translate(var(--er-dx, 20px), var(--er-dy, -200px)) scale(1.1); opacity: 0; }
+  0%   { transform: translate(0, 0) scale(0.6); opacity: 0; }
+  6%   { opacity: 1; }
+  92%  { opacity: 1; }
+  100% { transform: translate(var(--er-dx, 20px), var(--er-dy, -200px)) scale(1.0); opacity: 0; }
 }
 .firefly { width: 3px; height: 3px; background: #ffd47a; box-shadow: 0 0 6px rgba(255,200,120,0.8), 0 0 14px rgba(255,150,60,0.45); animation-timing-function: ease-in-out; }
 .firefly-bright { width: 4px; height: 4px; background: #fff0b8; box-shadow: 0 0 10px rgba(255,230,140,0.95), 0 0 24px rgba(255,180,80,0.6); }
@@ -3653,25 +3653,22 @@ function renderPathway() {
     stage.appendChild(m);
   }
 
-  // Fireflies — small count, but each one rises from the bottom of the map
-  // up to ~halfway up the page. The big number is the vertical TRAVEL DISTANCE
-  // (--er-dy), not the spawn count.
-  const FF_COUNT = 8;
-  // travel distance: roughly half the map height, with per-ember variance
-  // 6-7× the prior half-page rise so fireflies sail far up across the page
-  const FF_TRAVEL = MAP_H * 3.3;
+  // Fireflies — modest count, very long vertical travel.
+  // Stagger phases evenly across the cycle so at any frame some are
+  // near the bottom, some mid-page, some near the top.
+  const FF_COUNT = 12;
   for (let e = 0; e < FF_COUNT; e++) {
     const el = document.createElement('div');
     el.className = 'codex-ember firefly';
-    // spawn near the bottom edge of the stage
-    el.style.left = (5 + (e * 47) % 90) + '%';
-    el.style.top = (MAP_H - 30 - (e * 11) % 40) + 'px';
-    // long, slow rise — duration scales with distance for a steady velocity
-    el.style.setProperty('--er-dur', (14 + (e * 1.7) % 8) + 's');
-    el.style.setProperty('--er-delay', (-e * 1.9) + 's');
-    el.style.setProperty('--er-dx', (((e * 11) % 41) - 20) + 'px');
-    // travel up to ~half the page — vary ±15% per firefly so they don't all stop at the same line
-    el.style.setProperty('--er-dy', (-(FF_TRAVEL * (0.85 + ((e * 13) % 30) / 100))) + 'px');
+    el.style.left = (4 + (e * 41) % 92) + '%';
+    el.style.top = (MAP_H - 20 - (e * 13) % 50) + 'px';
+    const dur = 18 + (e * 1.7) % 10;
+    el.style.setProperty('--er-dur', dur + 's');
+    // Phase-spread negative delays so the rise visibly fills the column
+    el.style.setProperty('--er-delay', (-(e * dur) / FF_COUNT) + 's');
+    el.style.setProperty('--er-dx', (((e * 11) % 51) - 25) + 'px');
+    // Travel ~full MAP_H so they clear the stage top
+    el.style.setProperty('--er-dy', (-(MAP_H * (0.9 + ((e * 13) % 30) / 100))) + 'px');
     if (e % 4 === 0) el.classList.add('firefly-bright');
     stage.appendChild(el);
   }
