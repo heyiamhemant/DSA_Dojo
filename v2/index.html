@@ -142,15 +142,13 @@
 /* CTA Enter the Dungeon — castle-gate feel */
 .cta-enter {
   border: 3px solid transparent !important;
-  background:
-    radial-gradient(ellipse at center, rgba(122,31,31,0.5) 0%, rgba(20,16,12,0.95) 70%) padding-box,
-    linear-gradient(135deg, var(--gold-bright), var(--gold-deep), var(--gold)) border-box !important;
 
+  background-color: #1a0f08;
   background-image:
     linear-gradient(180deg, rgba(11,8,7,0.55), rgba(11,8,7,0.85)),
-    url('./assets/pathway_darkroot2.jpg') !important;
-  background-size: cover, cover;
-  background-position: center, center;
+    url('./assets/pathway_darkroot2.jpg');
+  background-size: auto, cover;
+  background-position: 0 0, center;
   background-repeat: no-repeat, no-repeat;
 }
 .cta-enter::after {
@@ -592,10 +590,13 @@ a:hover { color: var(--gold-bright); }
 }
 .dungeon-card {
   padding: var(--space); border: 1px solid rgba(232,200,122,0.2);
-  background:
+  background-color: #1f1812;
+  background-image:
     linear-gradient(180deg, rgba(11,8,7,0.22) 0%, rgba(11,8,7,0.6) 55%, rgba(11,8,7,0.92) 100%),
-    var(--bg-img, none) center/cover no-repeat,
-    linear-gradient(180deg, rgba(31,24,18,0.7), rgba(11,8,7,0.9));
+    var(--bg-img);
+  background-size: auto, cover;
+  background-position: 0 0, center;
+  background-repeat: no-repeat, no-repeat;
   border-radius: var(--rad); cursor: pointer;
   transition: all .3s ease; position: relative; overflow: hidden;
   min-height: 170px;
@@ -637,10 +638,13 @@ a:hover { color: var(--gold-bright); }
 .realm-card {
   position: relative; padding: clamp(16px, 1.6vw, 22px);
   border: 1px solid rgba(232,200,122,0.22); border-radius: 6px;
-  background:
+  background-color: #1f1812;
+  background-image:
     linear-gradient(180deg, rgba(11,8,7,0.25) 0%, rgba(11,8,7,0.6) 55%, rgba(11,8,7,0.92) 100%),
-    var(--bg-img, none) center/cover no-repeat,
-    linear-gradient(180deg, rgba(31,24,18,0.85), rgba(11,8,7,0.95));
+    var(--bg-img);
+  background-size: auto, cover;
+  background-position: 0 0, center;
+  background-repeat: no-repeat, no-repeat;
   cursor: pointer; transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
   overflow: hidden;
   display: flex; flex-direction: column; gap: 14px;
@@ -866,15 +870,19 @@ a:hover { color: var(--gold-bright); }
 .quest-card {
   display: grid; grid-template-columns: auto 1fr auto auto; gap: var(--space);
   align-items: center; padding: var(--space);
-  background: linear-gradient(180deg, rgba(31,24,18,0.75), rgba(11,8,7,0.9));
   border: 1px solid rgba(232,200,122,0.15);
   border-radius: var(--rad); position: relative; overflow: hidden;
   transition: all .3s ease;
-
-  background:
     linear-gradient(180deg, rgba(11,8,7,0.55) 0%, rgba(11,8,7,0.92) 75%),
     var(--bg-img, none) center/cover no-repeat,
     linear-gradient(180deg, rgba(31,24,18,0.85), rgba(11,8,7,0.95));
+  background-color: #1f1812;
+  background-image:
+    linear-gradient(180deg, rgba(11,8,7,0.40) 0%, rgba(11,8,7,0.88) 75%, rgba(11,8,7,0.95) 100%),
+    var(--bg-img);
+  background-size: auto, cover;
+  background-position: 0 0, center;
+  background-repeat: no-repeat, no-repeat;
   position: relative; overflow: hidden;
 }
 .quest-card:hover { border-color: rgba(232,200,122,0.4); transform: translateX(2px); }
@@ -1270,14 +1278,17 @@ a:hover { color: var(--gold-bright); }
   gap: var(--space);
 }
 .monster-card {
-  padding: var(--space); border: 1px solid rgba(232,200,122,0.12);
-  background:
-    linear-gradient(180deg, rgba(11,8,7,0.5) 0%, rgba(11,8,7,0.92) 80%),
-    var(--bg-img, none) center/cover no-repeat,
-    linear-gradient(180deg, rgba(31,24,18,0.7), rgba(11,8,7,0.9));
+  padding: var(--space); border: 1px solid rgba(232,200,122,0.18);
+  background-color: #1f1812;
+  background-image:
+    linear-gradient(180deg, rgba(11,8,7,0.35) 0%, rgba(11,8,7,0.85) 75%, rgba(11,8,7,0.95) 100%),
+    var(--bg-img);
+  background-size: auto, cover;
+  background-position: 0 0, center;
+  background-repeat: no-repeat, no-repeat;
   border-radius: var(--rad); cursor: pointer;
   transition: all .3s ease; position: relative; overflow: hidden;
-  min-height: 150px;
+  min-height: 160px;
 }
 .monster-card > * { position: relative; z-index: 1; }
 .monster-card::before {
@@ -1304,15 +1315,18 @@ a:hover { color: var(--gold-bright); }
    ═════════════════════════════════════════════════════════════════════════ */
 .boss-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--space); }
 .boss-card {
-  padding: var(--space-md); border: 1px solid rgba(176,69,69,0.25);
-  background:
-    linear-gradient(180deg, rgba(11,8,7,0.55) 0%, rgba(11,8,7,0.95) 80%),
-    radial-gradient(ellipse at top right, rgba(122,31,31,0.3), transparent 60%),
-    var(--boss-img, none) center/cover no-repeat,
-    linear-gradient(180deg, rgba(31,24,18,0.85), rgba(11,8,7,0.95));
+  padding: var(--space-md); border: 1px solid rgba(176,69,69,0.35);
+  background-color: #1c0e0e;
+  background-image:
+    linear-gradient(180deg, rgba(11,8,7,0.30) 0%, rgba(11,8,7,0.75) 60%, rgba(11,8,7,0.95) 100%),
+    radial-gradient(ellipse at top right, rgba(122,31,31,0.35), transparent 60%),
+    var(--boss-img);
+  background-size: auto, auto, cover;
+  background-position: 0 0, 0 0, center;
+  background-repeat: no-repeat, no-repeat, no-repeat;
   border-radius: var(--rad); cursor: pointer;
   transition: all .35s ease; position: relative; overflow: hidden;
-  min-height: 220px;
+  min-height: 240px;
 }
 .boss-card::before {
   content: ''; position: absolute; inset: 0; pointer-events: none;
@@ -1590,31 +1604,41 @@ textarea.modal-comment {
      the dark-souls scene image. Lighten the overlay and scale image cover so
      the image stays visible behind card content. */
   .realm-card {
-    background:
-      linear-gradient(180deg, rgba(11,8,7,0.30) 0%, rgba(11,8,7,0.75) 60%, rgba(11,8,7,0.92) 100%),
-      var(--bg-img, none) center/cover no-repeat,
-      linear-gradient(180deg, rgba(31,24,18,0.85), rgba(11,8,7,0.95)) !important;
+    background-image:
+      linear-gradient(180deg, rgba(11,8,7,0.20) 0%, rgba(11,8,7,0.7) 60%, rgba(11,8,7,0.92) 100%),
+      var(--bg-img) !important;
+    background-size: auto, cover !important;
+    background-position: 0 0, center !important;
+    background-repeat: no-repeat, no-repeat !important;
     min-height: 240px;
   }
   .dungeon-card {
-    background:
-      linear-gradient(180deg, rgba(11,8,7,0.25) 0%, rgba(11,8,7,0.7) 65%, rgba(11,8,7,0.92) 100%),
-      var(--bg-img, none) center/cover no-repeat,
-      linear-gradient(180deg, rgba(31,24,18,0.7), rgba(11,8,7,0.9)) !important;
+    background-image:
+      linear-gradient(180deg, rgba(11,8,7,0.18) 0%, rgba(11,8,7,0.65) 60%, rgba(11,8,7,0.92) 100%),
+      var(--bg-img) !important;
+    background-size: auto, cover !important;
+    background-position: 0 0, center !important;
+    background-repeat: no-repeat, no-repeat !important;
     min-height: 160px;
   }
   /* Bestiary monster cards + boss cards + quest cards: ensure the bg-img layer
      keeps a visible top band on mobile by lightening the top of the overlay. */
-  .monster-card, .boss-card, .quest-card {
-    background-blend-mode: normal;
-  }
-  .monster-card[style*="--bg-img"], .boss-card[style*="--bg-img"], .quest-card[style*="--bg-img"] {
+  .monster-card, .quest-card {
     background-image:
-      linear-gradient(180deg, rgba(11,8,7,0.35) 0%, rgba(11,8,7,0.85) 70%, rgba(11,8,7,0.95) 100%),
+      linear-gradient(180deg, rgba(11,8,7,0.25) 0%, rgba(11,8,7,0.78) 70%, rgba(11,8,7,0.95) 100%),
       var(--bg-img) !important;
-    background-size: cover, cover;
-    background-position: center, center;
-    background-repeat: no-repeat, no-repeat;
+    background-size: auto, cover !important;
+    background-position: 0 0, center !important;
+    background-repeat: no-repeat, no-repeat !important;
+  }
+  .boss-card {
+    background-image:
+      linear-gradient(180deg, rgba(11,8,7,0.20) 0%, rgba(11,8,7,0.7) 60%, rgba(11,8,7,0.95) 100%),
+      radial-gradient(ellipse at top right, rgba(122,31,31,0.35), transparent 60%),
+      var(--boss-img) !important;
+    background-size: auto, auto, cover !important;
+    background-position: 0 0, 0 0, center !important;
+    background-repeat: no-repeat, no-repeat, no-repeat !important;
   }
 }
 
