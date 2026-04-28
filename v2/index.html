@@ -80,6 +80,77 @@
 }
 @keyframes sceneBreathe { from { transform: scale(1) translate(0,0); } to { transform: scale(1.06) translate(-1%, -1%); } }
 
+/* ─── Gothic Filigree Corners (applied to .filigree elements) ─── */
+.filigree { position: relative; }
+.filigree::before, .filigree::after {
+  content: ''; position: absolute; width: 28px; height: 28px;
+  pointer-events: none; opacity: .9;
+  background-image:
+    radial-gradient(circle at 0 0, var(--gold) 0 1.2px, transparent 1.5px),
+    radial-gradient(circle at 0 0, transparent 8px, var(--gold) 8px 9px, transparent 10px),
+    radial-gradient(circle at 0 0, transparent 14px, var(--gold-deep) 14px 15px, transparent 16px);
+  background-size: 100% 100%;
+}
+.filigree::before { top: 0; left: 0;
+  background:
+    linear-gradient(135deg, var(--gold) 0 1.5px, transparent 1.5px) top left/16px 1.5px no-repeat,
+    linear-gradient(135deg, var(--gold) 0 1.5px, transparent 1.5px) top left/1.5px 16px no-repeat,
+    radial-gradient(circle 5px at 6px 6px, transparent 4px, var(--gold) 4px 5px, transparent 5px),
+    radial-gradient(circle 9px at 11px 11px, transparent 8px, var(--gold-deep) 8px 9px, transparent 9px);
+}
+.filigree::after { top: 0; right: 0; transform: scaleX(-1);
+  background:
+    linear-gradient(135deg, var(--gold) 0 1.5px, transparent 1.5px) top left/16px 1.5px no-repeat,
+    linear-gradient(135deg, var(--gold) 0 1.5px, transparent 1.5px) top left/1.5px 16px no-repeat,
+    radial-gradient(circle 5px at 6px 6px, transparent 4px, var(--gold) 4px 5px, transparent 5px),
+    radial-gradient(circle 9px at 11px 11px, transparent 8px, var(--gold-deep) 8px 9px, transparent 9px);
+}
+.filigree-bottom::before, .filigree-bottom::after { top: auto; bottom: 0; transform: scaleY(-1); }
+.filigree-bottom::after { transform: scale(-1, -1); }
+
+/* SVG-based filigree corners (richer) */
+.fcorners { position: relative; }
+.fcorners > .fc {
+  position: absolute; width: 36px; height: 36px; pointer-events: none;
+  color: var(--gold); opacity: .85;
+  filter: drop-shadow(0 0 6px rgba(232,200,122,0.4));
+}
+.fcorners > .fc.tl { top: 4px; left: 4px; }
+.fcorners > .fc.tr { top: 4px; right: 4px; transform: scaleX(-1); }
+.fcorners > .fc.bl { bottom: 4px; left: 4px; transform: scaleY(-1); }
+.fcorners > .fc.br { bottom: 4px; right: 4px; transform: scale(-1,-1); }
+
+/* Apply filigree to primary buttons + cards */
+.btn-primary, .cta-enter, .conf-btn.sel, .panel, .hero, .quest-card, .monster-card, .boss-card, .dungeon-card, .modal {
+  position: relative;
+}
+
+/* Buttons get a gold-braid border treatment */
+.btn-primary {
+  background:
+    linear-gradient(180deg, var(--gold-deep), var(--bone)) padding-box,
+    linear-gradient(135deg, var(--gold-bright), var(--gold), var(--gold-deep), var(--gold)) border-box;
+  border: 2px solid transparent !important;
+  position: relative;
+}
+.btn-primary::before {
+  content: ''; position: absolute; inset: 4px; pointer-events: none;
+  border: 1px solid rgba(232,200,122,0.35); border-radius: var(--rad);
+  box-shadow: inset 0 0 8px rgba(232,200,122,0.15);
+}
+
+/* CTA Enter the Dungeon — castle-gate feel */
+.cta-enter {
+  border: 3px solid transparent !important;
+  background:
+    radial-gradient(ellipse at center, rgba(122,31,31,0.5) 0%, rgba(20,16,12,0.95) 70%) padding-box,
+    linear-gradient(135deg, var(--gold-bright), var(--gold-deep), var(--gold)) border-box !important;
+}
+.cta-enter::after {
+  content: ''; position: absolute; inset: 6px; pointer-events: none;
+  border: 1px solid rgba(232,200,122,0.4); border-radius: var(--rad-lg);
+}
+
 /* ─── Reset + base ─── */
 *, *::before, *::after { box-sizing: border-box; }
 html, body { margin:0; padding:0; min-height:100%; background: var(--ink); color: var(--text); font-family: var(--ui); -webkit-font-smoothing: antialiased; }
@@ -956,6 +1027,71 @@ textarea.modal-comment {
   100% { opacity: 0; transform: scale(1.05); }
 }
 
+
+.pathway-scroll {
+  position: sticky; top: 8px; z-index: 5; margin: 0 auto 8px; width: max-content;
+  padding: 8px 24px; font-family: var(--medieval); letter-spacing: .25em;
+  color: var(--gold); font-size: 13px; text-transform: uppercase;
+  background:
+    linear-gradient(90deg, transparent 0%, rgba(214,195,154,0.15) 8%, rgba(214,195,154,0.22) 50%, rgba(214,195,154,0.15) 92%, transparent 100%);
+  border-top: 1px solid rgba(232,200,122,0.4);
+  border-bottom: 1px solid rgba(232,200,122,0.4);
+  text-shadow: 0 0 12px rgba(232,200,122,0.5);
+  filter: drop-shadow(0 4px 16px rgba(0,0,0,0.6));
+}
+.pathway-scroll::before, .pathway-scroll::after {
+  content: '✦'; padding: 0 14px; color: var(--gold-deep);
+}
+
+.path-stone {
+  fill: #2a221a; stroke: #1a1208; stroke-width: 2;
+}
+.path-bridge { opacity: .7; }
+.path-checkpoint-text {
+  font-family: var(--medieval); fill: var(--gold-deep); font-size: 11px; letter-spacing: .2em; text-anchor: middle;
+}
+.path-gate-glow {
+  fill: url(#gateGlow); animation: gateBreathe 3s ease-in-out infinite alternate;
+}
+@keyframes gateBreathe { from { opacity: .25; } to { opacity: .55; } }
+
+/* Quest card — show reason + overdue + snooze inline */
+.quest-card { grid-template-columns: auto 1fr auto auto; }
+.quest-reason {
+  display: block; margin-top: 6px; padding: 4px 8px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .08em;
+  color: var(--gold); background: rgba(232,200,122,0.06);
+  border-left: 2px solid var(--gold-deep); border-radius: 2px;
+}
+.quest-reason.overdue { color: var(--hard); border-left-color: var(--hard); background: rgba(176,69,69,0.08); animation: urgentPulse 2s ease-in-out infinite; }
+.quest-snooze {
+  background: transparent; border: 1px solid rgba(232,200,122,0.25); color: var(--text-dim);
+  width: 32px; height: 32px; border-radius: 50%; font-size: 14px; transition: all .2s ease;
+}
+.quest-snooze:hover { color: var(--gold); border-color: var(--gold); background: rgba(232,200,122,0.08); }
+.quest-snooze.snoozed { color: var(--ember); border-color: var(--ember); }
+
+/* Castle battlement decoration on top of panels */
+.battlement {
+  position: relative;
+  padding-top: 8px;
+}
+.battlement::before {
+  content: ''; position: absolute; top: -12px; left: 0; right: 0; height: 12px;
+  background:
+    linear-gradient(90deg,
+      var(--bone) 0 12px, transparent 12px 18px,
+      var(--bone) 18px 30px, transparent 30px 36px,
+      var(--bone) 36px 48px, transparent 48px 54px,
+      var(--bone) 54px 66px, transparent 66px 72px,
+      var(--bone) 72px 84px, transparent 84px 90px,
+      var(--bone) 90px 102px, transparent 102px 108px,
+      var(--bone) 108px 100%);
+  background-size: 108px 100%;
+  border-bottom: 1px solid var(--gold-deep);
+  filter: drop-shadow(0 -2px 4px rgba(0,0,0,0.6));
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
@@ -983,7 +1119,67 @@ textarea.modal-comment {
     <radialGradient id="emberGrad" cx="50%" cy="50%" r="50%">
       <stop offset="0%" stop-color="#ffd98c"/><stop offset="60%" stop-color="#ff8a3a"/><stop offset="100%" stop-color="transparent"/>
     </radialGradient>
+    <radialGradient id="gateGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffd98c" stop-opacity="0.8"/>
+      <stop offset="60%" stop-color="#ff8a3a" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </radialGradient>
+    <linearGradient id="bridgeGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#3a2a1a" stop-opacity=".2"/>
+      <stop offset="50%" stop-color="#8b6c36" stop-opacity=".8"/>
+      <stop offset="100%" stop-color="#3a2a1a" stop-opacity=".2"/>
+    </linearGradient>
     <symbol id="i-sword" viewBox="0 0 24 24"><path fill="currentColor" d="M14.5 1.5l8 8-1.5 1.5-1-1L14 18l1 1-1.5 1.5-8-8L7 11l1 1L14 6l-1-1 1.5-1.5zM4 18l2 2-2 2-2-2 2-2zm15 0l3 3-1 1-3-3 1-1z"/></symbol>
+    <symbol id="i-filigree" viewBox="0 0 36 36">
+      <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+        <path d="M2 2 L20 2 M2 2 L2 20"/>
+        <path d="M5 5 Q12 5 12 12 Q12 18 6 18"/>
+        <path d="M5 5 Q5 12 12 12"/>
+        <circle cx="14" cy="14" r="2.5" stroke-width="1"/>
+        <path d="M14 14 L20 8" stroke-width=".8"/>
+        <path d="M8 8 Q10 10 8 12 Q6 10 8 8 Z" fill="currentColor" opacity=".5"/>
+      </g>
+    </symbol>
+    <symbol id="i-bonfire" viewBox="0 0 32 40">
+      <g>
+        <path d="M8 38 L24 38 L22 32 L10 32 Z" fill="#3a2a1a" stroke="#1a1208" stroke-width="1"/>
+        <path d="M11 32 L21 32 L20 28 L12 28 Z" fill="#5a3a22"/>
+        <line x1="14" y1="32" x2="13" y2="22" stroke="#3a2a1a" stroke-width="2"/>
+        <line x1="18" y1="32" x2="19" y2="22" stroke="#3a2a1a" stroke-width="2"/>
+        <line x1="16" y1="32" x2="16" y2="20" stroke="#3a2a1a" stroke-width="2"/>
+        <path d="M16 4 Q12 14 14 22 Q16 18 16 14 Q18 18 20 22 Q22 14 16 4 Z" fill="#ffd98c">
+          <animate attributeName="d" dur="1.2s" repeatCount="indefinite"
+            values="M16 4 Q12 14 14 22 Q16 18 16 14 Q18 18 20 22 Q22 14 16 4 Z;
+                    M16 6 Q11 14 13 22 Q15 17 16 13 Q19 17 21 22 Q23 14 16 6 Z;
+                    M16 4 Q12 14 14 22 Q16 18 16 14 Q18 18 20 22 Q22 14 16 4 Z"/>
+        </path>
+        <path d="M16 8 Q14 14 15 20 Q16 17 16 15 Q17 17 18 20 Q20 14 16 8 Z" fill="#ff8a3a"/>
+      </g>
+    </symbol>
+    <symbol id="i-gate" viewBox="0 0 60 80">
+      <g fill="none" stroke="currentColor" stroke-width="1.2">
+        <rect x="6" y="20" width="48" height="58" fill="#1a1208" stroke="#3a2a1a"/>
+        <path d="M6 20 L6 12 L14 12 L14 8 L22 8 L22 12 L38 12 L38 8 L46 8 L46 12 L54 12 L54 20" fill="#1a1208" stroke="#3a2a1a"/>
+        <path d="M16 78 L16 38 Q16 28 30 28 Q44 28 44 38 L44 78" fill="#0a0807" stroke="currentColor" stroke-width="1.5"/>
+        <line x1="30" y1="28" x2="30" y2="78" stroke="#3a2a1a"/>
+        <circle cx="22" cy="55" r="1.5" fill="currentColor"/>
+        <circle cx="38" cy="55" r="1.5" fill="currentColor"/>
+      </g>
+    </symbol>
+    <symbol id="i-bridge" viewBox="0 0 100 30">
+      <g fill="none" stroke="currentColor" stroke-width="1">
+        <path d="M2 18 Q50 4 98 18" stroke-width="1.5"/>
+        <path d="M2 24 Q50 10 98 24" opacity=".5"/>
+        <line x1="10" y1="16" x2="10" y2="26"/>
+        <line x1="22" y1="11" x2="22" y2="23"/>
+        <line x1="34" y1="8" x2="34" y2="20"/>
+        <line x1="50" y1="6" x2="50" y2="18"/>
+        <line x1="66" y1="8" x2="66" y2="20"/>
+        <line x1="78" y1="11" x2="78" y2="23"/>
+        <line x1="90" y1="16" x2="90" y2="26"/>
+      </g>
+    </symbol>
+
   </defs>
 </svg>
 
@@ -1052,7 +1248,11 @@ textarea.modal-comment {
         </div>
       </div>
 
-      <div class="hero">
+      <div class="hero fcorners">
+        <svg class="fc tl" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
+        <svg class="fc tr" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
+        <svg class="fc bl" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
+        <svg class="fc br" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
         <div class="hero-crest">
           <svg class="level-ring" viewBox="0 0 110 110">
             <circle class="bg" cx="55" cy="55" r="50"/>
@@ -1155,9 +1355,14 @@ textarea.modal-comment {
           <div class="page-subtitle">Through the forest of unknowns</div>
         </div>
       </div>
-      <div class="pathway-shell">
+      <div class="pathway-shell fcorners">
+        <svg class="fc tl" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
+        <svg class="fc tr" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
+        <svg class="fc bl" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
+        <svg class="fc br" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
         <div class="pathway-bg"></div>
-        <svg class="pathway-svg" id="pathway-svg" viewBox="0 0 1000 1400" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="pathway-scroll" id="pathway-scroll">⚜ DESCENT THROUGH THE FORTRESS ⚜</div>
+        <svg class="pathway-svg" id="pathway-svg" viewBox="0 0 1000 1800" preserveAspectRatio="xMidYMid meet"></svg>
         <div class="path-tooltip" id="path-tooltip"></div>
       </div>
     </section>
@@ -1209,7 +1414,11 @@ textarea.modal-comment {
 
 <!-- ═════════ MODAL ═════════ -->
 <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
-  <div class="modal" id="modal">
+  <div class="modal fcorners" id="modal">
+    <svg class="fc tl" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
+    <svg class="fc tr" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
+    <svg class="fc bl" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
+    <svg class="fc br" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
     <button class="modal-close" onclick="closeModal()">✕</button>
     <div class="modal-head">
       <div class="modal-encounter" id="modal-encounter">⚔ Encounter</div>
@@ -1834,6 +2043,12 @@ function renderQuests() {
     const p = RAW_PROBLEMS.find(x => x.id === q.id); if (!p) return '';
     const v = visualOf(p.topic);
     const xp = q.done ? `+${q.xpAwarded || 0}` : `~${(q.xpEstimate || 10)} XP`;
+    const di = getDueInfo(p);
+    const overdueDays = di.days < 0 ? Math.abs(di.days) : 0;
+    const isOverdue = overdueDays > 0;
+    const reason = q.why || (isOverdue ? `Overdue ${overdueDays}d` : (di.cls === 'due-new' ? 'New encounter' : 'Due review'));
+    const ud = userData[p.id] || {};
+    const snoozed = ud.snoozeUntil && new Date(ud.snoozeUntil).getTime() > Date.now();
     return `<div class="quest-card ${q.done ? 'done' : ''}" data-id="${p.id}" onclick="openModal(${p.id})" style="--mc:${v.color}40">
       <div class="quest-monster">${monsterFor(p)}</div>
       <div class="quest-info">
@@ -1841,11 +2056,15 @@ function renderQuests() {
         <div class="quest-meta">
           <span class="quest-tag ${p.diff.toLowerCase()}">${p.diff}</span>
           <span class="quest-tag">${visualOf(p.topic).icon} ${p.topic}</span>
-          ${q.why ? `<span class="quest-tag" title="${q.why}">${q.why.length > 40 ? q.why.slice(0,40)+'…' : q.why}</span>` : ''}
+          ${isOverdue ? `<span class="quest-tag hard">⏰ ${overdueDays}d overdue</span>` : ''}
         </div>
+        <div class="quest-reason ${isOverdue ? 'overdue' : ''}">${reason}</div>
       </div>
       <div class="quest-xp ${q.done ? 'granted' : ''}">${xp}</div>
-      <button class="quest-action" onclick="event.stopPropagation();openModal(${p.id})">${q.done ? 'Review' : '⚔ Fight'}</button>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="quest-snooze ${snoozed ? 'snoozed' : ''}" title="${snoozed ? 'Already snoozed' : 'Snooze 7 days'}" onclick="event.stopPropagation();snoozeProblem(${p.id});renderQuests()">${snoozed ? '🔕' : '💤'}</button>
+        <button class="quest-action" onclick="event.stopPropagation();openModal(${p.id})">${q.done ? 'Review' : '⚔ Fight'}</button>
+      </div>
     </div>`;
   }).join('');
 }
@@ -1866,6 +2085,7 @@ function renderPathway() {
     if (getConf(p) > 0) topics[p.topic].solved++;
   });
   // Compute richer per-topic stats for tooltip
+  const _ = 0;
   const stats = {};
   RAW_PROBLEMS.forEach(p => {
     if (!stats[p.topic]) stats[p.topic] = { total: 0, solved: 0, due: 0, overdue: 0 };
@@ -1880,38 +2100,62 @@ function renderPathway() {
     }
   });
   const list = Object.entries(topics).sort((a, b) => b[1].total - a[1].total);
-  const W = 1000, H = Math.max(900, list.length * 110);
+  const N = list.length;
+  // Vertical descent: each checkpoint is a fort gate, alternating left/right
+  const stepY = 140;
+  const W = 1000, H = 120 + N * stepY + 80;
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
 
-  const positions = list.map((_, i) => ({ y: 80 + i * 100, x: 200 + 600 * Math.abs(Math.sin(i * 0.85)) }));
+  const positions = list.map((_, i) => {
+    const y = 100 + i * stepY;
+    // alternate sides with gentle drift
+    const side = i % 2;
+    const x = side ? W * 0.3 : W * 0.7;
+    return { x, y, side };
+  });
 
+  // Build the descending stone path with bridges between gates
   let pathD = `M ${positions[0].x} ${positions[0].y}`;
+  let bridges = '';
   for (let i = 1; i < positions.length; i++) {
     const p0 = positions[i - 1], p1 = positions[i];
-    const cx = (p0.x + p1.x) / 2 + (i % 2 ? 80 : -80);
-    pathD += ` Q ${cx} ${(p0.y + p1.y) / 2} ${p1.x} ${p1.y}`;
+    const midY = (p0.y + p1.y) / 2;
+    const cx = (p0.x + p1.x) / 2;
+    pathD += ` Q ${cx} ${midY - 30} ${p1.x} ${p1.y}`;
+    // Bridge segment (decorative): a faint stone arch under the curve
+    bridges += `<path d="M ${p0.x} ${p0.y} Q ${cx} ${midY - 30} ${p1.x} ${p1.y}" stroke="url(#bridgeGrad)" stroke-width="14" fill="none" opacity=".25"/>`;
+    bridges += `<path d="M ${p0.x} ${p0.y + 4} Q ${cx} ${midY - 26} ${p1.x} ${p1.y + 4}" stroke="#1a1208" stroke-width="2" fill="none" opacity=".6"/>`;
   }
 
   let nodes = '';
   list.forEach(([t, d], i) => {
     const v = visualOf(t);
     const pp = d.total ? d.solved / d.total : 0;
-    const C = 2 * Math.PI * 36;
+    const C = 2 * Math.PI * 44;
     const off = C - C * pp;
     const pos = positions[i];
     const s = stats[t] || { due: 0, overdue: 0 };
-    const dueBadge = (s.due + s.overdue) > 0 ? `<circle cx="32" cy="-32" r="11" fill="${s.overdue ? 'var(--hard)' : 'var(--medium)'}" stroke="var(--ink)" stroke-width="2"/><text x="32" y="-28" text-anchor="middle" font-family="var(--mono)" font-size="11" font-weight="700" fill="white">${s.due + s.overdue}</text>` : '';
+    const isComplete = pp >= 1;
+    const dueBadge = (s.due + s.overdue) > 0 ? `<circle cx="40" cy="-40" r="13" fill="${s.overdue ? '#b04545' : '#c89c4a'}" stroke="#0a0807" stroke-width="2"/><text x="40" y="-35" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" font-weight="700" fill="white">${s.due + s.overdue}</text>` : '';
+    // Stone platform under the gate
+    const platform = `<ellipse cx="0" cy="56" rx="76" ry="14" fill="#1a1208" opacity=".7"/><ellipse cx="0" cy="54" rx="72" ry="10" fill="#2a221a" stroke="#3a2a1a" stroke-width="1"/>`;
+    // Lit bonfire glow for completed gates
+    const fireGlow = isComplete ? `<circle cx="0" cy="0" r="80" class="path-gate-glow"/>` : '';
     nodes += `<g class="path-node" data-topic="${t.replace(/"/g,'&quot;')}" transform="translate(${pos.x},${pos.y})" onclick="filterByTopic('${t.replace(/'/g,"\\'")}')">
-      <circle class="outer" r="42"/>
-      <circle class="progress" r="36" stroke="${v.color}" stroke-dasharray="${C}" stroke-dashoffset="${off}"/>
-      <text class="icon" y="-6" style="fill:${v.color}">${v.icon}</text>
-      <text class="label" y="14">${t.length > 14 ? t.slice(0, 12) + '…' : t}</text>
-      <text class="pct" y="28">${d.solved}/${d.total}</text>
+      ${platform}
+      ${fireGlow}
+      <circle class="outer" r="50"/>
+      <circle class="progress" r="44" stroke="${v.color}" stroke-dasharray="${C}" stroke-dashoffset="${off}" stroke-width="5"/>
+      <text class="icon" y="-8" style="fill:${v.color};font-size:28px">${v.icon}</text>
+      <text class="label" y="14" style="font-size:11px">${t.length > 14 ? t.slice(0, 12) + '…' : t}</text>
+      <text class="pct" y="30" style="font-size:10px">${d.solved}/${d.total}</text>
       ${dueBadge}
+      <text class="path-checkpoint-text" y="78">CHECKPOINT ${String(i + 1).padStart(2,'0')} OF ${String(N).padStart(2,'0')}</text>
     </g>`;
   });
 
-  svg.innerHTML = `<path class="path-line" d="${pathD}"/>${nodes}`;
+  // The "long fall" path itself
+  svg.innerHTML = `${bridges}<path class="path-line" d="${pathD}"/>${nodes}`;
 
   // Tooltip wiring
   const tip = document.getElementById('path-tooltip');
