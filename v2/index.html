@@ -280,7 +280,7 @@ a:hover { color: var(--gold-bright); }
   padding: var(--space-md) var(--space-sm);
   display: flex; flex-direction: column; gap: var(--space-sm);
   position: sticky; top: 0; height: 100vh; overflow-y: auto;
-  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
 }
 .rail-brand {
   font-family: var(--serif-display); font-size: 18px; font-weight: 900;
@@ -353,7 +353,7 @@ a:hover { color: var(--gold-bright); }
   position: sticky; top: 0; z-index: 10;
   background:
     linear-gradient(180deg, rgba(11,8,7,0.92) 60%, rgba(11,8,7,0.4) 100%);
-  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
   margin-left: calc(var(--space-lg) * -1);
   margin-right: calc(var(--space-lg) * -1);
   padding-left: var(--space-lg); padding-right: var(--space-lg);
@@ -593,7 +593,7 @@ a:hover { color: var(--gold-bright); }
   background-color: #1f1812;
   background-image:
     linear-gradient(180deg, rgba(11,8,7,0.22) 0%, rgba(11,8,7,0.6) 55%, rgba(11,8,7,0.92) 100%),
-    var(--bg-img);
+    var(--bg-img, none);
   background-size: auto, cover;
   background-position: 0 0, center;
   background-repeat: no-repeat, no-repeat;
@@ -641,7 +641,7 @@ a:hover { color: var(--gold-bright); }
   background-color: #1f1812;
   background-image:
     linear-gradient(180deg, rgba(11,8,7,0.25) 0%, rgba(11,8,7,0.6) 55%, rgba(11,8,7,0.92) 100%),
-    var(--bg-img);
+    var(--bg-img, none);
   background-size: auto, cover;
   background-position: 0 0, center;
   background-repeat: no-repeat, no-repeat;
@@ -879,7 +879,7 @@ a:hover { color: var(--gold-bright); }
   background-color: #1f1812;
   background-image:
     linear-gradient(180deg, rgba(11,8,7,0.40) 0%, rgba(11,8,7,0.88) 75%, rgba(11,8,7,0.95) 100%),
-    var(--bg-img);
+    var(--bg-img, none);
   background-size: auto, cover;
   background-position: 0 0, center;
   background-repeat: no-repeat, no-repeat;
@@ -1282,7 +1282,7 @@ a:hover { color: var(--gold-bright); }
   background-color: #1f1812;
   background-image:
     linear-gradient(180deg, rgba(11,8,7,0.35) 0%, rgba(11,8,7,0.85) 75%, rgba(11,8,7,0.95) 100%),
-    var(--bg-img);
+    var(--bg-img, none);
   background-size: auto, cover;
   background-position: 0 0, center;
   background-repeat: no-repeat, no-repeat;
@@ -1320,7 +1320,7 @@ a:hover { color: var(--gold-bright); }
   background-image:
     linear-gradient(180deg, rgba(11,8,7,0.30) 0%, rgba(11,8,7,0.75) 60%, rgba(11,8,7,0.95) 100%),
     radial-gradient(ellipse at top right, rgba(122,31,31,0.35), transparent 60%),
-    var(--boss-img);
+    var(--boss-img, none);
   background-size: auto, auto, cover;
   background-position: 0 0, 0 0, center;
   background-repeat: no-repeat, no-repeat, no-repeat;
@@ -1351,7 +1351,7 @@ a:hover { color: var(--gold-bright); }
 .modal-overlay {
   position: fixed; inset: 0; z-index: 200;
   background: rgba(0,0,0,0.85);
-  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
   display: none; align-items: center; justify-content: center; padding: var(--space);
   animation: modalBg .3s ease;
 }
@@ -1457,12 +1457,12 @@ textarea.modal-comment {
 .mobile-topbar {
   display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 50;
   padding: 10px 14px; background: linear-gradient(180deg, rgba(11,8,7,0.95), rgba(11,8,7,0.7));
-  border-bottom: 1px solid rgba(232,200,122,0.15); backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(232,200,122,0.15); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
   align-items: center; justify-content: space-between;
 }
 .hamburger { background: transparent; border: 1px solid rgba(232,200,122,0.3); color: var(--gold); width: 38px; height: 38px; border-radius: var(--rad-sm); font-size: 18px; }
 .mobile-brand { font-family: var(--serif-display); color: var(--gold); font-size: 16px; letter-spacing: .08em; }
-.drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 80; backdrop-filter: blur(4px); }
+.drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 80; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
 .drawer-overlay.open { display: block; animation: modalBg .3s ease; }
 .mobile-drawer { display: none; position: fixed; top: 0; left: 0; bottom: 0; width: 280px; z-index: 90;
   background: linear-gradient(180deg, var(--ash), var(--ink)); border-right: 1px solid rgba(232,200,122,0.2);
@@ -1488,7 +1488,7 @@ textarea.modal-comment {
   font-family: var(--mono); font-size: 10px; letter-spacing: .2em;
   color: var(--gold-deep); padding: 6px 12px;
   border: 1px solid rgba(232,200,122,0.25); border-radius: 4px;
-  background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+  background: rgba(0,0,0,0.5); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
   text-decoration: none;
 }
 .back-classic:hover { color: var(--gold); border-color: var(--gold); }
@@ -1568,7 +1568,7 @@ textarea.modal-comment {
   position: sticky; top: 0; z-index: 12;
   background: linear-gradient(180deg, rgba(11,8,7,0.95) 0%, rgba(11,8,7,0.6) 80%, transparent 100%);
   padding: 8px 0;
-  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
 }
 .dash-tabs {
   display: inline-flex; gap: 0;
@@ -1606,7 +1606,7 @@ textarea.modal-comment {
   .realm-card {
     background-image:
       linear-gradient(180deg, rgba(11,8,7,0.20) 0%, rgba(11,8,7,0.7) 60%, rgba(11,8,7,0.92) 100%),
-      var(--bg-img) !important;
+      var(--bg-img, none) !important;
     background-size: auto, cover !important;
     background-position: 0 0, center !important;
     background-repeat: no-repeat, no-repeat !important;
@@ -1615,7 +1615,7 @@ textarea.modal-comment {
   .dungeon-card {
     background-image:
       linear-gradient(180deg, rgba(11,8,7,0.18) 0%, rgba(11,8,7,0.65) 60%, rgba(11,8,7,0.92) 100%),
-      var(--bg-img) !important;
+      var(--bg-img, none) !important;
     background-size: auto, cover !important;
     background-position: 0 0, center !important;
     background-repeat: no-repeat, no-repeat !important;
@@ -1626,7 +1626,7 @@ textarea.modal-comment {
   .monster-card, .quest-card {
     background-image:
       linear-gradient(180deg, rgba(11,8,7,0.25) 0%, rgba(11,8,7,0.78) 70%, rgba(11,8,7,0.95) 100%),
-      var(--bg-img) !important;
+      var(--bg-img, none) !important;
     background-size: auto, cover !important;
     background-position: 0 0, center !important;
     background-repeat: no-repeat, no-repeat !important;
@@ -1635,7 +1635,7 @@ textarea.modal-comment {
     background-image:
       linear-gradient(180deg, rgba(11,8,7,0.20) 0%, rgba(11,8,7,0.7) 60%, rgba(11,8,7,0.95) 100%),
       radial-gradient(ellipse at top right, rgba(122,31,31,0.35), transparent 60%),
-      var(--boss-img) !important;
+      var(--boss-img, none) !important;
     background-size: auto, auto, cover !important;
     background-position: 0 0, 0 0, center !important;
     background-repeat: no-repeat, no-repeat, no-repeat !important;
@@ -1675,7 +1675,7 @@ textarea.modal-comment {
   background: linear-gradient(180deg, rgba(40,28,18,0.55), rgba(15,10,6,0.85));
   border: 1px solid rgba(232,200,122,0.22);
   box-shadow: 0 6px 18px rgba(0,0,0,0.5), inset 0 1px 0 rgba(232,200,122,0.08);
-  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
   min-width: 70px;
 }
 .util-chip.alert { border-color: rgba(201,42,42,0.55); box-shadow: 0 6px 22px rgba(201,42,42,0.2), inset 0 1px 0 rgba(255,138,58,0.18); }
@@ -3070,7 +3070,7 @@ document.getElementById('dungeon-grid').innerHTML = rows.map(r => {
   const lastTxt = lastReviewMs ? new Date(lastReviewMs).toLocaleDateString(undefined, { day: '2-digit', month: 'short' }) : 'never';
   const conqBadge = pp >= 1 ? `<div class="rl-conq">⚜ Conquered</div>` : '';
   const alertBadge = (dueNow + overdueNow) > 0 ? `<div class="rl-alert" title="${dueNow} due · ${overdueNow} overdue">${overdueNow ? '⚠' : '⏰'} ${dueNow + overdueNow}</div>` : '';
-  return `<div class="realm-card" onclick="filterByTopic('${t.replace(/'/g,"\\'")}')" style="--col:${v.color}55;--col-bar:${v.color}80;--col-bar2:${v.color};--bg-img:url('${sceneFor(t)}')">
+  return `<div class="realm-card" onclick="filterByTopic('${t.replace(/'/g,"\\'")}')" style="--col:${v.color}55;--col-bar:${v.color}80;--col-bar2:${v.color};--bg-img:url(${sceneFor(t)})">
     ${conqBadge}
     ${alertBadge}
     <div class="rl-head">
@@ -3496,7 +3496,7 @@ function renderTopicDeepDive() {
   document.getElementById('topic-problems').innerHTML = probs.map(p => {
     const conf = getConf(p);
     const diffCol = p.diff === 'Easy' ? 'var(--easy)' : p.diff === 'Medium' ? 'var(--medium)' : 'var(--hard)';
-    return `<div class="monster-card ${conf > 0 ? 'solved' : ''}" onclick="openModal(${p.id})" style="--diff-col:${diffCol};--bg-img:url('${sceneFor(p.topic)}')">
+    return `<div class="monster-card ${conf > 0 ? 'solved' : ''}" onclick="openModal(${p.id})" style="--diff-col:${diffCol};--bg-img:url(${sceneFor(p.topic)})">
       <div class="mc-head"><div class="mc-sprite">${monsterFor(p)}</div>
         <div><h4 class="mc-name">${p.name}</h4><div class="mc-num">#${p.num} · ${tierNameOf(p)} · ${p.diff}</div></div></div>
       <div class="mc-hint">${(p.hint||'').slice(0,110)}${(p.hint||'').length>110?'…':''}</div>
@@ -3562,7 +3562,7 @@ function renderQuests() {
     const rateRow = q.done ? '' : `<div class="quest-rate" onclick="event.stopPropagation()">
       ${[1,2,3,4,5].map(c => `<button class="quest-rate-btn c${c} ${curRating === c ? 'sel' : ''}" title="Rate ${c}/5 and log victory" onclick="event.stopPropagation();quickRate(${p.id}, ${c})">${c}</button>`).join('')}
     </div>`;
-    return `<div class="quest-card ${q.done ? 'done' : ''}" data-id="${p.id}" style="--mc:${v.color}40;--bg-img:url('${sceneFor(p.topic)}')">
+    return `<div class="quest-card ${q.done ? 'done' : ''}" data-id="${p.id}" style="--mc:${v.color}40;--bg-img:url(${sceneFor(p.topic)})">
       <div class="quest-monster" onclick="openModal(${p.id})" title="${tierNameOf(p)}">${monsterFor(p)}</div>
       <div class="quest-info" onclick="openModal(${p.id})">
         <h4 class="quest-name">${p.name}</h4>
@@ -3790,7 +3790,7 @@ function renderPathway() {
     node.style.left = p.x + '%'; node.style.top = p.y + 'px';
     node.dataset.topic = t;
     node.innerHTML = `
-      <div class="keep-medallion ${sizeClass}" style="--seal-col:${sealCol};--seal-glow:${sealGlow};--seal-rim:${sealRim};--keep-bg:url('${sceneFor(t)}');">
+      <div class="keep-medallion ${sizeClass}" style="--seal-col:${sealCol};--seal-glow:${sealGlow};--seal-rim:${sealRim};--keep-bg:url(${sceneFor(t)});">
         <svg class="keep-arc" viewBox="0 0 ${ring} ${ring}">
           <circle cx="${ring/2}" cy="${ring/2}" r="${r}" stroke="${arcCol}" stroke-width="3" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"/>
         </svg>
@@ -3876,7 +3876,7 @@ function renderBestiary() {
     const lastLbl = last ? new Date(last).toLocaleDateString() : 'Never';
     const ud = userData[p.id] || {};
     const diffCol = p.diff === 'Easy' ? 'var(--easy)' : p.diff === 'Medium' ? 'var(--medium)' : 'var(--hard)';
-    return `<div class="monster-card ${conf > 0 ? 'solved' : ''}" onclick="openModal(${p.id})" style="--diff-col:${diffCol};--bg-img:url('${sceneFor(p.topic)}')">
+    return `<div class="monster-card ${conf > 0 ? 'solved' : ''}" onclick="openModal(${p.id})" style="--diff-col:${diffCol};--bg-img:url(${sceneFor(p.topic)})">
       <div class="mc-head">
         <div class="mc-sprite">${monsterFor(p)}</div>
         <div>
@@ -3918,7 +3918,7 @@ function renderBoss() {
   if (!pool.length) { grid.innerHTML = `<div class="empty-state"><div class="empty-icon">👑</div><h3>No bosses match</h3><p>Adjust your filters</p></div>`; return; }
   grid.innerHTML = pool.map(p => {
     const ud = userData['sd_' + p.id] || {};
-    return `<div class="boss-card ${ud.attempted ? 'defeated' : ''}" onclick="openSDModal('${p.id}')" style="--boss-img:url('${bossImageFor(p.id || p.title)}')">
+    return `<div class="boss-card ${ud.attempted ? 'defeated' : ''}" onclick="openSDModal('${p.id}')" style="--boss-img:url(${bossImageFor(p.id || p.title)})">
       <span class="boss-freq" style="background:${fcol[p.freq]}22;color:${fcol[p.freq]};border:1px solid ${fcol[p.freq]}55">${p.freq}</span>
       <h3 class="boss-title">👑 ${p.title}</h3>
       <p class="boss-desc">${p.desc}</p>
