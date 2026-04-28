@@ -1437,29 +1437,49 @@ textarea.modal-comment {
   border-radius: 8px;
   mask-image: linear-gradient(180deg, #000 0%, #000 70%, transparent 100%);
 }
-/* ── Dashboard tabs ── */
+/* ── Dashboard tabs row ── */
+.dash-tabs-row {
+  display: flex; justify-content: center;
+  margin: clamp(8px, 1vw, 14px) 0 clamp(20px, 2.4vw, 32px);
+  position: sticky; top: 0; z-index: 12;
+  background: linear-gradient(180deg, rgba(11,8,7,0.95) 0%, rgba(11,8,7,0.6) 80%, transparent 100%);
+  padding: 8px 0;
+  backdrop-filter: blur(6px);
+}
 .dash-tabs {
   display: inline-flex; gap: 0;
-  background: linear-gradient(180deg, rgba(40,28,18,0.6), rgba(15,10,6,0.85));
-  border: 1px solid rgba(232,200,122,0.22);
-  border-radius: 4px; padding: 4px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.5), inset 0 1px 0 rgba(232,200,122,0.08);
+  background: linear-gradient(180deg, rgba(40,28,18,0.85), rgba(15,10,6,0.95));
+  border: 1px solid rgba(232,200,122,0.32);
+  border-radius: 6px; padding: 6px;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.6), inset 0 1px 0 rgba(232,200,122,0.12), 0 0 30px rgba(232,200,122,0.08);
 }
 .dash-tab {
-  padding: 8px 14px; background: transparent; border: 0;
-  font-family: var(--serif); font-weight: 600; font-size: 12px;
-  letter-spacing: .14em; text-transform: uppercase;
-  color: var(--text-dim); border-radius: 3px;
+  display: inline-flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 10px 22px; background: transparent; border: 0;
+  font-family: var(--serif); font-weight: 700; font-size: 13px;
+  letter-spacing: .16em; text-transform: uppercase;
+  color: var(--text-dim); border-radius: 4px;
   transition: all .2s ease; cursor: pointer;
+  min-width: 130px; line-height: 1.1;
 }
+.dt-ico { font-size: 18px; line-height: 1; opacity: .85; }
+.dt-label { display: block; }
+.dt-meta { font-family: var(--mono); font-size: 9px; color: var(--text-muted); letter-spacing: .15em; text-transform: none; opacity: .8; min-height: 12px; }
 .dash-tab:hover { color: var(--gold); background: rgba(232,200,122,0.06); }
+.dash-tab:hover .dt-ico { opacity: 1; }
 .dash-tab.active {
   color: var(--gold-bright);
-  background: linear-gradient(180deg, rgba(232,200,122,0.18), rgba(122,31,31,0.15));
-  box-shadow: inset 0 1px 0 rgba(232,200,122,0.2), 0 0 12px rgba(232,200,122,0.15);
-  text-shadow: 0 0 10px rgba(232,200,122,0.4);
+  background: linear-gradient(180deg, rgba(232,200,122,0.22), rgba(122,31,31,0.18));
+  box-shadow: inset 0 1px 0 rgba(232,200,122,0.28), inset 0 -2px 0 rgba(0,0,0,0.45), 0 0 16px rgba(232,200,122,0.22);
+  text-shadow: 0 0 10px rgba(232,200,122,0.5);
 }
-@media (max-width: 720px) { .dash-tab { padding: 6px 10px; font-size: 11px; } }
+.dash-tab.active .dt-ico { opacity: 1; transform: scale(1.05); }
+.dash-tab.active .dt-meta { color: var(--gold); }
+@media (max-width: 720px) {
+  .dash-tab { padding: 8px 12px; font-size: 11px; min-width: 0; }
+  .dt-ico { font-size: 16px; }
+  .dt-meta { display: none; }
+}
 /* Tab visibility on bento cells */
 .page.is-dashboard.tab-overview [data-tab]:not([data-tab~="overview"]):not([data-tab~="all"]) { display: none; }
 .page.is-dashboard.tab-progress [data-tab]:not([data-tab~="progress"]):not([data-tab~="all"]) { display: none; }
@@ -2040,18 +2060,21 @@ textarea.modal-comment {
           <h1 class="page-title">Dungeon Map</h1>
           <div class="page-subtitle">Your realm, your conquest</div>
         </div>
-        <div class="dash-tabs">
-          <button class="dash-tab active" data-tab="overview" onclick="setDashTab('overview')">⚔ Overview</button>
-          <button class="dash-tab" data-tab="progress" onclick="setDashTab('progress')">📈 Progress</button>
-          <button class="dash-tab" data-tab="map" onclick="setDashTab('map')">⚜ Realms</button>
-        </div>
         <div class="dash-utility">
           <div class="util-chip"><span class="uc-label">Level</span><span class="uc-val" id="util-level">1</span></div>
           <div class="util-chip"><span class="uc-label">Today</span><span class="uc-val" id="util-today-xp">0 XP</span></div>
           <div class="util-chip alert"><span class="uc-label">Due</span><span class="uc-val" id="util-due">0</span></div>
-          <button class="btn-secondary util-import" onclick="document.getElementById('import-input').click()">⇪ Import</button>
+          <button class="util-btn" onclick="document.getElementById('import-input').click()">⇪ Import</button>
         </div>
       </div>
+
+      <nav class="dash-tabs-row" role="tablist" aria-label="Dashboard sections">
+        <div class="dash-tabs">
+          <button class="dash-tab active" data-tab="overview" role="tab" aria-selected="true" onclick="setDashTab('overview')"><span class="dt-ico">⚔</span><span class="dt-label">Overview</span><span class="dt-meta" id="tab-meta-overview"></span></button>
+          <button class="dash-tab" data-tab="progress" role="tab" aria-selected="false" onclick="setDashTab('progress')"><span class="dt-ico">📈</span><span class="dt-label">Progress</span><span class="dt-meta" id="tab-meta-progress"></span></button>
+          <button class="dash-tab" data-tab="map" role="tab" aria-selected="false" onclick="setDashTab('map')"><span class="dt-ico">⚜</span><span class="dt-label">Realms</span><span class="dt-meta" id="tab-meta-map"></span></button>
+        </div>
+      </nav>
 
       <div class="hero fcorners" data-tab="overview">
         <svg class="fc tl" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
@@ -2731,13 +2754,32 @@ function getStreakMultiplierLocal(streak) {
   return bonus;
 }
 
+function _populateTabMetas() {
+  try {
+    const slain = RAW_PROBLEMS.filter(p => getConf(p) > 0).length;
+    const m = (id, t) => { const el = document.getElementById(id); if (el) el.textContent = t; };
+    m('tab-meta-overview', `${slain} slain · streak ${getStreakDays()}`);
+    const days = (typeof getDailyHistory === 'function') ? getDailyHistory() : [];
+    const r = days.reduce((a, b) => a + b.reviews, 0);
+    m('tab-meta-progress', `${r} reviews · 14d`);
+    const topics = {};
+    RAW_PROBLEMS.forEach(p => { topics[p.topic] = (topics[p.topic] || { t: 0, s: 0 }); topics[p.topic].t++; if (getConf(p) > 0) topics[p.topic].s++; });
+    const cleared = Object.values(topics).filter(x => x.t && x.s / x.t >= 1).length;
+    m('tab-meta-map', `${cleared}/${Object.keys(topics).length} cleared`);
+  } catch (e) {}
+}
 function setDashTab(tab) {
   const page = document.getElementById('page-dashboard');
   if (!page) return;
   page.classList.remove('tab-overview', 'tab-progress', 'tab-map');
   page.classList.add('tab-' + tab);
-  document.querySelectorAll('.dash-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.dash-tab').forEach(b => {
+    const on = b.dataset.tab === tab;
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
   try { localStorage.setItem('dsa_dojo_dash_tab', tab); } catch (e) {}
+  _populateTabMetas();
   // Re-render data for the visible tab so freshly-shown panels populate
   if (tab === 'progress') {
     if (typeof renderHeatmap === 'function') renderHeatmap();
