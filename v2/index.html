@@ -1564,6 +1564,39 @@ textarea.modal-comment {
 .dash-tab.active .dt-ico { opacity: 1; transform: scale(1.05); }
 .dash-tab.active .dt-meta { color: var(--gold); }
 @media (max-width: 720px) {
+  /* On mobile, single-column cards become tall, so the dark overlay swallowed
+     the dark-souls scene image. Lighten the overlay and scale image cover so
+     the image stays visible behind card content. */
+  .realm-card {
+    background:
+      linear-gradient(180deg, rgba(11,8,7,0.30) 0%, rgba(11,8,7,0.75) 60%, rgba(11,8,7,0.92) 100%),
+      var(--bg-img, none) center/cover no-repeat,
+      linear-gradient(180deg, rgba(31,24,18,0.85), rgba(11,8,7,0.95)) !important;
+    min-height: 240px;
+  }
+  .dungeon-card {
+    background:
+      linear-gradient(180deg, rgba(11,8,7,0.25) 0%, rgba(11,8,7,0.7) 65%, rgba(11,8,7,0.92) 100%),
+      var(--bg-img, none) center/cover no-repeat,
+      linear-gradient(180deg, rgba(31,24,18,0.7), rgba(11,8,7,0.9)) !important;
+    min-height: 160px;
+  }
+  /* Bestiary monster cards + boss cards + quest cards: ensure the bg-img layer
+     keeps a visible top band on mobile by lightening the top of the overlay. */
+  .monster-card, .boss-card, .quest-card {
+    background-blend-mode: normal;
+  }
+  .monster-card[style*="--bg-img"], .boss-card[style*="--bg-img"], .quest-card[style*="--bg-img"] {
+    background-image:
+      linear-gradient(180deg, rgba(11,8,7,0.35) 0%, rgba(11,8,7,0.85) 70%, rgba(11,8,7,0.95) 100%),
+      var(--bg-img) !important;
+    background-size: cover, cover;
+    background-position: center, center;
+    background-repeat: no-repeat, no-repeat;
+  }
+}
+
+@media (max-width: 720px) {
   .dash-tab { padding: 8px 12px; font-size: 11px; min-width: 0; }
   .dt-ico { font-size: 16px; }
   .dt-meta { display: none; }
