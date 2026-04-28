@@ -3653,26 +3653,25 @@ function renderPathway() {
     stage.appendChild(m);
   }
 
-  // Firefly swarm — denser, rises from the bottom half of the map
-  // Density tuned so the lower 50% of the page has visible ambient motion
-  // without tanking framerate (count caps with map height).
-  const FF_COUNT = Math.min(48, Math.max(28, Math.floor(MAP_H / 60)));
-  const FF_BAND_TOP = MAP_H * 0.5;     // start of firefly band (mid-page)
-  const FF_BAND_H = MAP_H - FF_BAND_TOP - 20;
+  // Fireflies — small count, but each one rises from the bottom of the map
+  // up to ~halfway up the page. The big number is the vertical TRAVEL DISTANCE
+  // (--er-dy), not the spawn count.
+  const FF_COUNT = 8;
+  // travel distance: roughly half the map height, with per-ember variance
+  const FF_TRAVEL = MAP_H * 0.5;
   for (let e = 0; e < FF_COUNT; e++) {
     const el = document.createElement('div');
     el.className = 'codex-ember firefly';
-    // pseudo-random but stable distribution
-    const rx = (e * 73 + 17) % 100;
-    const ry = (e * 131 + 41) % 100;
-    el.style.left = (rx) + '%';
-    el.style.top = (FF_BAND_TOP + (ry / 100) * FF_BAND_H) + 'px';
-    el.style.setProperty('--er-dur', (8 + (e * 1.3) % 10) + 's');
-    el.style.setProperty('--er-delay', (-(e * 0.41) % 12) + 's');
+    // spawn near the bottom edge of the stage
+    el.style.left = (5 + (e * 47) % 90) + '%';
+    el.style.top = (MAP_H - 30 - (e * 11) % 40) + 'px';
+    // long, slow rise — duration scales with distance for a steady velocity
+    el.style.setProperty('--er-dur', (14 + (e * 1.7) % 8) + 's');
+    el.style.setProperty('--er-delay', (-e * 1.9) + 's');
     el.style.setProperty('--er-dx', (((e * 11) % 41) - 20) + 'px');
-    el.style.setProperty('--er-dy', (-(180 + (e * 17) % 220)) + 'px');
-    // tier-3 fireflies glow brighter — vary scale per index for life
-    if (e % 5 === 0) el.classList.add('firefly-bright');
+    // travel up to ~half the page — vary ±15% per firefly so they don't all stop at the same line
+    el.style.setProperty('--er-dy', (-(FF_TRAVEL * (0.85 + ((e * 13) % 30) / 100))) + 'px');
+    if (e % 4 === 0) el.classList.add('firefly-bright');
     stage.appendChild(el);
   }
 
