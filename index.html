@@ -1772,7 +1772,24 @@ textarea.modal-comment {
 .hpb-fill.easy { background: linear-gradient(90deg, #4a6741, #6fa86b); box-shadow: 0 0 8px rgba(111,168,107,0.5); }
 .hpb-fill.medium { background: linear-gradient(90deg, #8b6c36, #c89c4a); box-shadow: 0 0 8px rgba(200,156,74,0.5); }
 .hpb-fill.hard { background: linear-gradient(90deg, #6b1f1f, #b04545); box-shadow: 0 0 8px rgba(176,69,69,0.6); }
-.hpb-stats { color: var(--text); white-space: nowrap; min-width: 80px; text-align: right; }
+.hpb-stats { color: var(--text); white-space: nowrap; min-width: 80px; text-align: right; display: inline-flex; align-items: center; justify-content: flex-end; gap: 6px; }
+.pw-clickable { cursor: pointer; border-radius: 4px; padding: 4px 6px; margin: 0 -6px; transition: background 0.18s ease; }
+.pw-clickable:hover { background: rgba(217,181,107,0.06); }
+.pw-clickable.pw-open { background: rgba(217,181,107,0.10); }
+.pw-clickable.pw-open .pw-chevron { transform: rotate(180deg); color: var(--gold); }
+.pw-chevron { font-size: 10px; color: var(--text-dim); opacity: 0.55; transition: transform 0.22s ease, color 0.18s ease; display: inline-block; }
+.pw-clickable:hover .pw-chevron { opacity: 0.95; color: var(--gold); }
+.pw-detail { max-height: 0; overflow: hidden; transition: max-height 0.32s ease, padding 0.32s ease; padding: 0 6px; }
+.pw-detail.pw-detail-open { max-height: 360px; padding: 6px 6px 10px; overflow-y: auto; }
+.pw-detail-list { display: flex; flex-direction: column; gap: 4px; }
+.pw-detail-item { display: flex; align-items: center; gap: 8px; font-size: 11px; padding: 5px 8px; border-radius: 4px; background: rgba(255,255,255,0.025); border: 1px solid rgba(217,181,107,0.08); cursor: pointer; transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease; }
+.pw-detail-item:hover { background: rgba(217,181,107,0.10); border-color: rgba(217,181,107,0.25); transform: translateX(2px); }
+.pw-detail-name { flex: 1; font-family: var(--font-body); color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.pw-detail-conf { font-family: var(--mono); font-size: 9px; padding: 2px 6px; border-radius: 3px; flex-shrink: 0; letter-spacing: .08em; text-transform: uppercase; }
+.pw-detail-xp { font-family: var(--mono); font-size: 10px; color: var(--gold); flex-shrink: 0; width: 38px; text-align: right; font-weight: 700; }
+.pw-detail-empty { font-size: 11px; color: var(--text-dim); font-style: italic; padding: 8px 0; text-align: center; }
+.pw-detail-section { font-size: 9px; color: var(--text-dim); padding: 6px 6px 2px; text-transform: uppercase; letter-spacing: 1.2px; opacity: 0.7; margin-top: 4px; border-top: 1px dashed rgba(217,181,107,0.12); }
+.pw-detail-more { font-size: 10px; color: var(--text-dim); text-align: center; padding: 4px; font-style: italic; }
 
 /* ─── Today Command Center ─── */
 .tcc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space); margin-bottom: var(--space-md); }
@@ -3320,12 +3337,72 @@ function renderHeroPowerBars() {
     const x = data[d];
     const tier = MONSTER_TIER[d];
     const pct = x.t ? Math.round(x.s / x.t * 100) : 0;
-    return `<div class="hpb-row" title="${tier.plural} slain">
+    return `<div class="hpb-row pw-clickable" data-diff="${d}" onclick="togglePowerDetail('${d}')" title="Click to see ${tier.plural} slain">
       <div class="hpb-label"><span class="hpb-ico">${tier.icon}</span>${tier.plural}</div>
       <div class="hpb-track"><div class="hpb-fill ${x.c}" style="width:${pct}%"></div></div>
-      <div class="hpb-stats">${x.s} / ${x.t} · ${pct}%</div>
-    </div>`;
+      <div class="hpb-stats">${x.s} / ${x.t} · ${pct}% <span class="pw-chevron">▾</span></div>
+    </div>
+    <div class="pw-detail" id="pw-detail-${d}"></div>`;
   }).join('');
+}
+
+// V1-style click-to-reveal: lists every monster of this tier, slain first
+// (most-recently slain at top) with confidence badge + XP earned.
+function togglePowerDetail(diff) {
+  const el = document.getElementById('pw-detail-' + diff); if (!el) return;
+  const row = el.previousElementSibling;
+  const isOpen = el.classList.contains('pw-detail-open');
+  document.querySelectorAll('#hero-powerbars .pw-detail-open').forEach(d => {
+    d.classList.remove('pw-detail-open');
+    if (d.previousElementSibling) d.previousElementSibling.classList.remove('pw-open');
+  });
+  if (isOpen) return;
+
+  const diffMult = { Easy: 1, Medium: 2, Hard: 3 };
+  const confColors = ['var(--text-dim)', 'var(--blood)', '#c89c4a', '#d4a017', '#6fa86b', '#20c997'];
+  const confLabels = ['?', 'Fled', 'Shaky', 'Won', 'Dominated', 'Mastered'];
+  const tier = (typeof MONSTER_TIER === 'object' && MONSTER_TIER[diff]) ? MONSTER_TIER[diff] : { plural: diff, icon: '' };
+  const probs = RAW_PROBLEMS.filter(p => p.diff === diff);
+  const items = probs.map(p => {
+    const c = (typeof getConf === 'function') ? getConf(p) : 0;
+    const xp = c * (diffMult[diff] || 1);
+    const ud = (typeof userData === 'object' && userData) ? userData[p.id] : null;
+    const lastDate = (ud && ud.lastReviewed) || p.date || '';
+    return { p, c, xp, lastDate };
+  }).sort((a, b) => {
+    if (a.c > 0 && b.c === 0) return -1;
+    if (a.c === 0 && b.c > 0) return 1;
+    if (a.c > 0 && b.c > 0) {
+      const da = new Date(a.lastDate || 0).getTime() || 0;
+      const db = new Date(b.lastDate || 0).getTime() || 0;
+      return db - da;
+    }
+    return (a.p.name || '').localeCompare(b.p.name || '');
+  });
+  const slain = items.filter(x => x.c > 0);
+  const unslain = items.filter(x => x.c === 0);
+
+  if (!items.length) {
+    el.innerHTML = `<div class="pw-detail-empty">No ${tier.plural.toLowerCase()} of this tier yet</div>`;
+  } else {
+    const renderItem = ({ p, c, xp }) => `
+      <div class="pw-detail-item" onclick="event.stopPropagation(); openModal(${p.id})" title="${(p.name||'').replace(/"/g,'&quot;')}">
+        <span class="pw-detail-name">${p.num ? '#' + p.num + ' ' : ''}${p.name || ''}</span>
+        <span class="pw-detail-conf" style="color:${confColors[c] || confColors[0]};background:${c > 0 ? (confColors[c] || confColors[0]) + '22' : 'rgba(255,255,255,0.04)'}">${confLabels[c] || '?'}</span>
+        <span class="pw-detail-xp">${xp > 0 ? '+' + xp : '—'}</span>
+      </div>`;
+    let html = '<div class="pw-detail-list">';
+    if (slain.length) html += slain.map(renderItem).join('');
+    if (unslain.length) {
+      html += `<div class="pw-detail-section">Unslain (${unslain.length})</div>`;
+      html += unslain.slice(0, 12).map(renderItem).join('');
+      if (unslain.length > 12) html += `<div class="pw-detail-more">+${unslain.length - 12} more</div>`;
+    }
+    html += '</div>';
+    el.innerHTML = html;
+  }
+  el.classList.add('pw-detail-open');
+  if (row) row.classList.add('pw-open');
 }
 
 function renderHeatmap() {
