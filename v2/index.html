@@ -3876,12 +3876,12 @@ function renderBestiary() {
     const lastLbl = last ? new Date(last).toLocaleDateString() : 'Never';
     const ud = userData[p.id] || {};
     const diffCol = p.diff === 'Easy' ? 'var(--easy)' : p.diff === 'Medium' ? 'var(--medium)' : 'var(--hard)';
-    return `<div class="monster-card ${conf > 0 ? 'solved' : ''}" onclick="openModal(${p.id})" style="--diff-col:${diffCol}">
+    return `<div class="monster-card ${conf > 0 ? 'solved' : ''}" onclick="openModal(${p.id})" style="--diff-col:${diffCol};--bg-img:url('${sceneFor(p.topic)}')">
       <div class="mc-head">
         <div class="mc-sprite">${monsterFor(p)}</div>
         <div>
           <h4 class="mc-name">${p.name}</h4>
-          <div class="mc-num">#${p.num} · ${p.diff}</div>
+          <div class="mc-num">#${p.num} · ${tierNameOf(p)} · ${p.diff}</div>
         </div>
       </div>
       <div class="mc-hint">${(p.hint || '').slice(0, 110)}${(p.hint || '').length > 110 ? '…' : ''}</div>
