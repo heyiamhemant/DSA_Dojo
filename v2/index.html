@@ -2926,6 +2926,89 @@ function renderUtilityStrip() {
     }
   } catch (e) {}
 }
+function renderDungeons() {
+  if (!document.getElementById('dungeon-grid')) return;
+// Dungeons
+const topics = {};
+RAW_PROBLEMS.forEach(p => {
+  if (!topics[p.topic]) topics[p.topic] = { total: 0, solved: 0, conf: 0 };
+  topics[p.topic].total++;
+  const c = getConf(p);
+  if (c > 0) { topics[p.topic].solved++; topics[p.topic].conf += c; }
+});
+// Build rich realm rows
+const RECENT_MS = 180 * 86400000;
+const now = Date.now();
+const sortMode = (document.getElementById('realms-sort') && document.getElementById('realms-sort').value) || 'conquest';
+const rows = Object.entries(topics).map(([t, d]) => {
+  const v = visualOf(t);
+  const probsT = RAW_PROBLEMS.filter(p => p.topic === t);
+  const tc = countTiers(probsT);
+  const pp = d.total ? d.solved / d.total : 0;
+  let recent = 0, lastReviewMs = 0, dueNow = 0, overdueNow = 0;
+  probsT.forEach(p => {
+    const last = getLastReviewMsLocal(p);
+    if (last) {
+      if (last > lastReviewMs) lastReviewMs = last;
+      if ((now - last) <= RECENT_MS && getConf(p) > 0) recent++;
+    }
+    if (getConf(p) > 0) {
+      const di = getDueInfo(p);
+      if (di.cls !== 'due-new') {
+        if (di.days === 0) dueNow++;
+        else if (di.days < 0) overdueNow++;
+      }
+    }
+  });
+  const recentPct = d.total ? recent / d.total : 0;
+  return { t, d, v, probsT, tc, pp, recent, recentPct, lastReviewMs, dueNow, overdueNow };
+});
+if (sortMode === 'conquest')      rows.sort((a, b) => b.pp - a.pp || b.d.total - a.d.total);
+else if (sortMode === 'momentum') rows.sort((a, b) => b.recentPct - a.recentPct || b.recent - a.recent);
+else if (sortMode === 'due')      rows.sort((a, b) => (b.dueNow + b.overdueNow * 2) - (a.dueNow + a.overdueNow * 2));
+else if (sortMode === 'size')     rows.sort((a, b) => b.d.total - a.d.total);
+else                              rows.sort((a, b) => a.t.localeCompare(b.t));
+document.getElementById('dungeon-grid').innerHTML = rows.map(r => {
+  const { t, d, v, tc, pp, recent, recentPct, lastReviewMs, dueNow, overdueNow } = r;
+  const ppPct = Math.round(pp * 100);
+  const recentPctR = Math.round(recentPct * 100);
+  const tier = (slain, total, col, ico) => total
+    ? `<div class="rl-tier" style="--tc:${col}"><span class="rl-tier-ico">${ico}</span><span class="rl-tier-stats">${slain}/${total}</span><div class="rl-tier-bar"><div style="width:${total ? slain/total*100 : 0}%"></div></div></div>`
+    : '';
+  const lastTxt = lastReviewMs ? new Date(lastReviewMs).toLocaleDateString(undefined, { day: '2-digit', month: 'short' }) : 'never';
+  const conqBadge = pp >= 1 ? `<div class="rl-conq">⚜ Conquered</div>` : '';
+  const alertBadge = (dueNow + overdueNow) > 0 ? `<div class="rl-alert" title="${dueNow} due · ${overdueNow} overdue">${overdueNow ? '⚠' : '⏰'} ${dueNow + overdueNow}</div>` : '';
+  return `<div class="realm-card" onclick="filterByTopic('${t.replace(/'/g,"\\'")}')" style="--col:${v.color}55;--col-bar:${v.color}80;--col-bar2:${v.color};--bg-img:url('${sceneFor(t)}')">
+    ${conqBadge}
+    ${alertBadge}
+    <div class="rl-head">
+      <span class="rl-icon" style="color:${v.color}">${v.icon}</span>
+      <div class="rl-titles">
+        <div class="rl-name">${t}</div>
+        <div class="rl-sub">${d.total} encounters · last ${lastTxt}</div>
+      </div>
+    </div>
+    <div class="rl-progress">
+      <div class="rl-prog-row">
+        <span class="rl-prog-label">Conquest</span>
+        <span class="rl-prog-val">${d.solved} / ${d.total} · ${ppPct}%</span>
+      </div>
+      <div class="rl-bar"><div class="rl-bar-fill" style="width:${ppPct}%"></div></div>
+      <div class="rl-prog-row rl-prog-row-sub">
+        <span class="rl-prog-label">Momentum (180d)</span>
+        <span class="rl-prog-val">${recent} recent · ${recentPctR}%</span>
+      </div>
+      <div class="rl-bar rl-bar-sub"><div class="rl-bar-fill momentum" style="width:${recentPctR}%"></div></div>
+    </div>
+    <div class="rl-tiers">
+      ${tier(tc.slainSlime, tc.Slime, '#6fa86b', '🟢')}
+      ${tier(tc.slainDrake, tc.Drake, '#c89c4a', '🐉')}
+      ${tier(tc.slainDemon, tc.Demon, '#b04545', '👹')}
+    </div>
+  </div>`;
+}).join('');
+}
+
 function renderDashboard() {
   renderUtilityStrip();
   const xp = computeXP();
@@ -2971,85 +3054,7 @@ function renderDashboard() {
     <div class="kpi"><div class="kpi-icon">⏳</div><div class="kpi-num">${dueNow}</div><div class="kpi-label">Due Now</div></div>
   `;
 
-  // Dungeons
-  const topics = {};
-  RAW_PROBLEMS.forEach(p => {
-    if (!topics[p.topic]) topics[p.topic] = { total: 0, solved: 0, conf: 0 };
-    topics[p.topic].total++;
-    const c = getConf(p);
-    if (c > 0) { topics[p.topic].solved++; topics[p.topic].conf += c; }
-  });
-  // Build rich realm rows
-  const RECENT_MS = 180 * 86400000;
-  const now = Date.now();
-  const sortMode = (document.getElementById('realms-sort') && document.getElementById('realms-sort').value) || 'conquest';
-  const rows = Object.entries(topics).map(([t, d]) => {
-    const v = visualOf(t);
-    const probsT = RAW_PROBLEMS.filter(p => p.topic === t);
-    const tc = countTiers(probsT);
-    const pp = d.total ? d.solved / d.total : 0;
-    let recent = 0, lastReviewMs = 0, dueNow = 0, overdueNow = 0;
-    probsT.forEach(p => {
-      const last = getLastReviewMsLocal(p);
-      if (last) {
-        if (last > lastReviewMs) lastReviewMs = last;
-        if ((now - last) <= RECENT_MS && getConf(p) > 0) recent++;
-      }
-      if (getConf(p) > 0) {
-        const di = getDueInfo(p);
-        if (di.cls !== 'due-new') {
-          if (di.days === 0) dueNow++;
-          else if (di.days < 0) overdueNow++;
-        }
-      }
-    });
-    const recentPct = d.total ? recent / d.total : 0;
-    return { t, d, v, probsT, tc, pp, recent, recentPct, lastReviewMs, dueNow, overdueNow };
-  });
-  if (sortMode === 'conquest')      rows.sort((a, b) => b.pp - a.pp || b.d.total - a.d.total);
-  else if (sortMode === 'momentum') rows.sort((a, b) => b.recentPct - a.recentPct || b.recent - a.recent);
-  else if (sortMode === 'due')      rows.sort((a, b) => (b.dueNow + b.overdueNow * 2) - (a.dueNow + a.overdueNow * 2));
-  else if (sortMode === 'size')     rows.sort((a, b) => b.d.total - a.d.total);
-  else                              rows.sort((a, b) => a.t.localeCompare(b.t));
-  document.getElementById('dungeon-grid').innerHTML = rows.map(r => {
-    const { t, d, v, tc, pp, recent, recentPct, lastReviewMs, dueNow, overdueNow } = r;
-    const ppPct = Math.round(pp * 100);
-    const recentPctR = Math.round(recentPct * 100);
-    const tier = (slain, total, col, ico) => total
-      ? `<div class="rl-tier" style="--tc:${col}"><span class="rl-tier-ico">${ico}</span><span class="rl-tier-stats">${slain}/${total}</span><div class="rl-tier-bar"><div style="width:${total ? slain/total*100 : 0}%"></div></div></div>`
-      : '';
-    const lastTxt = lastReviewMs ? new Date(lastReviewMs).toLocaleDateString(undefined, { day: '2-digit', month: 'short' }) : 'never';
-    const conqBadge = pp >= 1 ? `<div class="rl-conq">⚜ Conquered</div>` : '';
-    const alertBadge = (dueNow + overdueNow) > 0 ? `<div class="rl-alert" title="${dueNow} due · ${overdueNow} overdue">${overdueNow ? '⚠' : '⏰'} ${dueNow + overdueNow}</div>` : '';
-    return `<div class="realm-card" onclick="filterByTopic('${t.replace(/'/g,"\\'")}')" style="--col:${v.color}55;--col-bar:${v.color}80;--col-bar2:${v.color};--bg-img:url('${sceneFor(t)}')">
-      ${conqBadge}
-      ${alertBadge}
-      <div class="rl-head">
-        <span class="rl-icon" style="color:${v.color}">${v.icon}</span>
-        <div class="rl-titles">
-          <div class="rl-name">${t}</div>
-          <div class="rl-sub">${d.total} encounters · last ${lastTxt}</div>
-        </div>
-      </div>
-      <div class="rl-progress">
-        <div class="rl-prog-row">
-          <span class="rl-prog-label">Conquest</span>
-          <span class="rl-prog-val">${d.solved} / ${d.total} · ${ppPct}%</span>
-        </div>
-        <div class="rl-bar"><div class="rl-bar-fill" style="width:${ppPct}%"></div></div>
-        <div class="rl-prog-row rl-prog-row-sub">
-          <span class="rl-prog-label">Momentum (180d)</span>
-          <span class="rl-prog-val">${recent} recent · ${recentPctR}%</span>
-        </div>
-        <div class="rl-bar rl-bar-sub"><div class="rl-bar-fill momentum" style="width:${recentPctR}%"></div></div>
-      </div>
-      <div class="rl-tiers">
-        ${tier(tc.slainSlime, tc.Slime, '#6fa86b', '🟢')}
-        ${tier(tc.slainDrake, tc.Drake, '#c89c4a', '🐉')}
-        ${tier(tc.slainDemon, tc.Demon, '#b04545', '👹')}
-      </div>
-    </div>`;
-  }).join('');
+  renderDungeons();
 
   renderHeroPowerBars();
   renderSummaryMetas();
