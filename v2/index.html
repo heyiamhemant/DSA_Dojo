@@ -1092,11 +1092,12 @@ a:hover { color: var(--gold-bright); }
 
 /* Ambient embers (subtle, not cartoon) */
 .codex-ember {
-  position: absolute; width: 2px; height: 2px; border-radius: 50%;
-  background: #ffb86a; box-shadow: 0 0 4px rgba(255,160,80,0.55), 0 0 10px rgba(255,120,40,0.28);
+  position: absolute; width: 1.5px; height: 1.5px; border-radius: 50%;
+  background: #ffb86a; box-shadow: 0 0 3px rgba(255,160,80,0.4), 0 0 8px rgba(255,120,40,0.2);
   pointer-events: none; z-index: 0; opacity: 0;
   animation: emberRise var(--er-dur, 9s) linear var(--er-delay, 0s) infinite;
   will-change: transform, opacity;
+  filter: blur(0.3px);
 }
 @keyframes emberRise {
   0%   { transform: translate(0, 0) scale(0.6); opacity: 0; }
@@ -1104,8 +1105,8 @@ a:hover { color: var(--gold-bright); }
   92%  { opacity: 1; }
   100% { transform: translate(var(--er-dx, 20px), var(--er-dy, -200px)) scale(1.0); opacity: 0; }
 }
-.firefly { width: 3px; height: 3px; background: #ffd47a; box-shadow: 0 0 5px rgba(255,200,120,0.55), 0 0 12px rgba(255,150,60,0.28); animation-timing-function: ease-in-out; }
-.firefly-bright { width: 4px; height: 4px; background: #fff0b8; box-shadow: 0 0 8px rgba(255,230,140,0.65), 0 0 18px rgba(255,180,80,0.38); }
+.firefly { width: 2px; height: 2px; background: #ffd47a; box-shadow: 0 0 4px rgba(255,200,120,0.4), 0 0 9px rgba(255,150,60,0.2); animation-timing-function: ease-in-out; opacity: .85; }
+.firefly-bright { width: 3px; height: 3px; background: #fff0b8; box-shadow: 0 0 6px rgba(255,230,140,0.5), 0 0 14px rgba(255,180,80,0.28); }
 
 /* The actual paved road */
 .road-paved-base { fill: none; stroke: #1c130b; stroke-width: 14; stroke-linecap: round; stroke-linejoin: round; }
@@ -3654,22 +3655,30 @@ function renderPathway() {
     stage.appendChild(m);
   }
 
-  // Fireflies — modest count, very long vertical travel.
-  // Stagger phases evenly across the cycle so at any frame some are
-  // near the bottom, some mid-page, some near the top.
-  const FF_COUNT = 12;
+  // Fireflies — biased so at any frame ≥50% are in the upper quarter of the page.
+  // Two cohorts:
+  //   • bottom-cohort: spawn near the bottom, rise full MAP_H (long phase below mid)
+  //   • top-cohort:    spawn near mid-page already, rise only the upper half — these
+  //                     spend their entire visible life in the top portion.
+  const FF_COUNT = 14;
   for (let e = 0; e < FF_COUNT; e++) {
+    const topCohort = e % 2 === 0; // half-and-half
     const el = document.createElement('div');
     el.className = 'codex-ember firefly';
     el.style.left = (4 + (e * 41) % 92) + '%';
-    el.style.top = (MAP_H - 20 - (e * 13) % 50) + 'px';
+    if (topCohort) {
+      // Spawn somewhere in the lower-mid stage and rise into the upper quarter
+      el.style.top = (MAP_H * (0.45 + ((e * 7) % 20) / 100)) + 'px';
+    } else {
+      // Spawn near the bottom edge
+      el.style.top = (MAP_H - 20 - (e * 13) % 50) + 'px';
+    }
     const dur = 18 + (e * 1.7) % 10;
     el.style.setProperty('--er-dur', dur + 's');
-    // Phase-spread negative delays so the rise visibly fills the column
+    // Phase-spread within each cohort
     el.style.setProperty('--er-delay', (-(e * dur) / FF_COUNT) + 's');
     el.style.setProperty('--er-dx', (((e * 11) % 51) - 25) + 'px');
-    // Every firefly travels at least the full map height (1.05–1.25× MAP_H)
-    // so they ALL reach the top of the page, with small variance for life.
+    // Both cohorts travel ~MAP_H worth of distance (their spawn-Y differs)
     el.style.setProperty('--er-dy', (-(MAP_H * (1.05 + ((e * 7) % 20) / 100))) + 'px');
     if (e % 4 === 0) el.classList.add('firefly-bright');
     stage.appendChild(el);
