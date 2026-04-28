@@ -1480,10 +1480,10 @@ textarea.modal-comment {
   .dt-ico { font-size: 16px; }
   .dt-meta { display: none; }
 }
-/* Tab visibility on bento cells */
-.page.is-dashboard.tab-overview [data-tab]:not([data-tab~="overview"]):not([data-tab~="all"]) { display: none; }
-.page.is-dashboard.tab-progress [data-tab]:not([data-tab~="progress"]):not([data-tab~="all"]) { display: none; }
-.page.is-dashboard.tab-map [data-tab]:not([data-tab~="map"]):not([data-tab~="all"]) { display: none; }
+/* Tab visibility — hide off-tab content but NEVER the tab buttons themselves */
+.page.is-dashboard.tab-overview [data-tab]:not(.dash-tab):not([data-tab~="overview"]):not([data-tab~="all"]) { display: none; }
+.page.is-dashboard.tab-progress [data-tab]:not(.dash-tab):not([data-tab~="progress"]):not([data-tab~="all"]) { display: none; }
+.page.is-dashboard.tab-map [data-tab]:not(.dash-tab):not([data-tab~="map"]):not([data-tab~="all"]) { display: none; }
 
 /* On non-Overview tabs, drop the 4-col bento grid and let panels span full width naturally */
 .page.is-dashboard.tab-progress .bento,
