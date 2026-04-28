@@ -1103,6 +1103,8 @@ a:hover { color: var(--gold-bright); }
   85% { opacity: .8; }
   100% { transform: translate(var(--er-dx, 20px), var(--er-dy, -200px)) scale(1.1); opacity: 0; }
 }
+.firefly { width: 3px; height: 3px; background: #ffd47a; box-shadow: 0 0 6px rgba(255,200,120,0.8), 0 0 14px rgba(255,150,60,0.45); animation-timing-function: ease-in-out; }
+.firefly-bright { width: 4px; height: 4px; background: #fff0b8; box-shadow: 0 0 10px rgba(255,230,140,0.95), 0 0 24px rgba(255,180,80,0.6); }
 
 /* The actual paved road */
 .road-paved-base { fill: none; stroke: #1c130b; stroke-width: 14; stroke-linecap: round; stroke-linejoin: round; }
@@ -1685,15 +1687,23 @@ textarea.modal-comment {
 .panel-sub { font-family: var(--mono); font-size: 10px; color: var(--text-muted); letter-spacing: .15em; text-transform: uppercase; margin-bottom: 8px; }
 
 /* ─── Heatmap ─── */
-.heatmap-wrap {
-  display: grid; grid-template-rows: repeat(7, 12px); grid-auto-flow: column; grid-auto-columns: 12px;
-  gap: 3px; padding: 10px 0; overflow-x: auto;
-}
+.heatmap-wrap { position: relative; padding: 4px 0 10px; overflow-x: auto; }
+.hm-grid { display: grid; grid-template-columns: 28px 1fr; grid-template-rows: 14px 1fr; gap: 4px; min-width: max-content; position: relative; }
+.hm-months { grid-column: 2 / 3; grid-row: 1 / 2; display: grid; grid-template-columns: repeat(var(--cols), 13px); column-gap: 3px; font-family: var(--mono); font-size: 10px; color: var(--text-muted); letter-spacing: .12em; text-transform: uppercase; }
+.hm-mlabel { white-space: nowrap; }
+.hm-days { grid-column: 1 / 2; grid-row: 2 / 3; display: grid; grid-template-rows: repeat(7, 13px); row-gap: 3px; font-family: var(--mono); font-size: 9px; color: var(--text-muted); letter-spacing: .12em; text-transform: uppercase; padding-top: 1px; }
+.hm-dlabel { line-height: 13px; }
+.hm-cells { grid-column: 2 / 3; grid-row: 2 / 3; display: grid; grid-template-rows: repeat(7, 13px); grid-auto-flow: column; grid-auto-columns: 13px; gap: 3px; }
+.hm-empty { background: transparent !important; border-color: transparent !important; pointer-events: none; }
+.hm-tooltip { position: absolute; transform: translate(-50%, -100%); background: rgba(15,11,8,0.96); border: 1px solid var(--gold-deep); border-radius: 4px; padding: 6px 10px; pointer-events: none; z-index: 10; box-shadow: 0 4px 16px rgba(0,0,0,0.6), 0 0 0 1px rgba(232,200,122,0.15); white-space: nowrap; }
+.hm-tooltip[hidden] { display: none; }
+.hm-tt-date { font-family: var(--serif); font-size: 12px; color: var(--gold); letter-spacing: .04em; }
+.hm-tt-count { font-family: var(--mono); font-size: 11px; color: var(--text); margin-top: 2px; }
 .hm-cell {
-  display: inline-block; width: 12px; height: 12px;
+  display: inline-block; width: 13px; height: 13px;
   background: rgba(232,200,122,0.04);
   border: 1px solid rgba(232,200,122,0.06);
-  border-radius: 2px; transition: transform .15s ease;
+  border-radius: 2px; transition: transform .12s ease;
   position: relative;
 }
 .hm-cell:hover { transform: scale(1.4); z-index: 2; border-color: var(--gold); }
@@ -3099,22 +3109,77 @@ function renderHeatmap() {
     const key = d.getTime();
     counts[key] = (counts[key] || 0) + 1;
   });
-  const out = [];
   const today = new Date(); today.setHours(0,0,0,0);
   // Align so that the leftmost column starts on a Sunday
   const start = new Date(today.getTime() - (days - 1) * DAY);
   const startDow = start.getDay();
-  // pad with empty cells before start to align
-  for (let i = 0; i < startDow; i++) out.push('<span class="hm-cell" style="visibility:hidden"></span>');
+
+  // Total cell count incl. leading padding, then group into week columns (7 rows × N cols)
+  const totalCells = startDow + days;
+  const cols = Math.ceil(totalCells / 7);
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  // Month labels: for each column, look at the first non-padded day in that column;
+  // if its day-of-month <= 7 we know that's the column where a new month begins → label it.
+  const monthLabels = new Array(cols).fill('');
+  let lastLabeledMonth = -1;
+  for (let col = 0; col < cols; col++) {
+    // first cell index of this column = col*7
+    // first DAY index of this column = col*7 - startDow (clamped to >= 0)
+    const dayIx = col * 7 - startDow;
+    if (dayIx < 0 || dayIx >= days) continue;
+    const d = new Date(start.getTime() + dayIx * DAY);
+    if (d.getMonth() !== lastLabeledMonth && d.getDate() <= 7) {
+      monthLabels[col] = MONTHS[d.getMonth()];
+      lastLabeledMonth = d.getMonth();
+    }
+  }
+
+  const monthRow = monthLabels.map(m => `<span class="hm-mlabel">${m}</span>`).join('');
+  const dayRow = ['', 'Mon', '', 'Wed', '', 'Fri', ''].map(l => `<span class="hm-dlabel">${l}</span>`).join('');
+
+  // Cells
+  const cells = [];
+  for (let i = 0; i < startDow; i++) cells.push('<span class="hm-cell hm-empty"></span>');
   for (let i = 0; i < days; i++) {
     const d = new Date(start.getTime() + i * DAY);
-    const k = d.getTime();
-    const c = counts[k] || 0;
+    const c = counts[d.getTime()] || 0;
     let lvl = 0;
     if (c >= 6) lvl = 4; else if (c >= 4) lvl = 3; else if (c >= 2) lvl = 2; else if (c >= 1) lvl = 1;
-    out.push(`<span class="hm-cell hm-${lvl}" title="${d.toLocaleDateString()}: ${c} review${c !== 1 ? 's' : ''}"></span>`);
+    const fmt = d.toLocaleDateString(undefined, { weekday: 'short', day: '2-digit', month: 'short' });
+    cells.push(`<span class="hm-cell hm-${lvl}" data-date="${fmt}" data-count="${c}"></span>`);
   }
-  wrap.innerHTML = out.join('');
+
+  wrap.innerHTML = `
+    <div class="hm-grid" style="--cols:${cols}">
+      <div class="hm-months">${monthRow}</div>
+      <div class="hm-days">${dayRow}</div>
+      <div class="hm-cells">${cells.join('')}</div>
+      <div class="hm-tooltip" id="hm-tooltip" hidden></div>
+    </div>
+  `;
+
+  // Custom tooltip: more reliable + immediate vs the native title delay
+  const tip = wrap.querySelector('#hm-tooltip');
+  const cellsRoot = wrap.querySelector('.hm-cells');
+  const onMove = (ev) => {
+    const t = ev.target;
+    if (!t.classList || !t.classList.contains('hm-cell') || t.classList.contains('hm-empty')) {
+      tip.hidden = true; return;
+    }
+    const date = t.dataset.date || '';
+    const count = +(t.dataset.count || 0);
+    tip.innerHTML = `<div class="hm-tt-date">${date}</div><div class="hm-tt-count">${count} review${count !== 1 ? 's' : ''}</div>`;
+    tip.hidden = false;
+    const wrapRect = wrap.getBoundingClientRect();
+    const cellRect = t.getBoundingClientRect();
+    const x = cellRect.left + cellRect.width / 2 - wrapRect.left;
+    const y = cellRect.top - wrapRect.top - 8;
+    tip.style.left = x + 'px';
+    tip.style.top = y + 'px';
+  };
+  cellsRoot.addEventListener('mousemove', onMove);
+  cellsRoot.addEventListener('mouseleave', () => { tip.hidden = true; });
 }
 
 /* ═════════ TODAY COMMAND CENTER ═════════ */
@@ -3588,16 +3653,26 @@ function renderPathway() {
     stage.appendChild(m);
   }
 
-  // Subtle ambient embers (6, slow, drifting up — perf)
-  for (let e = 0; e < 6; e++) {
+  // Firefly swarm — denser, rises from the bottom half of the map
+  // Density tuned so the lower 50% of the page has visible ambient motion
+  // without tanking framerate (count caps with map height).
+  const FF_COUNT = Math.min(48, Math.max(28, Math.floor(MAP_H / 60)));
+  const FF_BAND_TOP = MAP_H * 0.5;     // start of firefly band (mid-page)
+  const FF_BAND_H = MAP_H - FF_BAND_TOP - 20;
+  for (let e = 0; e < FF_COUNT; e++) {
     const el = document.createElement('div');
-    el.className = 'codex-ember';
-    el.style.left = (5 + (e * 47) % 90) + '%';
-    el.style.top = (60 + (e * 137) % (MAP_H - 80)) + 'px';
-    el.style.setProperty('--er-dur', (10 + e * 1.3) + 's');
-    el.style.setProperty('--er-delay', (-e * 1.7) + 's');
-    el.style.setProperty('--er-dx', ((e * 11 % 21) - 10) + 'px');
-    el.style.setProperty('--er-dy', (-180 - (e * 13 % 80)) + 'px');
+    el.className = 'codex-ember firefly';
+    // pseudo-random but stable distribution
+    const rx = (e * 73 + 17) % 100;
+    const ry = (e * 131 + 41) % 100;
+    el.style.left = (rx) + '%';
+    el.style.top = (FF_BAND_TOP + (ry / 100) * FF_BAND_H) + 'px';
+    el.style.setProperty('--er-dur', (8 + (e * 1.3) % 10) + 's');
+    el.style.setProperty('--er-delay', (-(e * 0.41) % 12) + 's');
+    el.style.setProperty('--er-dx', (((e * 11) % 41) - 20) + 'px');
+    el.style.setProperty('--er-dy', (-(180 + (e * 17) % 220)) + 'px');
+    // tier-3 fireflies glow brighter — vary scale per index for life
+    if (e % 5 === 0) el.classList.add('firefly-bright');
     stage.appendChild(el);
   }
 
