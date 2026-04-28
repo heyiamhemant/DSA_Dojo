@@ -1600,46 +1600,13 @@ textarea.modal-comment {
 .dash-tab.active .dt-ico { opacity: 1; transform: scale(1.05); }
 .dash-tab.active .dt-meta { color: var(--gold); }
 @media (max-width: 720px) {
-  /* On mobile, single-column cards become tall, so the dark overlay swallowed
-     the dark-souls scene image. Lighten the overlay and scale image cover so
-     the image stays visible behind card content. */
-  .realm-card {
-    background-image:
-      linear-gradient(180deg, rgba(11,8,7,0.20) 0%, rgba(11,8,7,0.7) 60%, rgba(11,8,7,0.92) 100%),
-      var(--bg-img, none) !important;
-    background-size: 100% 100%, cover !important;
-    background-position: 0 0, center !important;
-    background-repeat: no-repeat, no-repeat !important;
-    min-height: 240px;
-  }
-  .dungeon-card {
-    background-image:
-      linear-gradient(180deg, rgba(11,8,7,0.18) 0%, rgba(11,8,7,0.65) 60%, rgba(11,8,7,0.92) 100%),
-      var(--bg-img, none) !important;
-    background-size: 100% 100%, cover !important;
-    background-position: 0 0, center !important;
-    background-repeat: no-repeat, no-repeat !important;
-    min-height: 160px;
-  }
-  /* Bestiary monster cards + boss cards + quest cards: ensure the bg-img layer
-     keeps a visible top band on mobile by lightening the top of the overlay. */
-  .monster-card, .quest-card {
-    background-image:
-      linear-gradient(180deg, rgba(11,8,7,0.25) 0%, rgba(11,8,7,0.78) 70%, rgba(11,8,7,0.95) 100%),
-      var(--bg-img, none) !important;
-    background-size: 100% 100%, cover !important;
-    background-position: 0 0, center !important;
-    background-repeat: no-repeat, no-repeat !important;
-  }
-  .boss-card {
-    background-image:
-      linear-gradient(180deg, rgba(11,8,7,0.20) 0%, rgba(11,8,7,0.7) 60%, rgba(11,8,7,0.95) 100%),
-      radial-gradient(ellipse at top right, rgba(122,31,31,0.35), transparent 60%),
-      var(--boss-img, none) !important;
-    background-size: 100% 100%, 100% 100%, cover !important;
-    background-position: 0 0, 0 0, center !important;
-    background-repeat: no-repeat, no-repeat, no-repeat !important;
-  }
+  /* Mobile-only sizing tweaks for cards. NOTE: do NOT re-set background-image
+     here. The inline style on each card already carries the full literal
+     background-image (overlay gradient + url) — re-setting it here with
+     var(--bg-img) re-introduces the Safari bug we just fixed for desktop.
+     We just adjust min-height and let inline styles win. */
+  .realm-card { min-height: 240px; }
+  .dungeon-card { min-height: 160px; }
 }
 
 @media (max-width: 720px) {
