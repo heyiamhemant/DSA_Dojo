@@ -640,6 +640,12 @@ body::after {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 6px;
 }
+.mobile-utility-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 6px;
+}
 .mobile-nav-btn {
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -656,6 +662,18 @@ body::after {
 .mobile-nav-btn.active {
   color: var(--accent);
   border-color: rgba(143,206,0,0.45);
+}
+.mobile-util-btn {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(16, 24, 16, 0.72);
+  color: var(--dim);
+  font-family: var(--font-body);
+  font-size: 11px;
+  min-height: 38px;
+}
+.mobile-util-btn:active {
+  transform: translateY(1px);
 }
 .mobile-hunt-fab {
   display: none;
@@ -3267,6 +3285,11 @@ td { padding: 11px 14px; vertical-align: middle; }
     <button class="mobile-nav-btn" data-page="today" onclick="navigate('today')">&#128220; Quest</button>
     <button class="mobile-nav-btn" data-page="problems" onclick="navigate('problems')">&#128126; Bestiary</button>
     <button class="mobile-nav-btn" data-page="sysdesign" onclick="navigate('sysdesign')">&#128081; Boss</button>
+  </div>
+  <div class="mobile-utility-grid">
+    <button class="mobile-util-btn" onclick="exportProgress()">&#128190; Export</button>
+    <button class="mobile-util-btn" onclick="document.getElementById('import-file').click()">&#128194; Import</button>
+    <button class="mobile-util-btn" onclick="toggleTheme()">&#9788;&#65039; Theme</button>
   </div>
 </div>
 <button class="mobile-hunt-fab" id="mobile-hunt-fab" onclick="startTodayHunt()">Start Hunt</button>
