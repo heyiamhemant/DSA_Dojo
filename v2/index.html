@@ -2962,7 +2962,8 @@ function renderDashboard() {
   const totalHard = RAW_PROBLEMS.filter(p => p.diff === 'Hard').length;
   const dueNow = RAW_PROBLEMS.filter(p => { const ud = userData[p.id]; if (!ud || !ud.firstSolvedTs) return false; const di = getDueInfo(p); return di.days <= 0 && di.cls !== 'due-new'; }).length;
 
-  document.getElementById('kpi-grid').innerHTML = `
+  const _kpiEl = document.getElementById('kpi-grid');
+  if (_kpiEl) _kpiEl.innerHTML = `
     <div class="kpi"><div class="kpi-icon">⚔️</div><div class="kpi-num">${slain}</div><div class="kpi-label">Slain / ${total}</div></div>
     <div class="kpi easy"><div class="kpi-icon">🦗</div><div class="kpi-num">${easy} / ${totalEasy}</div><div class="kpi-label">Easy</div></div>
     <div class="kpi medium"><div class="kpi-icon">🐲</div><div class="kpi-num">${med} / ${totalMed}</div><div class="kpi-label">Medium</div></div>
