@@ -855,6 +855,92 @@ a:hover { color: var(--gold-bright); }
   100% { transform: translate(var(--er-dx, 20px), var(--er-dy, -200px)) scale(1.1); opacity: 0; }
 }
 
+/* The actual paved road */
+.road-paved-base { fill: none; stroke: #1c130b; stroke-width: 14; stroke-linecap: round; stroke-linejoin: round; }
+.road-paved-mid  { fill: none; stroke: #2a1d12; stroke-width: 11; stroke-linecap: round; stroke-linejoin: round; }
+.road-paved-top  { fill: none; stroke: #38281b; stroke-width: 8;  stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 0.4 0.7; vector-effect: non-scaling-stroke; opacity: .85; }
+.road-edge { fill: none; stroke: #0a0604; stroke-width: 0.8; vector-effect: non-scaling-stroke; opacity: .9; }
+.road-light {
+  fill: none; stroke: rgba(255,170,80,0.35); stroke-width: 2.5;
+  stroke-linecap: round; vector-effect: non-scaling-stroke;
+  filter: blur(2px); opacity: 0;
+  animation: roadGlow 4s ease-in-out infinite;
+}
+.road-light.active { animation-delay: -1s; opacity: 1; }
+.road-light.cleared { stroke: rgba(255,210,130,0.55); animation-delay: -2s; opacity: 1; }
+@keyframes roadGlow { 0%,100% { opacity: .25; } 50% { opacity: .9; } }
+
+/* Torch sconces along the road */
+.torch {
+  position: absolute; transform: translate(-50%, -50%);
+  pointer-events: none; z-index: 3;
+  width: 30px; height: 60px;
+}
+.torch-pole {
+  position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
+  width: 4px; height: 36px;
+  background: linear-gradient(180deg, #1a120c, #08050300 90%);
+  border-radius: 2px;
+  box-shadow: 1px 0 0 rgba(0,0,0,0.6);
+}
+.torch-bowl {
+  position: absolute; left: 50%; top: 14px; transform: translateX(-50%);
+  width: 14px; height: 8px; border-radius: 0 0 8px 8px;
+  background: linear-gradient(180deg, #4a3a28, #1a120c);
+  box-shadow: inset 0 1px 0 rgba(232,200,122,0.35), 0 1px 2px rgba(0,0,0,0.6);
+}
+.torch-flame {
+  position: absolute; left: 50%; top: -6px; transform: translateX(-50%);
+  width: 14px; height: 22px; border-radius: 50% 50% 30% 30%;
+  background:
+    radial-gradient(ellipse at 50% 95%, #fff5d8 0%, #ffd07a 25%, #ff8a3a 55%, #c9421a 80%, transparent 95%);
+  filter: blur(0.4px) drop-shadow(0 0 10px rgba(255,160,60,0.85)) drop-shadow(0 0 22px rgba(255,120,40,0.55));
+  animation: torchFlick .42s ease-in-out infinite alternate;
+}
+.torch-halo {
+  position: absolute; left: 50%; top: -2px; transform: translate(-50%, -50%);
+  width: 110px; height: 110px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,180,90,0.35) 0%, rgba(255,140,60,0.18) 30%, transparent 70%);
+  pointer-events: none; z-index: -1;
+  animation: torchHaloPulse 3s ease-in-out infinite;
+}
+@keyframes torchFlick {
+  0%   { transform: translateX(-50%) scaleY(1)    scaleX(1)   skewX(0deg); opacity: .92; }
+  40%  { transform: translateX(-52%) scaleY(1.1)  scaleX(.95) skewX(-3deg); opacity: 1; }
+  100% { transform: translateX(-48%) scaleY(.95)  scaleX(1.05) skewX(2deg); opacity: .96; }
+}
+@keyframes torchHaloPulse { 0%,100% { opacity: .7; transform: translate(-50%, -50%) scale(.95); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); } }
+
+/* Spark embers shooting from torches */
+.torch-spark {
+  position: absolute; left: 50%; top: -4px;
+  width: 2px; height: 2px; border-radius: 50%;
+  background: #ffb86a;
+  box-shadow: 0 0 4px rgba(255,180,90,0.9);
+  animation: sparkRise var(--sp-dur, 2.4s) ease-out var(--sp-delay, 0s) infinite;
+  opacity: 0;
+}
+@keyframes sparkRise {
+  0%   { transform: translate(-50%, 0) scale(.6); opacity: 0; }
+  20%  { opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--sp-dx, 6px)), -56px) scale(.4); opacity: 0; }
+}
+
+/* Ground fog drifting along the road */
+.road-fog {
+  position: absolute; left: 0; right: 0; height: 24px;
+  pointer-events: none; z-index: 2; opacity: .4;
+  background: radial-gradient(ellipse 60% 100% at 50% 50%, rgba(220,210,200,0.35), transparent 70%);
+  filter: blur(8px);
+  animation: fogDrift 20s linear infinite;
+}
+@keyframes fogDrift {
+  0%   { transform: translateX(-8%); opacity: .35; }
+  50%  { transform: translateX(8%);  opacity: .55; }
+  100% { transform: translateX(-8%); opacity: .35; }
+}
+
 /* Footer */
 .codex-foot {
   position: relative; z-index: 3; text-align: center;
@@ -1125,6 +1211,44 @@ textarea.modal-comment {
   margin-top: clamp(20px, 2.4vw, 36px);
 }
 .bento-cell { min-width: 0; }
+/* ── Dashboard background art (subtle) ── */
+.dash-bg-art {
+  position: absolute; inset: 0; pointer-events: none; z-index: -1;
+  background:
+    linear-gradient(180deg, rgba(11,8,7,0.85) 0%, rgba(11,8,7,0.96) 100%),
+    url('./assets/page_undead_burg.jpg') center/cover no-repeat;
+  filter: saturate(0.7) brightness(0.55);
+  opacity: .55;
+  border-radius: 8px;
+  mask-image: linear-gradient(180deg, #000 0%, #000 70%, transparent 100%);
+}
+/* ── Utility strip: glass chips beneath page header ── */
+.dash-utility { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.util-chip {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+  padding: 8px 14px; border-radius: 4px;
+  background: linear-gradient(180deg, rgba(40,28,18,0.55), rgba(15,10,6,0.85));
+  border: 1px solid rgba(232,200,122,0.22);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.5), inset 0 1px 0 rgba(232,200,122,0.08);
+  backdrop-filter: blur(6px);
+  min-width: 70px;
+}
+.util-chip.alert { border-color: rgba(201,42,42,0.55); box-shadow: 0 6px 22px rgba(201,42,42,0.2), inset 0 1px 0 rgba(255,138,58,0.18); }
+.uc-label { font-family: var(--mono); font-size: 9px; color: var(--text-dim); letter-spacing: .25em; text-transform: uppercase; }
+.uc-val { font-family: var(--serif-display); font-weight: 900; color: var(--gold-bright); font-size: 18px; line-height: 1; }
+.util-chip.alert .uc-val { color: #ff8a3a; }
+.util-import { padding: 8px 14px !important; }
+
+/* ── Modern 4-column bento on big screens ── */
+@media (min-width: 1280px) {
+  .page.is-dashboard .bento {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .page.is-dashboard .bento-cell.span-2 { grid-column: span 2; }
+  .page.is-dashboard .bento-cell.span-3 { grid-column: span 3; }
+  .page.is-dashboard .bento-cell.span-4 { grid-column: span 4; }
+}
+
 /* ── Dashboard: gilt framing + breathing room ── */
 .page.is-dashboard { max-width: 1480px; margin: 0 auto; padding-block: clamp(8px, 1.4vw, 18px); }
 .page.is-dashboard .panel {
@@ -1618,10 +1742,17 @@ textarea.modal-comment {
 
     <!-- ═════════ DASHBOARD ═════════ -->
     <section class="page active is-dashboard" id="page-dashboard">
+      <div class="dash-bg-art" aria-hidden="true"></div>
       <div class="page-header">
         <div>
           <h1 class="page-title">Dungeon Map</h1>
           <div class="page-subtitle">Your realm, your conquest</div>
+        </div>
+        <div class="dash-utility">
+          <div class="util-chip"><span class="uc-label">Level</span><span class="uc-val" id="util-level">1</span></div>
+          <div class="util-chip"><span class="uc-label">Today</span><span class="uc-val" id="util-today-xp">0 XP</span></div>
+          <div class="util-chip alert"><span class="uc-label">Due</span><span class="uc-val" id="util-due">0</span></div>
+          <button class="btn-secondary util-import" onclick="document.getElementById('import-input').click()">⇪ Import</button>
         </div>
       </div>
 
@@ -1670,7 +1801,7 @@ textarea.modal-comment {
           <div class="kpi-grid" id="kpi-grid" style="grid-template-columns:1fr 1fr"></div>
         </div>
 
-        <div class="bento-cell span-3 panel">
+        <div class="bento-cell span-4 panel">
           <h3 class="panel-title">📅 Chronicle Heatmap — Last 180 Days</h3>
           <div class="heatmap-wrap" id="heatmap-wrap"></div>
           <div class="heatmap-legend">
@@ -1695,7 +1826,7 @@ textarea.modal-comment {
           <div class="mastery-grid" id="mastery-grid"></div>
         </div>
 
-        <div class="bento-cell span-3 panel">
+        <div class="bento-cell span-4 panel">
           <h3 class="panel-title">📈 Chronicle of Battle — Last 14 Days</h3>
           <div class="analytics-grid">
             <div>
@@ -1711,7 +1842,7 @@ textarea.modal-comment {
           </div>
         </div>
 
-        <div class="bento-cell span-3 panel">
+        <div class="bento-cell span-4 panel">
           <h3 class="panel-title">⚜ Dungeon Mastery</h3>
           <div class="dungeon-grid" id="dungeon-grid"></div>
         </div>
@@ -2225,7 +2356,31 @@ function getStreakMultiplierLocal(streak) {
   return bonus;
 }
 
+function renderUtilityStrip() {
+  try {
+    const lv = document.getElementById('util-level');
+    const tx = document.getElementById('util-today-xp');
+    const du = document.getElementById('util-due');
+    if (lv) lv.textContent = (typeof getLevel === 'function' ? getLevel() : (window.userLevel || 1));
+    if (tx) {
+      const days = (typeof getDailyHistory === 'function') ? getDailyHistory() : [];
+      const today = days[days.length - 1];
+      tx.textContent = (today ? today.xp : 0) + ' XP';
+    }
+    if (du) {
+      let n = 0;
+      RAW_PROBLEMS.forEach(p => {
+        if (getConf(p) > 0) {
+          const di = getDueInfo(p);
+          if (di.cls !== 'due-new' && di.days <= 0) n++;
+        }
+      });
+      du.textContent = n;
+    }
+  } catch (e) {}
+}
 function renderDashboard() {
+  renderUtilityStrip();
   const xp = computeXP();
   let lvl = 0;
   for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) if (xp >= LEVEL_THRESHOLDS[i]) { lvl = i; break; }
@@ -2728,12 +2883,14 @@ function renderPathway() {
     row.forEach(([t], ci) => pos.set(t, { x: spread[ci], y }));
   });
 
-  // SVG ink network
+  // SVG paved road (3 layers + glow)
   const svgNS = 'http://www.w3.org/2000/svg';
   const svg = document.createElementNS(svgNS, 'svg');
   svg.setAttribute('class', 'codex-svg');
   svg.setAttribute('viewBox', `0 0 100 ${MAP_H}`);
   svg.setAttribute('preserveAspectRatio', 'none');
+  let roadHTML = { base: '', mid: '', top: '', glow: '' };
+  const segments = [];
   let segIdx = 0;
   const addSeg = (fn, tn) => {
     const f = pos.get(fn), t = pos.get(tn);
@@ -2741,17 +2898,16 @@ function renderPathway() {
     const conf = fs.total ? (fs.confSum / fs.total) / 5 : 0;
     const cls = conf >= 0.8 ? 'cleared' : conf > 0 ? 'active' : '';
     const cy = (f.y + t.y) / 2;
-    // Slight S-curve via two control points
     const c1x = f.x + ((segIdx * 11 % 7) - 3) * 0.8;
     const c2x = t.x + ((segIdx * 13 % 7) - 3) * 0.8;
     const d = `M ${f.x} ${f.y} C ${c1x} ${cy - 18}, ${c2x} ${cy + 18}, ${t.x} ${t.y}`;
-    const base = document.createElementNS(svgNS, 'path'); base.setAttribute('d', d); base.setAttribute('class', 'ink-base'); base.setAttribute('vector-effect', 'non-scaling-stroke'); svg.appendChild(base);
-    const line = document.createElementNS(svgNS, 'path'); line.setAttribute('d', d); line.setAttribute('class', `ink-line ${cls}`); line.setAttribute('vector-effect', 'non-scaling-stroke'); svg.appendChild(line);
-    if (cls) {
-      const pulse = document.createElementNS(svgNS, 'path'); pulse.setAttribute('d', d); pulse.setAttribute('class', `ink-pulse ${cls === 'active' ? 'active' : ''}`); pulse.setAttribute('vector-effect', 'non-scaling-stroke');
-      pulse.style.animationDelay = (-segIdx * 0.5).toFixed(2) + 's';
-      svg.appendChild(pulse);
-    }
+    roadHTML.base += `<path class="road-paved-base" d="${d}" vector-effect="non-scaling-stroke"/>`;
+    roadHTML.mid  += `<path class="road-paved-mid"  d="${d}" vector-effect="non-scaling-stroke"/>`;
+    roadHTML.top  += `<path class="road-paved-top"  d="${d}" vector-effect="non-scaling-stroke"/>`;
+    if (cls) roadHTML.glow += `<path class="road-light ${cls}" d="${d}" vector-effect="non-scaling-stroke" style="animation-delay:${(-segIdx * 0.4).toFixed(2)}s"/>`;
+    const mx = (f.x + t.x) / 2 + ((segIdx * 7 % 5) - 2) * 0.5;
+    const my = (f.y + t.y) / 2 + ((segIdx * 11 % 5) - 2) * 4;
+    segments.push({ mx, my, cls });
     segIdx++;
   };
   for (let ri = 0; ri < rows.length - 1; ri++) {
@@ -2761,18 +2917,48 @@ function renderPathway() {
     else if (tr.length === 1) fr.forEach(([fn]) => addSeg(fn, tr[0][0]));
     else for (let i = 0; i < Math.max(fr.length, tr.length); i++) addSeg(fr[i % fr.length][0], tr[i % tr.length][0]);
   }
-  // Station dots
-  ordered.forEach(([t]) => {
-    const p = pos.get(t);
-    const td = stats[t];
-    const conf = td.total ? (td.confSum / td.total) / 5 : 0;
-    const c = document.createElementNS(svgNS, 'circle');
-    c.setAttribute('cx', p.x); c.setAttribute('cy', p.y); c.setAttribute('r', '0.8');
-    c.setAttribute('class', `ink-station ${conf >= 0.8 ? 'cleared' : ''}`);
-    c.setAttribute('vector-effect', 'non-scaling-stroke');
-    svg.appendChild(c);
-  });
+  svg.innerHTML = roadHTML.base + roadHTML.mid + roadHTML.top + roadHTML.glow;
   stage.appendChild(svg);
+
+  // Torch sconces
+  const torchAt = (xPct, yPx, lit, di) => {
+    const torch = document.createElement('div');
+    torch.className = 'torch';
+    torch.style.left = xPct + '%';
+    torch.style.top = yPx + 'px';
+    if (lit) {
+      const dx1 = ((di * 7) % 9) - 4, dx2 = ((di * 11) % 9) - 4, dx3 = ((di * 13) % 9) - 4;
+      torch.innerHTML = `
+        <div class="torch-halo"></div>
+        <div class="torch-pole"></div>
+        <div class="torch-bowl"></div>
+        <div class="torch-flame"></div>
+        <div class="torch-spark" style="--sp-dur:${(2 + (di % 5) * 0.3).toFixed(1)}s;--sp-delay:0s;--sp-dx:${dx1}px"></div>
+        <div class="torch-spark" style="--sp-dur:${(2.4 + (di % 4) * 0.4).toFixed(1)}s;--sp-delay:.6s;--sp-dx:${dx2}px"></div>
+        <div class="torch-spark" style="--sp-dur:${(2.8 + (di % 3) * 0.5).toFixed(1)}s;--sp-delay:1.2s;--sp-dx:${dx3}px"></div>`;
+    } else {
+      torch.innerHTML = `<div class="torch-pole"></div><div class="torch-bowl"></div>`;
+      torch.style.opacity = '.5';
+    }
+    stage.appendChild(torch);
+  };
+  segments.forEach((seg, i) => torchAt(seg.mx, seg.my, !!seg.cls, i));
+  ordered.forEach(([t, d], ix) => {
+    const conf = d.total ? (d.confSum / d.total) / 5 : 0;
+    if (conf <= 0) return;
+    const p = pos.get(t);
+    torchAt(p.x - 7, p.y + 80, true, ix * 2);
+    torchAt(p.x + 7, p.y + 80, true, ix * 2 + 1);
+  });
+
+  // Ground fog every couple rows
+  for (let r = 1; r < rows.length; r += 2) {
+    const fog = document.createElement('div');
+    fog.className = 'road-fog';
+    fog.style.top = (PAD_TOP + r * ROW_H - ROW_H / 2) + 'px';
+    fog.style.animationDelay = (-r * 1.7) + 's';
+    stage.appendChild(fog);
+  }
 
   // Section markers (between rows, every 4-5 rows)
   const SECTIONS = ['I · The Lowlands', 'II · The Marches', 'III · The Highlands', 'IV · The Sanctum'];
