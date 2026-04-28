@@ -737,6 +737,169 @@ textarea.modal-comment {
 }
 .back-classic:hover { color: var(--gold); border-color: var(--gold); }
 
+/* ─── Today Command Center ─── */
+.tcc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space); margin-bottom: var(--space-md); }
+.tcc-card {
+  padding: var(--space); border: 1px solid rgba(232,200,122,0.18);
+  background: linear-gradient(180deg, rgba(31,24,18,0.7), rgba(11,8,7,0.9));
+  border-radius: var(--rad); position: relative; overflow: hidden;
+  cursor: pointer; transition: all .25s ease;
+}
+.tcc-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+.tcc-card.urgent { border-color: rgba(176,69,69,0.45); background: linear-gradient(180deg, rgba(122,31,31,0.18), rgba(11,8,7,0.95)); }
+.tcc-card.urgent .tcc-num { color: var(--hard); animation: urgentPulse 1.6s ease-in-out infinite; }
+@keyframes urgentPulse { 0%,100% { text-shadow: 0 0 8px rgba(176,69,69,0.4); } 50% { text-shadow: 0 0 24px rgba(176,69,69,0.9); } }
+.tcc-icon { font-size: 22px; margin-bottom: 4px; opacity: .8; }
+.tcc-num { font-family: var(--serif-display); font-size: 30px; font-weight: 900; color: var(--gold); line-height: 1; }
+.tcc-label { font-family: var(--mono); font-size: 10px; color: var(--text-dim); letter-spacing: .15em; text-transform: uppercase; margin-top: 4px; }
+.tcc-sub { font-family: var(--mono); font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+
+/* ─── Streak milestones ─── */
+.streak-track {
+  display: flex; gap: 6px; margin-top: 12px; padding: 12px; flex-wrap: wrap;
+  background: linear-gradient(180deg, rgba(255,138,58,0.06), rgba(0,0,0,0.3));
+  border: 1px solid rgba(255,138,58,0.15); border-radius: var(--rad);
+}
+.streak-pip {
+  flex: 1; min-width: 64px; padding: 8px; text-align: center;
+  background: rgba(0,0,0,0.4); border: 1px solid rgba(232,200,122,0.12);
+  border-radius: var(--rad-sm); position: relative; overflow: hidden;
+  transition: all .3s ease;
+}
+.streak-pip.reached {
+  background: linear-gradient(180deg, rgba(255,138,58,0.18), rgba(122,31,31,0.18));
+  border-color: var(--ember);
+  box-shadow: 0 0 18px rgba(255,138,58,0.3);
+}
+.streak-pip.reached .pip-day { color: var(--ember); }
+.streak-pip.next { border-color: var(--gold); }
+.pip-day { font-family: var(--serif-display); font-size: 18px; font-weight: 900; color: var(--text-dim); }
+.pip-bonus { font-family: var(--mono); font-size: 10px; color: var(--gold); margin-top: 2px; }
+.pip-reward { font-family: var(--medieval); font-size: 10px; color: var(--text-muted); margin-top: 2px; letter-spacing: .05em; }
+.streak-pip.reached .pip-reward { color: var(--ember); }
+
+/* ─── Power levels ─── */
+.power-rows { display: flex; flex-direction: column; gap: 8px; }
+.power-row {
+  border: 1px solid rgba(232,200,122,0.15); border-radius: var(--rad);
+  background: linear-gradient(90deg, rgba(31,24,18,0.7), rgba(11,8,7,0.9));
+  overflow: hidden; transition: border-color .2s;
+}
+.power-row:hover { border-color: rgba(232,200,122,0.35); }
+.power-head {
+  display: grid; grid-template-columns: auto 1fr auto auto; gap: var(--space);
+  align-items: center; padding: var(--space); cursor: pointer;
+}
+.power-icon { font-size: 26px; filter: drop-shadow(0 0 8px var(--pcol, var(--gold))); }
+.power-name { font-family: var(--serif); font-size: 14px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--pcol, var(--gold)); }
+.power-bar {
+  width: 200px; height: 8px; background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(232,200,122,0.15); border-radius: 99px; overflow: hidden;
+}
+@media (max-width: 600px) { .power-bar { width: 100px; } .power-head { grid-template-columns: auto 1fr auto; } .power-bar { display: none; } }
+.power-bar-fill { height: 100%; background: linear-gradient(90deg, var(--pcol-dim, var(--gold-deep)), var(--pcol, var(--gold))); transition: width 1s ease; }
+.power-stats { font-family: var(--mono); font-size: 12px; color: var(--gold); white-space: nowrap; }
+.power-toggle { font-family: var(--mono); font-size: 14px; color: var(--text-dim); transition: transform .25s ease; }
+.power-row.open .power-toggle { transform: rotate(90deg); }
+.power-detail { display: none; padding: 0 var(--space) var(--space); border-top: 1px dashed rgba(232,200,122,0.15); }
+.power-row.open .power-detail { display: block; animation: detailIn .3s ease; }
+@keyframes detailIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+.power-detail-list { list-style: none; padding: 8px 0 0; margin: 0; max-height: 320px; overflow-y: auto; }
+.power-detail-item {
+  display: grid; grid-template-columns: auto 1fr auto auto; gap: 10px;
+  align-items: center; padding: 8px 4px; border-bottom: 1px solid rgba(232,200,122,0.08);
+  font-family: var(--mono); font-size: 12px; cursor: pointer;
+  transition: background .15s ease;
+}
+.power-detail-item:hover { background: rgba(232,200,122,0.05); }
+.power-detail-item:last-child { border-bottom: none; }
+.power-detail-stars { color: var(--gold); font-size: 11px; letter-spacing: 1px; }
+.power-detail-date { color: var(--text-muted); font-size: 10px; }
+
+/* ─── Topic Mastery ─── */
+.mastery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+.mastery-tile {
+  padding: 10px 12px; border: 1px solid rgba(232,200,122,0.15);
+  background: rgba(11,8,7,0.6); border-radius: var(--rad-sm);
+  display: flex; flex-direction: column; gap: 6px;
+}
+.mastery-head { display: flex; align-items: center; gap: 8px; }
+.mastery-icon { font-size: 18px; }
+.mastery-name { font-family: var(--serif); font-size: 12px; font-weight: 600; color: var(--text); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mastery-bar { height: 4px; background: rgba(0,0,0,0.4); border-radius: 2px; overflow: hidden; }
+.mastery-bar-fill { height: 100%; background: linear-gradient(90deg, var(--mc-dim, var(--gold-deep)), var(--mc, var(--gold))); transition: width 1s ease; }
+.mastery-meta { font-family: var(--mono); font-size: 10px; color: var(--text-dim); }
+
+/* ─── Analytics mini-bars ─── */
+.mini-bars { display: flex; align-items: flex-end; gap: 3px; height: 60px; padding: 8px 0; }
+.mini-bar {
+  flex: 1; background: linear-gradient(180deg, var(--gold), var(--gold-deep));
+  border-radius: 2px 2px 0 0; min-height: 2px;
+  cursor: pointer; transition: filter .15s ease;
+  position: relative;
+}
+.mini-bar:hover { filter: brightness(1.4); }
+.mini-bar.active { filter: brightness(1.6); box-shadow: 0 0 8px var(--gold); }
+.mini-readout { font-family: var(--mono); font-size: 11px; color: var(--text-dim); margin-top: 6px; min-height: 16px; }
+.analytics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space); }
+
+/* ─── Bestiary tooltip ─── */
+.mc-tooltip {
+  position: absolute; z-index: 30; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+  background: linear-gradient(180deg, var(--ash), var(--ink));
+  border: 1px solid var(--gold); border-radius: var(--rad-sm);
+  padding: 8px 12px; min-width: 200px; pointer-events: none;
+  font-family: var(--mono); font-size: 11px; color: var(--text-dim);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.7);
+  opacity: 0; transition: opacity .2s ease;
+}
+.monster-card:hover .mc-tooltip { opacity: 1; }
+.mc-tooltip-row { display: flex; justify-content: space-between; gap: 12px; padding: 2px 0; }
+.mc-tooltip-row span:first-child { color: var(--text-muted); }
+.mc-tooltip-row span:last-child { color: var(--gold); }
+
+/* Pathway tooltip */
+.path-tooltip {
+  position: absolute; pointer-events: none; z-index: 20;
+  background: linear-gradient(180deg, var(--ash), var(--ink));
+  border: 1px solid var(--gold); border-radius: var(--rad-sm);
+  padding: 8px 12px; min-width: 180px;
+  font-family: var(--mono); font-size: 11px; color: var(--text-dim);
+  opacity: 0; transition: opacity .15s ease;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.7);
+}
+.path-tooltip.show { opacity: 1; }
+.path-tooltip h5 { margin: 0 0 4px; font-family: var(--serif); font-size: 13px; color: var(--gold); letter-spacing: .04em; }
+
+/* Modal extra actions */
+.modal-extra-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.modal-extra-actions .btn-secondary { font-size: 10px; padding: 6px 10px; }
+
+/* Bestiary controls extra */
+.bestiary-controls select.search-box { flex: 0 1 200px; padding: 10px 14px; }
+
+/* Level-up overlay */
+.levelup-overlay {
+  position: fixed; inset: 0; z-index: 9990; pointer-events: none;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at center, rgba(232,200,122,0.25), transparent 60%);
+  animation: lvlBg 2.4s ease forwards;
+}
+@keyframes lvlBg { 0% { opacity: 0; } 30% { opacity: 1; } 100% { opacity: 0; } }
+.levelup-overlay .lvl-text {
+  font-family: var(--serif-display); font-weight: 900;
+  font-size: clamp(40px, 8vw, 96px);
+  color: var(--gold); letter-spacing: .12em;
+  text-shadow: 0 0 40px rgba(232,200,122,0.9), 0 0 100px rgba(255,138,58,0.6);
+  animation: lvlIn 2.4s cubic-bezier(.2,.8,.2,1) forwards;
+}
+@keyframes lvlIn {
+  0% { opacity: 0; transform: scale(.4); filter: blur(20px); }
+  20% { opacity: 1; transform: scale(1.1); filter: blur(0); }
+  60% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.05); }
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
@@ -859,7 +1022,39 @@ textarea.modal-comment {
         <span class="runes">☩ ⚔</span>
       </button>
 
+      <div class="panel" style="margin-bottom:var(--space-md)">
+        <h3 class="panel-title">⏳ Today's Command Center</h3>
+        <div class="tcc-grid" id="tcc-grid"></div>
+        <div class="streak-track" id="streak-track"></div>
+      </div>
+
       <div class="kpi-grid" id="kpi-grid"></div>
+
+      <div class="panel" style="margin-bottom:var(--space-md)">
+        <h3 class="panel-title">⚔ Power Levels — Click to Reveal Conquests</h3>
+        <div class="power-rows" id="power-rows"></div>
+      </div>
+
+      <div class="panel" style="margin-bottom:var(--space-md)">
+        <h3 class="panel-title">📜 Topic Mastery <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);font-weight:400;letter-spacing:.1em">based on reviews in the last 180 days</span></h3>
+        <div class="mastery-grid" id="mastery-grid"></div>
+      </div>
+
+      <div class="panel" style="margin-bottom:var(--space-md)">
+        <h3 class="panel-title">📈 Chronicle of Battle — Last 14 Days</h3>
+        <div class="analytics-grid">
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text-dim);letter-spacing:.1em">REVIEWS</div>
+            <div class="mini-bars" id="reviews-trend"></div>
+            <div class="mini-readout" id="reviews-readout">Click any bar to see details</div>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text-dim);letter-spacing:.1em">XP EARNED</div>
+            <div class="mini-bars" id="xp-trend"></div>
+            <div class="mini-readout" id="xp-readout">Click any bar to see details</div>
+          </div>
+        </div>
+      </div>
 
       <div class="panel">
         <h3 class="panel-title">⚜ Dungeon Mastery</h3>
@@ -906,6 +1101,7 @@ textarea.modal-comment {
       <div class="pathway-shell">
         <div class="pathway-bg"></div>
         <svg class="pathway-svg" id="pathway-svg" viewBox="0 0 1000 1400" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="path-tooltip" id="path-tooltip"></div>
       </div>
     </section>
 
@@ -919,11 +1115,22 @@ textarea.modal-comment {
       </div>
       <div class="bestiary-controls">
         <input type="search" class="search-box" id="best-search" placeholder="Search by name, topic, hint…" oninput="renderBestiary()">
+        <select class="search-box" id="best-topic" onchange="renderBestiary()"><option value="">All topics</option></select>
+        <select class="search-box" id="best-sort" onchange="renderBestiary()">
+          <option value="conf-desc">Sort: Confidence ↓</option>
+          <option value="conf-asc">Confidence ↑</option>
+          <option value="recent">Recently reviewed</option>
+          <option value="diff">Difficulty</option>
+          <option value="topic">Topic</option>
+          <option value="due">Due soonest</option>
+          <option value="num">Number</option>
+        </select>
         <button class="filter-pill active" data-filter="all" onclick="setFilter('all')">All</button>
         <button class="filter-pill" data-filter="Easy" onclick="setFilter('Easy')">Easy</button>
         <button class="filter-pill" data-filter="Medium" onclick="setFilter('Medium')">Medium</button>
         <button class="filter-pill" data-filter="Hard" onclick="setFilter('Hard')">Hard</button>
         <button class="filter-pill" data-filter="solved" onclick="setFilter('solved')">Slain</button>
+        <button class="filter-pill" data-filter="due" onclick="setFilter('due')">Due Now</button>
         <button class="filter-pill" data-filter="unsolved" onclick="setFilter('unsolved')">Uncharted</button>
       </div>
       <div class="bestiary-grid" id="bestiary-grid"></div>
@@ -974,6 +1181,8 @@ textarea.modal-comment {
       </div>
     </div>
     <div class="modal-foot">
+      <div class="modal-extra-actions" id="modal-extra-actions"></div>
+      <div style="flex:1"></div>
       <button class="btn-secondary" onclick="closeModal()">Cancel</button>
       <button class="btn-primary" onclick="saveModal()">⚔ Log Victory</button>
     </div>
@@ -1220,6 +1429,34 @@ function getStreakDays() {
 }
 
 /* ═════════ DASHBOARD ═════════ */
+const RECENT_MASTERY_DAYS = 180;
+const RECENT_MASTERY_MS = RECENT_MASTERY_DAYS * 86400000;
+
+function getLastReviewMsLocal(p) {
+  const ud = userData[p.id];
+  if (ud) {
+    if (ud.lastReviewedTs) return ud.lastReviewedTs;
+    if (ud.lastReviewed) {
+      const t = new Date(ud.lastReviewed).getTime();
+      if (!isNaN(t)) return t;
+    }
+  }
+  if (p.date) {
+    const parts = p.date.split(' ');
+    if (parts.length === 3) {
+      const d = new Date(parts[1] + ' ' + parts[0] + ', ' + parts[2]);
+      if (!isNaN(d)) return d.getTime();
+    }
+  }
+  return null;
+}
+
+function getStreakMultiplierLocal(streak) {
+  let bonus = 0;
+  for (const m of STREAK_MILESTONES) if (streak >= m.days) bonus = m.bonus;
+  return bonus;
+}
+
 function renderDashboard() {
   const xp = computeXP();
   let lvl = 0;
@@ -1277,6 +1514,181 @@ function renderDashboard() {
         <div class="dungeon-bar"><div class="dungeon-bar-fill" style="width:${pp}%"></div></div>
       </div>`;
     }).join('');
+
+  renderTodayCommandCenter();
+  renderStreakTrack();
+  renderPowerLevels();
+  renderTopicMastery();
+  renderAnalytics();
+}
+
+/* ═════════ TODAY COMMAND CENTER ═════════ */
+function renderTodayCommandCenter() {
+  const wrap = document.getElementById('tcc-grid'); if (!wrap) return;
+  const dueNow = RAW_PROBLEMS.filter(p => { const di = getDueInfo(p); return di.days === 0 && di.cls !== 'due-new'; }).length;
+  const overdue = RAW_PROBLEMS.filter(p => { const di = getDueInfo(p); return di.days < 0 && di.cls !== 'due-new'; }).length;
+  const planTotal = (todayPlan || []).length;
+  const planDone = (todayPlan || []).filter(q => q.done).length;
+  const streak = getStreakDays();
+  const mult = getStreakMultiplierLocal(streak);
+  wrap.innerHTML = `
+    <div class="tcc-card ${overdue ? 'urgent' : ''}" onclick="setFilter('due'); navigate('bestiary')">
+      <div class="tcc-icon">⏰</div>
+      <div class="tcc-num">${overdue}</div>
+      <div class="tcc-label">Overdue</div>
+      <div class="tcc-sub">need attention</div>
+    </div>
+    <div class="tcc-card" onclick="setFilter('due'); navigate('bestiary')">
+      <div class="tcc-icon">⏳</div>
+      <div class="tcc-num">${dueNow}</div>
+      <div class="tcc-label">Due Today</div>
+      <div class="tcc-sub">ripe for review</div>
+    </div>
+    <div class="tcc-card" onclick="navigate('quest')">
+      <div class="tcc-icon">📜</div>
+      <div class="tcc-num">${planDone} / ${planTotal || '—'}</div>
+      <div class="tcc-label">Today's Hunt</div>
+      <div class="tcc-sub">${planTotal ? (planTotal - planDone) + ' remaining' : 'no plan yet'}</div>
+    </div>
+    <div class="tcc-card" onclick="document.getElementById('streak-track').scrollIntoView({behavior:'smooth'})">
+      <div class="tcc-icon">🔥</div>
+      <div class="tcc-num">${streak}</div>
+      <div class="tcc-label">Streak</div>
+      <div class="tcc-sub">${mult ? '+' + Math.round(mult * 100) + '% XP bonus' : 'keep going'}</div>
+    </div>`;
+}
+
+/* ═════════ STREAK MILESTONES ═════════ */
+function renderStreakTrack() {
+  const el = document.getElementById('streak-track'); if (!el) return;
+  const streak = getStreakDays();
+  let nextSet = false;
+  el.innerHTML = STREAK_MILESTONES.map(m => {
+    const reached = streak >= m.days;
+    let cls = '';
+    if (reached) cls = 'reached';
+    else if (!nextSet) { cls = 'next'; nextSet = true; }
+    return `<div class="streak-pip ${cls}">
+      <div class="pip-day">${m.label}</div>
+      <div class="pip-bonus">+${Math.round(m.bonus * 100)}%</div>
+      <div class="pip-reward">${m.reward}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ═════════ POWER LEVELS ═════════ */
+const _powerOpen = { Easy: false, Medium: false, Hard: false };
+function renderPowerLevels() {
+  const wrap = document.getElementById('power-rows'); if (!wrap) return;
+  const groups = { Easy: [], Medium: [], Hard: [] };
+  RAW_PROBLEMS.forEach(p => {
+    const c = getConf(p);
+    if (c > 0) groups[p.diff].push({ p, c });
+  });
+  Object.values(groups).forEach(arr => arr.sort((a, b) => (getLastReviewMsLocal(b.p) || 0) - (getLastReviewMsLocal(a.p) || 0)));
+  const totals = { Easy: groups.Easy.length, Medium: groups.Medium.length, Hard: groups.Hard.length };
+  const grand = { Easy: RAW_PROBLEMS.filter(p => p.diff === 'Easy').length, Medium: RAW_PROBLEMS.filter(p => p.diff === 'Medium').length, Hard: RAW_PROBLEMS.filter(p => p.diff === 'Hard').length };
+  const cols = { Easy: { c: 'var(--easy)', dim: 'rgba(111,168,107,0.3)', icon: '🦗' }, Medium: { c: 'var(--medium)', dim: 'rgba(200,156,74,0.3)', icon: '🐲' }, Hard: { c: 'var(--hard)', dim: 'rgba(176,69,69,0.3)', icon: '🐉' } };
+  wrap.innerHTML = ['Easy', 'Medium', 'Hard'].map(d => {
+    const arr = groups[d];
+    const pct = grand[d] ? Math.round(totals[d] / grand[d] * 100) : 0;
+    const open = _powerOpen[d];
+    const items = arr.slice(0, 60).map(({ p, c }) => {
+      const last = getLastReviewMsLocal(p);
+      const dateLbl = last ? new Date(last).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: '2-digit' }) : '—';
+      return `<li class="power-detail-item" onclick="event.stopPropagation();openModal(${p.id})">
+        <span>${monsterFor(p)}</span>
+        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)">${p.name}</span>
+        <span class="power-detail-stars">${'★'.repeat(c)}</span>
+        <span class="power-detail-date">${dateLbl}</span>
+      </li>`;
+    }).join('');
+    return `<div class="power-row ${open ? 'open' : ''}" data-diff="${d}" style="--pcol:${cols[d].c};--pcol-dim:${cols[d].dim}">
+      <div class="power-head" onclick="togglePower('${d}')">
+        <div class="power-icon">${cols[d].icon}</div>
+        <div class="power-name">${d}</div>
+        <div class="power-bar"><div class="power-bar-fill" style="width:${pct}%"></div></div>
+        <div class="power-stats">${totals[d]} / ${grand[d]} · ${pct}%</div>
+        <div class="power-toggle">▶</div>
+      </div>
+      <div class="power-detail">
+        ${arr.length ? `<ul class="power-detail-list">${items}</ul>` : '<div style="padding:12px;color:var(--text-muted);font-family:var(--medieval);letter-spacing:.15em;text-align:center">No conquests yet</div>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+function togglePower(d) {
+  _powerOpen[d] = !_powerOpen[d];
+  renderPowerLevels();
+}
+
+/* ═════════ TOPIC MASTERY (recent reviews) ═════════ */
+function renderTopicMastery() {
+  const wrap = document.getElementById('mastery-grid'); if (!wrap) return;
+  const now = Date.now();
+  const map = {};
+  RAW_PROBLEMS.forEach(p => {
+    if (!map[p.topic]) map[p.topic] = { total: 0, recent: 0 };
+    map[p.topic].total++;
+    const last = getLastReviewMsLocal(p);
+    if (last && (now - last) <= RECENT_MASTERY_MS && getConf(p) > 0) map[p.topic].recent++;
+  });
+  const list = Object.entries(map).sort((a, b) => (b[1].recent / Math.max(1, b[1].total)) - (a[1].recent / Math.max(1, a[1].total)));
+  wrap.innerHTML = list.map(([t, d]) => {
+    const v = visualOf(t);
+    const pct = d.total ? Math.round(d.recent / d.total * 100) : 0;
+    return `<div class="mastery-tile" onclick="filterByTopic('${t.replace(/'/g,"\\'")}')" style="--mc:${v.color};--mc-dim:${v.color}55;cursor:pointer">
+      <div class="mastery-head"><span class="mastery-icon">${v.icon}</span><span class="mastery-name" title="${t}">${t}</span></div>
+      <div class="mastery-bar"><div class="mastery-bar-fill" style="width:${pct}%"></div></div>
+      <div class="mastery-meta">${d.recent} recent · ${d.total} total · ${pct}%</div>
+    </div>`;
+  }).join('');
+}
+
+/* ═════════ ANALYTICS ═════════ */
+let _analyticsActive = { reviews: -1, xp: -1 };
+function getDailyHistory() {
+  // Returns last 14 days of {date, reviews, xp}
+  const days = [];
+  const now = new Date(); now.setHours(0,0,0,0);
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(now); d.setDate(now.getDate() - i);
+    days.push({ date: d, ms: d.getTime(), reviews: 0, xp: 0, problems: [] });
+  }
+  RAW_PROBLEMS.forEach(p => {
+    const last = getLastReviewMsLocal(p);
+    if (!last) return;
+    const dayMs = new Date(last); dayMs.setHours(0,0,0,0);
+    const t = dayMs.getTime();
+    const slot = days.find(x => x.ms === t);
+    if (!slot) return;
+    slot.reviews++;
+    slot.xp += Math.max(1, getConf(p)) * 5;
+    slot.problems.push(p);
+  });
+  return days;
+}
+
+function renderAnalytics() {
+  const days = getDailyHistory();
+  const maxR = Math.max(1, ...days.map(d => d.reviews));
+  const maxX = Math.max(1, ...days.map(d => d.xp));
+  const rWrap = document.getElementById('reviews-trend');
+  const xWrap = document.getElementById('xp-trend');
+  if (!rWrap) return;
+  rWrap.innerHTML = days.map((d, i) => `<div class="mini-bar ${i === _analyticsActive.reviews ? 'active' : ''}" style="height:${(d.reviews / maxR * 100) || 2}%" onclick="setAnalytics('reviews',${i})" title="${d.date.toLocaleDateString()}: ${d.reviews} reviews"></div>`).join('');
+  xWrap.innerHTML = days.map((d, i) => `<div class="mini-bar ${i === _analyticsActive.xp ? 'active' : ''}" style="height:${(d.xp / maxX * 100) || 2}%" onclick="setAnalytics('xp',${i})" title="${d.date.toLocaleDateString()}: ${d.xp} XP"></div>`).join('');
+}
+function setAnalytics(kind, idx) {
+  _analyticsActive[kind] = idx;
+  const days = getDailyHistory();
+  const d = days[idx]; if (!d) return;
+  const lbl = d.date.toLocaleDateString(undefined, { weekday: 'short', day: '2-digit', month: 'short' });
+  const out = kind === 'reviews'
+    ? `${lbl}: ${d.reviews} review${d.reviews !== 1 ? 's' : ''}${d.problems.length ? ' — ' + d.problems.slice(0,3).map(p=>p.name).join(', ') + (d.problems.length > 3 ? '…' : '') : ''}`
+    : `${lbl}: ${d.xp} XP earned`;
+  document.getElementById(kind + '-readout').textContent = out;
+  renderAnalytics();
 }
 
 function filterByTopic(t) {
@@ -1360,18 +1772,26 @@ function renderPathway() {
     topics[p.topic].total++;
     if (getConf(p) > 0) topics[p.topic].solved++;
   });
+  // Compute richer per-topic stats for tooltip
+  const stats = {};
+  RAW_PROBLEMS.forEach(p => {
+    if (!stats[p.topic]) stats[p.topic] = { total: 0, solved: 0, due: 0, overdue: 0 };
+    stats[p.topic].total++;
+    if (getConf(p) > 0) {
+      stats[p.topic].solved++;
+      const di = getDueInfo(p);
+      if (di.cls !== 'due-new') {
+        if (di.days === 0) stats[p.topic].due++;
+        else if (di.days < 0) stats[p.topic].overdue++;
+      }
+    }
+  });
   const list = Object.entries(topics).sort((a, b) => b[1].total - a[1].total);
   const W = 1000, H = Math.max(900, list.length * 110);
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
 
-  // Zigzag positions
-  const positions = list.map((_, i) => {
-    const y = 80 + i * 100;
-    const x = 200 + 600 * Math.abs(Math.sin(i * 0.85));
-    return { x, y };
-  });
+  const positions = list.map((_, i) => ({ y: 80 + i * 100, x: 200 + 600 * Math.abs(Math.sin(i * 0.85)) }));
 
-  // Path between positions
   let pathD = `M ${positions[0].x} ${positions[0].y}`;
   for (let i = 1; i < positions.length; i++) {
     const p0 = positions[i - 1], p1 = positions[i];
@@ -1386,16 +1806,41 @@ function renderPathway() {
     const C = 2 * Math.PI * 36;
     const off = C - C * pp;
     const pos = positions[i];
-    nodes += `<g class="path-node" transform="translate(${pos.x},${pos.y})" onclick="filterByTopic('${t.replace(/'/g,"\\'")}')">
+    const s = stats[t] || { due: 0, overdue: 0 };
+    const dueBadge = (s.due + s.overdue) > 0 ? `<circle cx="32" cy="-32" r="11" fill="${s.overdue ? 'var(--hard)' : 'var(--medium)'}" stroke="var(--ink)" stroke-width="2"/><text x="32" y="-28" text-anchor="middle" font-family="var(--mono)" font-size="11" font-weight="700" fill="white">${s.due + s.overdue}</text>` : '';
+    nodes += `<g class="path-node" data-topic="${t.replace(/"/g,'&quot;')}" transform="translate(${pos.x},${pos.y})" onclick="filterByTopic('${t.replace(/'/g,"\\'")}')">
       <circle class="outer" r="42"/>
       <circle class="progress" r="36" stroke="${v.color}" stroke-dasharray="${C}" stroke-dashoffset="${off}"/>
       <text class="icon" y="-6" style="fill:${v.color}">${v.icon}</text>
       <text class="label" y="14">${t.length > 14 ? t.slice(0, 12) + '…' : t}</text>
       <text class="pct" y="28">${d.solved}/${d.total}</text>
+      ${dueBadge}
     </g>`;
   });
 
   svg.innerHTML = `<path class="path-line" d="${pathD}"/>${nodes}`;
+
+  // Tooltip wiring
+  const tip = document.getElementById('path-tooltip');
+  const shell = document.querySelector('.pathway-shell');
+  svg.querySelectorAll('.path-node').forEach(n => {
+    n.addEventListener('pointerenter', e => {
+      const t = n.dataset.topic;
+      const s = stats[t]; if (!s) return;
+      const total = s.total, solved = s.solved, unseen = total - solved;
+      tip.innerHTML = `<h5>${visualOf(t).icon} ${t}</h5>
+        <div>${solved} / ${total} slain</div>
+        <div style="color:${s.due || s.overdue ? 'var(--medium)' : 'var(--text-muted)'}">${s.due} due · ${s.overdue} overdue</div>
+        <div style="color:var(--text-muted)">${unseen} uncharted</div>`;
+      tip.classList.add('show');
+    });
+    n.addEventListener('pointermove', e => {
+      const r = shell.getBoundingClientRect();
+      tip.style.left = (e.clientX - r.left + 16) + 'px';
+      tip.style.top = (e.clientY - r.top + 16) + 'px';
+    });
+    n.addEventListener('pointerleave', () => tip.classList.remove('show'));
+  });
 }
 
 /* ═════════ BESTIARY ═════════ */
@@ -1405,25 +1850,52 @@ function setFilter(f) {
   renderBestiary();
 }
 
+function populateTopicSelect() {
+  const sel = document.getElementById('best-topic'); if (!sel || sel.dataset.filled) return;
+  const topics = [...new Set(RAW_PROBLEMS.map(p => p.topic))].sort();
+  sel.innerHTML = '<option value="">All topics</option>' + topics.map(t => `<option value="${t}">${visualOf(t).icon} ${t}</option>`).join('');
+  sel.dataset.filled = '1';
+}
+
 function renderBestiary() {
+  populateTopicSelect();
   const q = (document.getElementById('best-search').value || '').toLowerCase();
+  const topicSel = (document.getElementById('best-topic').value || '');
+  const sortMode = (document.getElementById('best-sort').value || 'conf-desc');
   const grid = document.getElementById('bestiary-grid');
   let list = RAW_PROBLEMS.filter(p => {
     const conf = getConf(p);
     if (bestiaryFilter === 'solved' && conf === 0) return false;
     if (bestiaryFilter === 'unsolved' && conf > 0) return false;
+    if (bestiaryFilter === 'due') {
+      const di = getDueInfo(p);
+      if (di.cls === 'due-new' || di.days > 0) return false;
+    }
     if (['Easy','Medium','Hard'].includes(bestiaryFilter) && p.diff !== bestiaryFilter) return false;
+    if (topicSel && p.topic !== topicSel) return false;
     if (q && !`${p.name} ${p.topic} ${p.hint}`.toLowerCase().includes(q)) return false;
     return true;
   });
+  const diffOrder = { Easy: 0, Medium: 1, Hard: 2 };
   list.sort((a, b) => {
     const ca = getConf(a), cb = getConf(b);
-    if (cb !== ca) return cb - ca;
-    return a.id - b.id;
+    switch (sortMode) {
+      case 'conf-asc': return ca - cb || a.id - b.id;
+      case 'recent': return (getLastReviewMsLocal(b) || 0) - (getLastReviewMsLocal(a) || 0);
+      case 'diff': return diffOrder[a.diff] - diffOrder[b.diff] || a.name.localeCompare(b.name);
+      case 'topic': return a.topic.localeCompare(b.topic) || a.id - b.id;
+      case 'due': return getDueInfo(a).days - getDueInfo(b).days;
+      case 'num': return parseInt(a.num) - parseInt(b.num);
+      default: return cb - ca || a.id - b.id;
+    }
   });
-  grid.innerHTML = list.slice(0, 200).map(p => {
+  grid.innerHTML = list.slice(0, 240).map(p => {
     const conf = getConf(p);
     const v = visualOf(p.topic);
+    const di = getDueInfo(p);
+    const last = getLastReviewMsLocal(p);
+    const lastLbl = last ? new Date(last).toLocaleDateString() : 'Never';
+    const ud = userData[p.id] || {};
     const diffCol = p.diff === 'Easy' ? 'var(--easy)' : p.diff === 'Medium' ? 'var(--medium)' : 'var(--hard)';
     return `<div class="monster-card ${conf > 0 ? 'solved' : ''}" onclick="openModal(${p.id})" style="--diff-col:${diffCol}">
       <div class="mc-head">
@@ -1437,6 +1909,12 @@ function renderBestiary() {
       <div class="mc-foot">
         <span class="mc-tag" style="color:${v.color}">${v.icon} ${p.topic}</span>
         <span class="mc-stars">${'★'.repeat(conf)}${'☆'.repeat(5 - conf)}</span>
+      </div>
+      <div class="mc-tooltip">
+        <div class="mc-tooltip-row"><span>Status</span><span>${di.label}</span></div>
+        <div class="mc-tooltip-row"><span>Last reviewed</span><span>${lastLbl}</span></div>
+        <div class="mc-tooltip-row"><span>Reviews</span><span>${ud.reviewed || ud.reviewCount || 0}</span></div>
+        <div class="mc-tooltip-row"><span>Confidence</span><span>${conf}/5</span></div>
       </div>
     </div>`;
   }).join('');
@@ -1462,11 +1940,20 @@ function renderBoss() {
 /* ═════════ MODAL ═════════ */
 let modalSelectedConf = 0;
 
+const DIFF_BANNERS = {
+  Easy: './assets/dungeon_basin.jpg',
+  Medium: './assets/dungeon_sens.jpg',
+  Hard: './assets/dungeon_catacombs.jpg',
+};
+
 function openModal(id) {
   const p = RAW_PROBLEMS.find(x => x.id === id); if (!p) return;
   activeModal = id;
   const ud = userData[id] || {};
   modalSelectedConf = ud.conf || 0;
+
+  const head = document.querySelector('.modal-head');
+  if (head) head.style.setProperty('--banner-img', `url('${DIFF_BANNERS[p.diff] || './assets/modal_banner.jpg'}')`);
 
   document.getElementById('modal-encounter').textContent = `⚔ ${p.diff} Encounter`;
   document.getElementById('modal-title').textContent = p.name;
@@ -1494,7 +1981,32 @@ function openModal(id) {
   ).join('');
 
   document.getElementById('modal-comment').value = ud.notes || '';
+
+  // Extra actions: snooze / pin
+  const snoozed = ud.snoozeUntil && new Date(ud.snoozeUntil).getTime() > Date.now();
+  const pinned = !!ud.pinTomorrow;
+  document.getElementById('modal-extra-actions').innerHTML = `
+    <button class="btn-secondary" onclick="snoozeProblem(${id})">${snoozed ? '🔕 Snoozed' : '💤 Snooze 7d'}</button>
+    <button class="btn-secondary" onclick="pinProblem(${id})">${pinned ? '📌 Pinned' : '📌 Pin Tomorrow'}</button>
+  `;
+
   document.getElementById('modal-overlay').classList.add('open');
+}
+
+function snoozeProblem(id) {
+  if (!userData[id]) userData[id] = {};
+  const d = new Date(); d.setDate(d.getDate() + 7);
+  userData[id].snoozeUntil = d.toISOString();
+  saveState();
+  toast('🔕 Snoozed for 7 days');
+  closeModal();
+}
+function pinProblem(id) {
+  if (!userData[id]) userData[id] = {};
+  userData[id].pinTomorrow = !userData[id].pinTomorrow;
+  saveState();
+  toast(userData[id].pinTomorrow ? '📌 Pinned for tomorrow' : 'Unpinned');
+  closeModal();
 }
 
 function selectConf(c) {
