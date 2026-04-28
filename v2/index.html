@@ -1093,9 +1093,10 @@ a:hover { color: var(--gold-bright); }
 /* Ambient embers (subtle, not cartoon) */
 .codex-ember {
   position: absolute; width: 2px; height: 2px; border-radius: 50%;
-  background: #ffb86a; box-shadow: 0 0 4px rgba(255,160,80,0.7), 0 0 10px rgba(255,120,40,0.4);
-  pointer-events: none; z-index: 5; opacity: 0;
+  background: #ffb86a; box-shadow: 0 0 4px rgba(255,160,80,0.55), 0 0 10px rgba(255,120,40,0.28);
+  pointer-events: none; z-index: 0; opacity: 0;
   animation: emberRise var(--er-dur, 9s) linear var(--er-delay, 0s) infinite;
+  will-change: transform, opacity;
 }
 @keyframes emberRise {
   0%   { transform: translate(0, 0) scale(0.6); opacity: 0; }
@@ -1103,8 +1104,8 @@ a:hover { color: var(--gold-bright); }
   92%  { opacity: 1; }
   100% { transform: translate(var(--er-dx, 20px), var(--er-dy, -200px)) scale(1.0); opacity: 0; }
 }
-.firefly { width: 3px; height: 3px; background: #ffd47a; box-shadow: 0 0 6px rgba(255,200,120,0.8), 0 0 14px rgba(255,150,60,0.45); animation-timing-function: ease-in-out; }
-.firefly-bright { width: 4px; height: 4px; background: #fff0b8; box-shadow: 0 0 10px rgba(255,230,140,0.95), 0 0 24px rgba(255,180,80,0.6); }
+.firefly { width: 3px; height: 3px; background: #ffd47a; box-shadow: 0 0 5px rgba(255,200,120,0.55), 0 0 12px rgba(255,150,60,0.28); animation-timing-function: ease-in-out; }
+.firefly-bright { width: 4px; height: 4px; background: #fff0b8; box-shadow: 0 0 8px rgba(255,230,140,0.65), 0 0 18px rgba(255,180,80,0.38); }
 
 /* The actual paved road */
 .road-paved-base { fill: none; stroke: #1c130b; stroke-width: 14; stroke-linecap: round; stroke-linejoin: round; }
@@ -3667,8 +3668,9 @@ function renderPathway() {
     // Phase-spread negative delays so the rise visibly fills the column
     el.style.setProperty('--er-delay', (-(e * dur) / FF_COUNT) + 's');
     el.style.setProperty('--er-dx', (((e * 11) % 51) - 25) + 'px');
-    // Travel ~full MAP_H so they clear the stage top
-    el.style.setProperty('--er-dy', (-(MAP_H * (0.9 + ((e * 13) % 30) / 100))) + 'px');
+    // Every firefly travels at least the full map height (1.05–1.25× MAP_H)
+    // so they ALL reach the top of the page, with small variance for life.
+    el.style.setProperty('--er-dy', (-(MAP_H * (1.05 + ((e * 7) % 20) / 100))) + 'px');
     if (e % 4 === 0) el.classList.add('firefly-bright');
     stage.appendChild(el);
   }
