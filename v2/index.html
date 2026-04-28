@@ -326,9 +326,11 @@ a:hover { color: var(--gold-bright); }
   margin: 0 auto;
 }
 .main > .page { max-width: 1480px; margin: 0 auto; }
-.main > .page.is-pathway { max-width: 1820px; }
-.is-pathway .codex { padding-left: clamp(12px, 1.5vw, 28px); padding-right: clamp(12px, 1.5vw, 28px); }
-.is-pathway .codex-stage { margin: 0; }
+.main > .page.is-pathway { max-width: none; }
+.is-pathway { width: 100%; }
+.is-pathway .codex { border-radius: 0; margin-left: calc(var(--space-md) * -1); margin-right: calc(var(--space-md) * -1); padding-left: 0; padding-right: 0; }
+.is-pathway .codex-stage { margin: 0; border-left: 0; border-right: 0; border-radius: 0; }
+.is-pathway .codex-head, .is-pathway .codex-legend, .is-pathway .codex-foot { padding-left: clamp(20px, 2vw, 40px); padding-right: clamp(20px, 2vw, 40px); }
 @media (max-width: 980px) { .main { padding: var(--space) var(--space); } }
 
 /* Page transition */
@@ -481,31 +483,98 @@ a:hover { color: var(--gold-bright); }
 .kpi.medium .kpi-num { color: var(--medium); }
 .kpi.hard .kpi-num { color: var(--hard); }
 
+/* ── Enter the Dungeon: iron portcullis CTA ── */
 .cta-enter {
-  display: flex; align-items: center; justify-content: center; gap: 14px;
-  width: 100%; padding: var(--space-md) var(--space-lg);
+  position: relative; display: flex; align-items: center; justify-content: center; gap: 18px;
+  width: 100%; padding: clamp(24px, 3vw, 40px) clamp(24px, 4vw, 60px) clamp(28px, 3.5vw, 48px);
   background:
-    radial-gradient(ellipse at center, rgba(122,31,31,0.5) 0%, rgba(20,16,12,0.95) 70%),
-    linear-gradient(180deg, rgba(31,24,18,0.9), rgba(11,8,7,0.95));
-  border: 2px solid rgba(232,200,122,0.4);
-  border-radius: var(--rad-lg);
-  color: var(--gold); font-family: var(--serif-display); font-size: clamp(20px, 3vw, 32px);
-  font-weight: 900; letter-spacing: .15em; text-transform: uppercase;
-  box-shadow: 0 0 60px rgba(122,31,31,0.3), 0 30px 80px rgba(0,0,0,0.7), inset 0 0 30px rgba(232,200,122,0.06);
-  text-shadow: 0 0 20px rgba(232,200,122,0.6);
-  cursor: pointer; transition: all .35s cubic-bezier(.4,0,.2,1);
-  position: relative; overflow: hidden;
+    /* rivet field */
+    radial-gradient(circle at 30px 28px, rgba(232,200,122,0.55) 0 2.5px, transparent 3px),
+    radial-gradient(circle at calc(100% - 30px) 28px, rgba(232,200,122,0.55) 0 2.5px, transparent 3px),
+    radial-gradient(circle at 30px calc(100% - 28px), rgba(232,200,122,0.55) 0 2.5px, transparent 3px),
+    radial-gradient(circle at calc(100% - 30px) calc(100% - 28px), rgba(232,200,122,0.55) 0 2.5px, transparent 3px),
+    /* portcullis bars (vertical) */
+    repeating-linear-gradient(90deg, rgba(0,0,0,0) 0 36px, rgba(0,0,0,0.55) 36px 38px, rgba(0,0,0,0) 38px 78px),
+    /* ember underglow (animated) */
+    radial-gradient(ellipse 80% 60% at 50% 100%, rgba(255,90,30,0.45), rgba(122,31,31,0.25) 40%, transparent 75%),
+    /* iron face */
+    linear-gradient(180deg, #2a2018 0%, #0a0706 100%);
+  border: 3px solid #2a2018;
+  border-radius: 8px;
+  color: var(--gold-bright); font-family: var(--serif-display);
+  font-size: clamp(22px, 3.4vw, 38px);
+  font-weight: 900; letter-spacing: .2em; text-transform: uppercase;
+  text-shadow:
+    0 2px 0 #1a0a04,
+    0 4px 0 #0a0500,
+    0 6px 16px rgba(0,0,0,0.9),
+    0 0 28px rgba(255,160,80,0.45);
+  box-shadow:
+    inset 0 2px 0 rgba(232,200,122,0.18),
+    inset 0 -8px 0 rgba(0,0,0,0.6),
+    inset 0 0 60px rgba(0,0,0,0.65),
+    0 14px 0 #0a0706,
+    0 24px 60px rgba(0,0,0,0.85),
+    0 0 80px rgba(255,90,30,0.18);
+  cursor: pointer; transition: transform .15s ease, box-shadow .25s ease, filter .25s ease;
   margin-bottom: var(--space-md);
+  overflow: hidden; isolation: isolate;
+  animation: ctaBreathe 4s ease-in-out infinite;
 }
+@keyframes ctaBreathe {
+  0%,100% { box-shadow: inset 0 2px 0 rgba(232,200,122,0.18), inset 0 -8px 0 rgba(0,0,0,0.6), inset 0 0 60px rgba(0,0,0,0.65), 0 14px 0 #0a0706, 0 24px 60px rgba(0,0,0,0.85), 0 0 60px rgba(255,90,30,0.14); }
+  50%     { box-shadow: inset 0 2px 0 rgba(232,200,122,0.22), inset 0 -8px 0 rgba(0,0,0,0.6), inset 0 0 60px rgba(0,0,0,0.65), 0 14px 0 #0a0706, 0 24px 60px rgba(0,0,0,0.85), 0 0 110px rgba(255,90,30,0.32); }
+}
+/* Spike row across top */
 .cta-enter::before {
-  content: ''; position: absolute; inset: 0;
-  background: radial-gradient(circle at 50% 100%, rgba(255,138,58,0.3), transparent 60%);
-  opacity: 0; transition: opacity .4s ease;
+  content: ''; position: absolute; left: 0; right: 0; top: -10px; height: 12px;
+  background:
+    repeating-linear-gradient(90deg,
+      transparent 0 6px,
+      rgba(60,46,32,1) 6px 7px,
+      rgba(20,15,10,1) 7px 12px,
+      rgba(60,46,32,1) 12px 13px,
+      transparent 13px 18px);
+  clip-path: polygon(
+    0 100%, 2% 0, 4% 100%, 6% 0, 8% 100%, 10% 0, 12% 100%, 14% 0, 16% 100%, 18% 0,
+    20% 100%, 22% 0, 24% 100%, 26% 0, 28% 100%, 30% 0, 32% 100%, 34% 0, 36% 100%, 38% 0,
+    40% 100%, 42% 0, 44% 100%, 46% 0, 48% 100%, 50% 0, 52% 100%, 54% 0, 56% 100%, 58% 0,
+    60% 100%, 62% 0, 64% 100%, 66% 0, 68% 100%, 70% 0, 72% 100%, 74% 0, 76% 100%, 78% 0,
+    80% 100%, 82% 0, 84% 100%, 86% 0, 88% 100%, 90% 0, 92% 100%, 94% 0, 96% 100%, 98% 0,
+    100% 100%
+  );
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.7));
+  pointer-events: none;
+  z-index: 2;
 }
-.cta-enter:hover { transform: scale(1.01); border-color: var(--gold); box-shadow: 0 0 90px rgba(232,200,122,0.4), 0 40px 100px rgba(0,0,0,0.8); }
-.cta-enter:hover::before { opacity: 1; }
-.cta-enter:active { transform: scale(.99); }
-.cta-enter .runes { font-family: var(--medieval); font-size: 18px; opacity: .6; letter-spacing: .3em; }
+/* Ember rising from bottom */
+.cta-enter::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 60%;
+  background: radial-gradient(ellipse 40% 100% at 50% 100%, rgba(255,160,60,0.45), rgba(255,80,20,0.18) 50%, transparent 80%);
+  opacity: .6; pointer-events: none; z-index: 0;
+  animation: ctaEmber 3s ease-in-out infinite;
+}
+@keyframes ctaEmber { 0%,100% { opacity: .55; transform: scaleY(.9); } 50% { opacity: .9; transform: scaleY(1.08); } }
+.cta-enter > * { position: relative; z-index: 3; }
+.cta-enter:hover { filter: brightness(1.1) saturate(1.1); animation-play-state: paused; transform: translateY(-2px); }
+.cta-enter:hover { box-shadow: inset 0 2px 0 rgba(232,200,122,0.30), inset 0 -8px 0 rgba(0,0,0,0.6), inset 0 0 60px rgba(0,0,0,0.65), 0 16px 0 #0a0706, 0 28px 80px rgba(0,0,0,0.95), 0 0 140px rgba(255,90,30,0.4); }
+.cta-enter:active { transform: translateY(10px); box-shadow: inset 0 2px 0 rgba(232,200,122,0.18), inset 0 -2px 0 rgba(0,0,0,0.6), inset 0 0 60px rgba(0,0,0,0.65), 0 4px 0 #0a0706, 0 8px 24px rgba(0,0,0,0.85); }
+.cta-stack { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; line-height: 1; }
+.cta-line { display: block; }
+.cta-line.cta-main { font-family: var(--serif-display); }
+.cta-line.cta-warn {
+  font-family: var(--medieval); font-size: clamp(10px, 1.1vw, 14px);
+  color: rgba(255,160,80,0.7); font-weight: 400;
+  letter-spacing: .3em; text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+.cta-enter .runes {
+  font-family: var(--medieval); font-size: clamp(16px, 1.8vw, 24px);
+  color: rgba(255,160,80,0.85); letter-spacing: .35em;
+  text-shadow: 0 0 12px rgba(255,140,60,0.7), 0 2px 0 #1a0a04;
+  animation: runeFlicker 3s ease-in-out infinite;
+}
+.cta-enter .runes:nth-child(3) { animation-delay: -1.5s; }
+@keyframes runeFlicker { 0%,100% { opacity: .85; } 50% { opacity: 1; text-shadow: 0 0 18px rgba(255,180,80,0.95), 0 2px 0 #1a0a04; } }
 
 .dungeon-grid {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -718,36 +787,19 @@ a:hover { color: var(--gold-bright); }
 /* ───────── Pathway: Codex Atlas ───────── */
 .codex {
   position: relative;
-  padding: clamp(28px, 3vw, 56px) clamp(20px, 3vw, 56px) clamp(20px, 2.4vw, 36px);
+  padding: clamp(20px, 2vw, 36px) 0 clamp(16px, 2vw, 28px);
   background:
-    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(232,200,122,0.06), transparent 70%),
-    linear-gradient(180deg, #100b07 0%, #07050300 60%),
-    repeating-linear-gradient(0deg, rgba(0,0,0,0.04) 0 2px, transparent 2px 4px),
-    #060403;
+    linear-gradient(180deg, #100b07 0%, #060403 100%);
   border: 1px solid rgba(232,200,122,0.15);
   border-radius: 8px;
   overflow: hidden;
-  box-shadow:
-    0 50px 140px rgba(0,0,0,0.85),
-    inset 0 1px 0 rgba(232,200,122,0.10),
-    inset 0 0 200px rgba(0,0,0,0.7);
-  min-height: 1100px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.75), inset 0 0 0 1px rgba(0,0,0,0.4);
+  contain: paint layout style;
 }
 .codex-frame {
   position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;
 }
-.codex::before, .codex::after {
-  content: ''; position: absolute; left: 24px; right: 24px; height: 14px;
-  background: linear-gradient(180deg, #1a130d, #0a0706);
-  border-top: 1px solid rgba(232,200,122,0.18);
-  border-bottom: 1px solid rgba(0,0,0,0.6);
-  box-shadow:
-    inset 0 1px 0 rgba(232,200,122,0.08),
-    0 4px 14px rgba(0,0,0,0.6);
-  z-index: 1;
-}
-.codex::before { top: 16px; }
-.codex::after { bottom: 16px; }
+.codex::before, .codex::after { display: none; }
 
 /* Header */
 .codex-head { position: relative; z-index: 3; text-align: center; max-width: 760px; margin: 30px auto clamp(18px, 2.4vw, 28px); }
@@ -784,36 +836,22 @@ a:hover { color: var(--gold-bright); }
 /* The vellum stage */
 .codex-stage {
   position: relative; z-index: 2;
-  contain: paint layout;
-  margin: 0 clamp(8px, 2vw, 28px);
+  contain: paint layout style;
+  margin: 0;
   border-radius: 4px;
   background:
-    radial-gradient(ellipse 70% 50% at 50% 30%, rgba(232,200,122,0.06), transparent 70%),
-    linear-gradient(180deg, rgba(20,15,10,0.72), rgba(8,5,4,0.85));
-  border: 1px solid rgba(232,200,122,0.18);
-  box-shadow:
-    inset 0 0 80px rgba(0,0,0,0.7),
-    inset 0 0 0 1px rgba(0,0,0,0.5),
-    0 30px 80px rgba(0,0,0,0.7);
-  padding: clamp(40px, 4vw, 72px) 0 clamp(40px, 4vw, 72px);
+    linear-gradient(180deg, rgba(20,15,10,0.6), rgba(8,5,4,0.78));
+  border: 1px solid rgba(232,200,122,0.14);
+  box-shadow: inset 0 0 80px rgba(0,0,0,0.6);
+  padding: clamp(28px, 3vw, 56px) 0 clamp(28px, 3vw, 56px);
   overflow: hidden;
 }
 /* Aged paper warm overlay */
-.codex-paper {
-  position: absolute; inset: 0; pointer-events: none; z-index: 0;
-  background:
-    radial-gradient(ellipse 70% 70% at 50% 50%, rgba(180,140,80,0.08), transparent 75%),
-    radial-gradient(ellipse 40% 30% at 20% 80%, rgba(120,80,40,0.06), transparent 70%),
-    radial-gradient(ellipse 40% 30% at 80% 20%, rgba(120,80,40,0.06), transparent 70%);
-}
+.codex-paper { display: none; }
 /* Static noise via tiny CSS gradient pattern (cheap) */
 .codex-noise { display: none; }
 /* Burnt edge vignette inside the paper */
-.codex-burn {
-  position: absolute; inset: 0; pointer-events: none; z-index: 0;
-  background:
-    radial-gradient(ellipse 90% 100% at 50% 50%, transparent 60%, rgba(40,18,8,0.55) 90%, rgba(20,8,4,0.85) 100%);
-}
+.codex-burn { display: none; }
 
 /* Ink road network */
 .codex-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: visible; }
@@ -840,16 +878,12 @@ a:hover { color: var(--gold-bright); }
   width: 96px; height: 96px;
   border-radius: 50%;
   background:
-    radial-gradient(circle at 35% 30%, #2a2018 0%, #0e0805 70%),
-    #0a0806;
+    radial-gradient(circle at 35% 30%, #2a2018 0%, #0e0805 70%);
   border: 2px solid var(--seal-col, rgba(232,200,122,0.35));
   box-shadow:
-    inset 0 2px 0 rgba(255,235,180,0.06),
     inset 0 -8px 16px rgba(0,0,0,0.8),
-    0 8px 28px rgba(0,0,0,0.8),
-    0 0 0 6px rgba(20,14,10,0.7),
-    0 0 0 7px var(--seal-rim, rgba(232,200,122,0.14)),
-    0 0 32px var(--seal-glow, rgba(232,200,122,0.18));
+    0 6px 18px rgba(0,0,0,0.7),
+    0 0 24px var(--seal-glow, rgba(232,200,122,0.18));
   display: grid; place-items: center;
   transition: box-shadow .35s ease, border-color .35s ease;
 }
@@ -1020,6 +1054,8 @@ a:hover { color: var(--gold-bright); }
 
 /* Ground fog drifting along the road */
 .road-fog {
+  content-visibility: auto;
+  contain-intrinsic-size: 50px;
   position: absolute; left: -10%; right: -10%; height: 50px;
   pointer-events: none; z-index: 2; opacity: .35;
   background: linear-gradient(90deg, transparent, rgba(220,210,200,0.18), rgba(220,210,200,0.30), rgba(220,210,200,0.18), transparent);
@@ -1874,9 +1910,13 @@ textarea.modal-comment {
       </div>
 
       <button class="cta-enter" onclick="navigate('pathway')">
-        <span class="runes">⚔ ☩</span>
-        <span>Enter the Dungeon</span>
-        <span class="runes">☩ ⚔</span>
+        <span class="runes">⚔ ☩ ⚔</span>
+        <span class="cta-stack">
+          <span class="cta-line cta-warn">— Beyond this gate —</span>
+          <span class="cta-line cta-main">Enter the Dungeon</span>
+          <span class="cta-line cta-warn">— No retreat —</span>
+        </span>
+        <span class="runes">⚔ ☩ ⚔</span>
       </button>
 
       <div class="bento">
@@ -2378,12 +2418,31 @@ const TOPIC_VISUAL = {
 };
 const visualOf = t => TOPIC_VISUAL[t] || { icon: '⚔️', color: '#a89368' };
 
+// Difficulty → monster tier (v1 nomenclature: Slime/Drake/Demon)
+const MONSTER_TIER = {
+  Easy:   { name: 'Slime',  plural: 'Slimes',  emoji: '🟢', icon: '🟢', color: '#6fa86b' },
+  Medium: { name: 'Drake',  plural: 'Drakes',  emoji: '🐉', icon: '🐉', color: '#c89c4a' },
+  Hard:   { name: 'Demon',  plural: 'Demons',  emoji: '👹', icon: '👹', color: '#b04545' }
+};
+const tierOf = (p) => MONSTER_TIER[p.diff] || MONSTER_TIER.Easy;
+const tierNameOf = (p) => tierOf(p).name;
 const monsterFor = (p) => {
   const d = p.diff;
-  if (d === 'Easy') return ['👹','🦴','🐺','🦗','🪲'][p.id % 5];
-  if (d === 'Medium') return ['👺','🐲','🦂','🕷️','🦇'][p.id % 5];
-  return ['👿','🐉','💀','🧟','👻'][p.id % 5];
+  if (d === 'Easy') return ['🟢','🟩','🌱','🪲','🦗'][p.id % 5];
+  if (d === 'Medium') return ['🐉','🐲','🦎','🦂','🕷️'][p.id % 5];
+  return ['👹','👿','💀','🧟','👻'][p.id % 5];
 };
+// Tier counts for any list
+function countTiers(probs) {
+  const t = { Slime: 0, Drake: 0, Demon: 0, slainSlime: 0, slainDrake: 0, slainDemon: 0 };
+  probs.forEach(p => {
+    const n = tierNameOf(p);
+    t[n + 's'] = (t[n + 's'] || 0) + 1; // accumulate plurals too if needed elsewhere
+    t[n]++;
+    if (getConf(p) > 0) t['slain' + n]++;
+  });
+  return t;
+}
 
 const RANK_TITLES = [
   'Apprentice of the Code','Squire of Algorithms','Knight Errant','Royal Knight','Dungeon Slayer',
@@ -2451,6 +2510,12 @@ function renderUtilityStrip() {
     const lv = document.getElementById('util-level');
     const tx = document.getElementById('util-today-xp');
     const du = document.getElementById('util-due');
+    // Expose tier totals on the page subtitle
+    const sub = document.querySelector('#page-dashboard .page-subtitle');
+    if (sub) {
+      const tc = countTiers(RAW_PROBLEMS);
+      sub.innerHTML = `Your realm, your conquest · <span style="color:var(--easy)">${tc.slainSlime}/${tc.Slime} Slimes</span> · <span style="color:var(--medium)">${tc.slainDrake}/${tc.Drake} Drakes</span> · <span style="color:var(--hard)">${tc.slainDemon}/${tc.Demon} Demons</span>`;
+    }
     if (lv) lv.textContent = (typeof getLevel === 'function' ? getLevel() : (window.userLevel || 1));
     if (tx) {
       const days = (typeof getDailyHistory === 'function') ? getDailyHistory() : [];
@@ -2825,7 +2890,7 @@ function renderTopicDeepDive() {
     const diffCol = p.diff === 'Easy' ? 'var(--easy)' : p.diff === 'Medium' ? 'var(--medium)' : 'var(--hard)';
     return `<div class="monster-card ${conf > 0 ? 'solved' : ''}" onclick="openModal(${p.id})" style="--diff-col:${diffCol}">
       <div class="mc-head"><div class="mc-sprite">${monsterFor(p)}</div>
-        <div><h4 class="mc-name">${p.name}</h4><div class="mc-num">#${p.num} · ${p.diff}</div></div></div>
+        <div><h4 class="mc-name">${p.name}</h4><div class="mc-num">#${p.num} · ${tierNameOf(p)} · ${p.diff}</div></div></div>
       <div class="mc-hint">${(p.hint||'').slice(0,110)}${(p.hint||'').length>110?'…':''}</div>
       <div class="mc-foot">
         <span class="mc-stars">${'★'.repeat(conf)}${'☆'.repeat(5-conf)}</span>
@@ -2890,11 +2955,11 @@ function renderQuests() {
       ${[1,2,3,4,5].map(c => `<button class="quest-rate-btn c${c} ${curRating === c ? 'sel' : ''}" title="Rate ${c}/5 and log victory" onclick="event.stopPropagation();quickRate(${p.id}, ${c})">${c}</button>`).join('')}
     </div>`;
     return `<div class="quest-card ${q.done ? 'done' : ''}" data-id="${p.id}" style="--mc:${v.color}40">
-      <div class="quest-monster" onclick="openModal(${p.id})">${monsterFor(p)}</div>
+      <div class="quest-monster" onclick="openModal(${p.id})" title="${tierNameOf(p)}">${monsterFor(p)}</div>
       <div class="quest-info" onclick="openModal(${p.id})">
         <h4 class="quest-name">${p.name}</h4>
         <div class="quest-meta">
-          <span class="quest-tag ${p.diff.toLowerCase()}">${p.diff}</span>
+          <span class="quest-tag ${p.diff.toLowerCase()}">${tierNameOf(p)} · ${p.diff}</span>
           <span class="quest-tag">${visualOf(p.topic).icon} ${p.topic}</span>
           ${isOverdue ? `<span class="quest-tag hard">⏰ ${overdueDays}d overdue</span>` : ''}
           ${p.lc_url ? `<a class="quest-tag" href="${p.lc_url}" target="_blank" onclick="event.stopPropagation()" style="text-decoration:none">🔗 LeetCode ↗</a>` : ''}
@@ -3030,8 +3095,8 @@ function renderPathway() {
     }
     stage.appendChild(torch);
   };
-  // Cap torch count for perf — every other midpoint torch + one torch per lit keep
-  segments.forEach((seg, i) => { if (i % 2 === 0 || seg.cls) torchAt(seg.mx, seg.my, !!seg.cls, i); });
+  // Cap torch count for perf — every 3rd midpoint torch (or always if lit)
+  segments.forEach((seg, i) => { if (i % 3 === 0 || seg.cls) torchAt(seg.mx, seg.my, !!seg.cls, i); });
   ordered.forEach(([t, d], ix) => {
     const conf = d.total ? (d.confSum / d.total) / 5 : 0;
     if (conf <= 0) return;
@@ -3063,8 +3128,8 @@ function renderPathway() {
     stage.appendChild(m);
   }
 
-  // Subtle ambient embers (12, slow, drifting up)
-  for (let e = 0; e < 12; e++) {
+  // Subtle ambient embers (6, slow, drifting up — perf)
+  for (let e = 0; e < 6; e++) {
     const el = document.createElement('div');
     el.className = 'codex-ember';
     el.style.left = (5 + (e * 47) % 90) + '%';
@@ -3111,12 +3176,18 @@ function renderPathway() {
       </div>
       <div class="keep-name">${t}</div>
       <div class="keep-meta ${isCleared ? 'cleared' : (conf > 0 ? 'active' : '')}">${level} · ${pct}%</div>
-      <div class="keep-tooltip">
-        <strong>${t}</strong>
-        ${d.solved} / ${d.total} slain · ${pct}%<br>
-        ${dueCount > 0 ? `<span style="color:var(--ember)">${d.due} due${d.overdue ? ` · ${d.overdue} overdue` : ''}</span><br>` : ''}
-        <span style="color:var(--text-muted)">${d.total - d.solved} unseen</span>
-      </div>
+      ${(() => {
+        const probs = RAW_PROBLEMS.filter(p => p.topic === t);
+        const tc = countTiers(probs);
+        return `<div class="keep-tooltip">
+          <strong>${t}</strong>
+          ${d.solved} / ${d.total} slain · ${pct}%<br>
+          <span style="color:var(--easy)">🟢 ${tc.slainSlime}/${tc.Slime} Slimes</span><br>
+          <span style="color:var(--medium)">🐉 ${tc.slainDrake}/${tc.Drake} Drakes</span><br>
+          <span style="color:var(--hard)">👹 ${tc.slainDemon}/${tc.Demon} Demons</span>
+          ${dueCount > 0 ? `<br><span style="color:var(--ember)">${d.due} due${d.overdue ? ` · ${d.overdue} overdue` : ''}</span>` : ''}
+        </div>`;
+      })()}
     `;
     node.onclick = () => filterByTopic(t);
     stage.appendChild(node);
@@ -3139,13 +3210,17 @@ function populateTopicSelect() {
 
 function renderBestiary() {
   populateTopicSelect();
-  const q = (document.getElementById('best-search').value || '').toLowerCase();
+  let q = (document.getElementById('best-search').value || '').toLowerCase();
+  // Tier search aliases
+  const tierAlias = { slime: 'Easy', slimes: 'Easy', drake: 'Medium', drakes: 'Medium', demon: 'Hard', demons: 'Hard' };
+  const aliasDiff = tierAlias[q.trim()];
   const topicSel = (document.getElementById('best-topic').value || '');
   const sortMode = (document.getElementById('best-sort').value || 'conf-desc');
   const grid = document.getElementById('bestiary-grid');
   let list = RAW_PROBLEMS.filter(p => {
     const conf = getConf(p);
     if (bestiaryFilter === 'solved' && conf === 0) return false;
+    if (aliasDiff && p.diff !== aliasDiff) return false;
     if (bestiaryFilter === 'unsolved' && conf > 0) return false;
     if (bestiaryFilter === 'due') {
       const di = getDueInfo(p);
