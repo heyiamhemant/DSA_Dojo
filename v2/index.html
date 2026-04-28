@@ -3257,16 +3257,23 @@ document.getElementById('dungeon-grid').innerHTML = rows.map(r => {
 function renderDashboard() {
   renderUtilityStrip();
   const xp = computeXP();
+  // LEVEL_THRESHOLDS is array of {level, xp, rank} objects (from dojo-core.js).
+  // Convert to number-XP for comparison and read the rank from the same row.
+  const _xpOf = (i) => (LEVEL_THRESHOLDS[i] && typeof LEVEL_THRESHOLDS[i] === 'object')
+    ? LEVEL_THRESHOLDS[i].xp
+    : (LEVEL_THRESHOLDS[i] || 0);
   let lvl = 0;
-  for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) if (xp >= LEVEL_THRESHOLDS[i]) { lvl = i; break; }
-  const next = LEVEL_THRESHOLDS[lvl + 1] || (LEVEL_THRESHOLDS[lvl] + 1000);
-  const prev = LEVEL_THRESHOLDS[lvl] || 0;
-  const pct = Math.min(100, Math.round((xp - prev) / (next - prev) * 100));
+  for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) if (xp >= _xpOf(i)) { lvl = i; break; }
+  const next = (lvl + 1 < LEVEL_THRESHOLDS.length) ? _xpOf(lvl + 1) : (_xpOf(lvl) + 1000);
+  const prev = _xpOf(lvl);
+  const pct = Math.min(100, Math.round((xp - prev) / Math.max(1, next - prev) * 100));
 
   document.getElementById('level-num').textContent = lvl + 1;
-  document.getElementById('hero-rank').textContent = RANK_TITLES[Math.min(lvl, RANK_TITLES.length - 1)];
+  // Prefer the rank baked into the threshold row, fall back to RANK_TITLES.
+  const _rankFromRow = (LEVEL_THRESHOLDS[lvl] && typeof LEVEL_THRESHOLDS[lvl] === 'object') ? LEVEL_THRESHOLDS[lvl].rank : null;
+  document.getElementById('hero-rank').textContent = _rankFromRow || RANK_TITLES[Math.min(lvl, RANK_TITLES.length - 1)];
   document.getElementById('xp-fill').style.width = pct + '%';
-  document.getElementById('xp-text').textContent = `${xp.toLocaleString()} / ${next.toLocaleString()} XP`;
+  document.getElementById('xp-text').textContent = `${Number(xp).toLocaleString()} / ${Number(next).toLocaleString()} XP`;
   const ring = document.getElementById('level-fg');
   const C = 2 * Math.PI * 50;
   ring.setAttribute('stroke-dasharray', C);
