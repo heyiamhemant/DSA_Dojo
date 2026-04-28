@@ -2088,6 +2088,28 @@ textarea.modal-comment {
 
 /* ═════════ Mobile overflow / responsive polish ═════════ */
 @media (max-width: 720px) {
+  /* Welcome / intro screen */
+  .intro { padding: 24px 16px !important; gap: 12px !important; text-align: center; }
+  .intro-crest { width: 120px !important; height: 120px !important; }
+  .intro-crest svg { width: 60px !important; height: 60px !important; }
+  .intro-title {
+    font-size: clamp(24px, 8vw, 40px) !important;
+    letter-spacing: .04em !important;
+    line-height: 1.1; padding: 0 8px;
+    word-break: break-word; max-width: 100%;
+  }
+  .intro-tagline {
+    font-size: 10px !important; letter-spacing: .18em !important;
+    padding: 0 12px; max-width: 100%;
+  }
+  .intro-runes { font-size: 18px !important; gap: 8px !important; letter-spacing: .12em !important; }
+  .intro-hint {
+    font-size: 9px !important; letter-spacing: .14em !important;
+    bottom: 6vh !important; padding: 0 16px; text-align: center; max-width: 100%;
+  }
+}
+
+@media (max-width: 720px) {
   /* Page-level: ensure nothing forces horizontal scroll */
   html, body { overflow-x: hidden; }
   .main { padding-left: clamp(12px, 3vw, 18px) !important; padding-right: clamp(12px, 3vw, 18px) !important; }
