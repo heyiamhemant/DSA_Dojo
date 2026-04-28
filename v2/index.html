@@ -3152,11 +3152,30 @@ function renderUtilityStrip() {
       const tc = countTiers(RAW_PROBLEMS);
       sub.innerHTML = `Your realm, your conquest · <span style="color:var(--easy)">${tc.slainSlime}/${tc.Slime} Slimes</span> · <span style="color:var(--medium)">${tc.slainDrake}/${tc.Drake} Drakes</span> · <span style="color:var(--hard)">${tc.slainDemon}/${tc.Demon} Demons</span>`;
     }
-    if (lv) lv.textContent = (typeof getLevel === 'function' ? getLevel() : (window.userLevel || 1));
+    // Compute level from total XP (LEVEL_THRESHOLDS rows are {level, xp, rank})
+    if (lv) {
+      let totalXP = 0;
+      try {
+        const xd = (typeof computeXP === 'function') ? computeXP() : 0;
+        totalXP = (xd && typeof xd === 'object') ? (xd.totalXP || 0) : (xd || 0);
+      } catch (e) {}
+      let level = 1;
+      if (Array.isArray(LEVEL_THRESHOLDS)) {
+        for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) {
+          const xpAt = (typeof LEVEL_THRESHOLDS[i] === 'object') ? LEVEL_THRESHOLDS[i].xp : LEVEL_THRESHOLDS[i];
+          if (totalXP >= xpAt) { level = i + 1; break; }
+        }
+      }
+      lv.textContent = level;
+    }
     if (tx) {
-      const days = (typeof getDailyHistory === 'function') ? getDailyHistory() : [];
-      const today = days[days.length - 1];
-      tx.textContent = (today ? today.xp : 0) + ' XP';
+      let xpToday = 0;
+      try {
+        const days = (typeof getDailyHistory === 'function') ? getDailyHistory() : [];
+        const today = days[days.length - 1];
+        if (today && typeof today.xp === 'number') xpToday = today.xp;
+      } catch (e) {}
+      tx.textContent = xpToday + ' XP';
     }
     if (du) {
       let n = 0;
