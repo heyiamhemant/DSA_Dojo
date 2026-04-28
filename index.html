@@ -35,6 +35,12 @@
   --fog-color: rgba(11,18,8,0.92);
   --card-glow: rgba(92,184,92,0.08);
   --overlay-bg: rgba(5,10,3,0.8);
+  --glass-bg: rgba(21, 35, 22, 0.62);
+  --glass-border: rgba(143, 206, 0, 0.18);
+  --space-xs: 6px;
+  --space-sm: 10px;
+  --space-md: 14px;
+  --space-lg: 20px;
 }
 
 /* ── Light Theme (Sunlit Forest Clearing) ── */
@@ -58,6 +64,8 @@
   --fog-color: rgba(238,245,230,0.9);
   --card-glow: rgba(61,139,61,0.06);
   --overlay-bg: rgba(250,253,246,0.8);
+  --glass-bg: rgba(250, 253, 246, 0.78);
+  --glass-border: rgba(61, 139, 61, 0.15);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -66,7 +74,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: clamp(13px, 1.2vw, 15px);
   line-height: 1.6;
   min-height: 100vh;
   overflow-x: hidden;
@@ -614,6 +622,57 @@ body::after {
   font-size: 10px;
   color: var(--accent);
 }
+
+.mobile-bottom-nav {
+  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(180deg, rgba(12,20,12,0.9), rgba(8,14,8,0.97));
+  border-top: 1px solid var(--glass-border);
+  z-index: 160;
+  backdrop-filter: blur(8px);
+}
+.mobile-nav-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+.mobile-nav-btn {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(20, 28, 20, 0.7);
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: 11px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+.mobile-nav-btn.active {
+  color: var(--accent);
+  border-color: rgba(143,206,0,0.45);
+}
+.mobile-hunt-fab {
+  display: none;
+  position: fixed;
+  right: 14px;
+  bottom: calc(78px + env(safe-area-inset-bottom, 0px));
+  z-index: 170;
+  border: 1px solid rgba(143,206,0,0.35);
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--accent), #2d6a2d);
+  color: #fff;
+  font-family: var(--font-quest);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 11px 14px;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.28);
+}
 .nav-icon { font-size: 16px; width: 20px; text-align: center; filter: drop-shadow(0 0 3px currentColor); }
 .nav-badge {
   margin-left: auto;
@@ -705,7 +764,7 @@ body::after {
 /* ── Page titles — Ornate game headers ── */
 .page-title {
   font-family: var(--font-title);
-  font-size: 26px;
+  font-size: clamp(20px, 2.4vw, 30px);
   font-weight: 900;
   margin-bottom: 6px;
   letter-spacing: 2px;
@@ -1133,6 +1192,15 @@ body::after {
   position: relative;
   overflow: hidden;
 }
+.quest-setup,
+.quest-board,
+.dash-panel-card,
+.analytics-card,
+.card {
+  background: linear-gradient(180deg, var(--glass-bg), var(--card));
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(6px);
+}
 .quest-setup::before {
   content: '';
   position: absolute;
@@ -1389,6 +1457,33 @@ body::after {
   flex-shrink: 0;
   border: 1px solid rgba(111,207,111,0.2);
   letter-spacing: 0.5px;
+}
+.quest-item-why {
+  width: 100%;
+  margin-top: -4px;
+  margin-left: 40px;
+  font-size: 10px;
+  color: var(--muted);
+  font-family: var(--font-body);
+}
+.quest-item-actions {
+  margin-left: auto;
+  display: inline-flex;
+  gap: 6px;
+}
+.quest-mini-act {
+  border: 1px solid rgba(180, 140, 60, 0.25);
+  background: rgba(18, 24, 20, 0.75);
+  border-radius: 5px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 2px 6px;
+  cursor: pointer;
+}
+.quest-mini-act:hover {
+  color: var(--accent3);
+  border-color: rgba(245, 166, 35, 0.4);
 }
 .sr-rating-row {
   display: flex;
@@ -1773,6 +1868,34 @@ td { padding: 11px 14px; vertical-align: middle; }
   font-style: italic;
 }
 .modal-links { display: flex; gap: 8px; flex-wrap: wrap; }
+.modal-sr-info {
+  margin-top: 8px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.modal-plan-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.plan-action-btn {
+  background: rgba(46, 58, 40, 0.8);
+  border: 1px solid rgba(143, 206, 0, 0.25);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+.plan-action-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
 
 /* Battle Result / Confidence buttons */
 .conf-slider-wrap { display: flex; flex-direction: column; gap: 10px; }
@@ -2053,6 +2176,92 @@ td { padding: 11px 14px; vertical-align: middle; }
   border-radius: 3px 3px 0 0;
   opacity: 0.85;
   transition: height 0.6s cubic-bezier(.4,0,.2,1);
+}
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.analytics-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.analytics-title {
+  font-family: var(--font-head);
+  font-size: 12px;
+  letter-spacing: 0.4px;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.analytics-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.analytics-kpi {
+  border: 1px solid rgba(180,140,60,0.18);
+  border-radius: 8px;
+  padding: 8px;
+  background: rgba(12,18,14,0.5);
+}
+.analytics-kpi-label {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  font-family: var(--font-body);
+}
+.analytics-kpi-val {
+  margin-top: 2px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text);
+}
+.mini-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 96px;
+}
+.mini-bar {
+  flex: 1;
+  border-radius: 3px 3px 0 0;
+  min-height: 6px;
+  position: relative;
+  opacity: 0.9;
+  cursor: pointer;
+}
+.mini-bar:hover {
+  opacity: 1;
+  filter: brightness(1.05);
+}
+.mini-readout {
+  margin-top: 8px;
+  min-height: 16px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+.topic-heatmap {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+.topic-chip {
+  border: 1px solid rgba(180,140,60,0.22);
+  border-radius: 7px;
+  padding: 6px 8px;
+  font-size: 11px;
+  font-family: var(--font-body);
+  color: var(--text);
+  cursor: pointer;
+}
+.topic-chip small {
+  color: var(--muted);
+  font-family: var(--font-mono);
 }
 
 /* ══════════════════════════════════════════════════════
@@ -2551,6 +2760,77 @@ td { padding: 11px 14px; vertical-align: middle; }
   opacity: 0.5;
 }
 .empty-state-svg svg { width: 100%; height: 100%; }
+
+@media (max-width: 980px) {
+  #sidebar {
+    position: static;
+    width: 100%;
+    max-height: none;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    box-shadow: none;
+  }
+  #app {
+    display: block;
+    padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+  }
+  #main {
+    margin-left: 0;
+    padding: 14px;
+  }
+  .revision-panel,
+  .dash-hero-stats,
+  .analytics-grid {
+    grid-template-columns: 1fr;
+  }
+  .today-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .session-flow {
+    grid-template-columns: 1fr;
+  }
+  .problems-table-wrap {
+    border-width: 1px;
+  }
+  #sidebar .nav,
+  #sidebar .sidebar-actions,
+  #sidebar .theme-toggle-wrap {
+    display: none;
+  }
+  .mobile-bottom-nav {
+    display: block;
+  }
+  .mobile-hunt-fab.show {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 640px) {
+  #main {
+    padding: 10px;
+  }
+  .page-title {
+    margin-bottom: 8px;
+  }
+  .page-sub {
+    margin-bottom: 10px;
+  }
+  .btn,
+  .sidebar-action-btn,
+  .theme-toggle,
+  .rev-count-input,
+  .plan-action-btn,
+  .quest-mini-act {
+    min-height: 44px;
+  }
+  .quest-item {
+    padding: 10px 10px;
+    gap: 8px;
+  }
+}
 </style>
 </head>
 <body>
@@ -2717,18 +2997,18 @@ td { padding: 11px 14px; vertical-align: middle; }
     </div>
   </div>
   <div class="nav">
-    <div class="nav-item active" onclick="navigate('dashboard')">
+    <div class="nav-item active" data-page="dashboard" onclick="navigate('dashboard')">
       <span class="nav-icon">&#9876;</span> Dungeon Map
     </div>
-    <div class="nav-item" onclick="navigate('today')">
+    <div class="nav-item" data-page="today" onclick="navigate('today')">
       <span class="nav-icon">&#128220;</span> Quest Board
       <span class="nav-badge" id="badge-today" style="display:none"></span>
     </div>
-    <div class="nav-item" onclick="navigate('problems')">
+    <div class="nav-item" data-page="problems" onclick="navigate('problems')">
       <span class="nav-icon">&#128126;</span> Monster Bestiary
       <span class="nav-badge">336</span>
     </div>
-    <div class="nav-item" onclick="navigate('sysdesign')">
+    <div class="nav-item" data-page="sysdesign" onclick="navigate('sysdesign')">
       <span class="nav-icon">&#128081;</span> Boss Raids
       <span class="nav-badge" id="badge-sd">0/25</span>
     </div>
@@ -2847,6 +3127,24 @@ td { padding: 11px 14px; vertical-align: middle; }
       <span style="flex:1;text-align:center;">5 Mastered</span>
     </div>
   </div>
+  <div class="section-title">&#128202; Progress Hall</div>
+  <div class="analytics-grid">
+    <div class="analytics-card" id="analytics-kpis"></div>
+    <div class="analytics-card">
+      <div class="analytics-title">Reviews (last 14d)</div>
+      <div class="mini-bars" id="reviews-trend"></div>
+      <div class="mini-readout" id="reviews-readout">Click a bar to inspect that day</div>
+    </div>
+    <div class="analytics-card">
+      <div class="analytics-title">XP Momentum (last 8w)</div>
+      <div class="mini-bars" id="xp-trend"></div>
+      <div class="mini-readout" id="xp-readout">Click a bar to inspect that week</div>
+    </div>
+    <div class="analytics-card">
+      <div class="analytics-title">Topic Mastery</div>
+      <div class="topic-heatmap" id="topic-heatmap"></div>
+    </div>
+  </div>
 </div>
 
 <!-- ════ QUEST BOARD ════ -->
@@ -2864,6 +3162,10 @@ td { padding: 11px 14px; vertical-align: middle; }
       <div class="rev-input-row">
         <input type="number" class="rev-count-input" id="rev-count" value="10" min="1" max="50">
         <span style="color:var(--muted);font-size:13px;">monsters to hunt</span>
+      </div>
+      <div class="rev-input-row" style="margin-top:-6px;">
+        <input type="number" class="rev-count-input" id="rev-min-reviews" value="3" min="0" max="50" style="width:70px;font-size:16px;padding:7px;">
+        <span style="color:var(--muted);font-size:13px;">minimum reviews</span>
       </div>
       <div class="rev-info">
         Targets are selected using a spaced-repetition algorithm &#8212; prioritising low-confidence monsters,
@@ -2958,6 +3260,16 @@ td { padding: 11px 14px; vertical-align: middle; }
 </div>
 
 </main>
+
+<div class="mobile-bottom-nav" id="mobile-bottom-nav">
+  <div class="mobile-nav-grid">
+    <button class="mobile-nav-btn active" data-page="dashboard" onclick="navigate('dashboard')">&#9876; Map</button>
+    <button class="mobile-nav-btn" data-page="today" onclick="navigate('today')">&#128220; Quest</button>
+    <button class="mobile-nav-btn" data-page="problems" onclick="navigate('problems')">&#128126; Bestiary</button>
+    <button class="mobile-nav-btn" data-page="sysdesign" onclick="navigate('sysdesign')">&#128081; Boss</button>
+  </div>
+</div>
+<button class="mobile-hunt-fab" id="mobile-hunt-fab" onclick="startTodayHunt()">Start Hunt</button>
 </div>
 
 <!-- Battle Modal -->
@@ -2979,6 +3291,12 @@ td { padding: 11px 14px; vertical-align: middle; }
     <div class="modal-section">
       <div class="modal-label">&#128279; Intel Links</div>
       <div class="modal-links" id="modal-links"></div>
+      <div class="modal-sr-info" id="modal-sr-info"></div>
+      <div class="modal-plan-actions">
+        <button class="plan-action-btn" onclick="snoozeProblem(activeModal, 7)">Snooze 7d</button>
+        <button class="plan-action-btn" onclick="snoozeProblem(activeModal, 14)">Snooze 14d</button>
+        <button class="plan-action-btn" onclick="pinProblemTomorrow(activeModal)">Pin Tomorrow</button>
+      </div>
     </div>
     <div class="modal-section">
       <div class="modal-label">&#9876; Battle Result</div>
@@ -3213,6 +3531,63 @@ function getDueInfo(p) {
   if (dueIn <= 0) return { days: dueIn, label: dueIn === 0 ? 'Today' : `${Math.abs(dueIn)}d overdue`, cls: 'due-overdue' };
   if (dueIn <= 2) return { days: dueIn, label: `${dueIn}d`, cls: 'due-soon' };
   return { days: dueIn, label: `${dueIn}d`, cls: 'due-ok' };
+}
+
+function getLastReviewMs(p) {
+  const ud = userData[p.id];
+  if (ud && ud.lastReviewed) {
+    const t = new Date(ud.lastReviewed).getTime();
+    if (!isNaN(t)) return t;
+  }
+  if (p.date) {
+    const parts = p.date.split(' ');
+    if (parts.length === 3) {
+      const d = new Date(parts[1] + ' ' + parts[0] + ', ' + parts[2]);
+      if (!isNaN(d)) return d.getTime();
+    }
+  }
+  return null;
+}
+
+function getDateAfterDays(days) {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toISOString().split('T')[0];
+}
+
+function snoozeProblem(id, days) {
+  if (id === null || id === undefined) return;
+  if (typeof id === 'string' && id.startsWith('sd_')) return;
+  const ud = getUD(id);
+  userData[id] = {
+    ...ud,
+    snoozeUntil: getDateAfterDays(days),
+    pinTomorrow: false
+  };
+  todayPlan = todayPlan.filter(x => x.id !== id);
+  saveState();
+  savePlan();
+  renderToday();
+  updateBadges();
+  closeModalDirect();
+  showToast(`Snoozed for ${days} days`, 'info');
+}
+
+function pinProblemTomorrow(id) {
+  if (id === null || id === undefined) return;
+  if (typeof id === 'string' && id.startsWith('sd_')) return;
+  const ud = getUD(id);
+  userData[id] = {
+    ...ud,
+    pinTomorrow: true
+  };
+  todayPlan = todayPlan.filter(x => x.id !== id);
+  saveState();
+  savePlan();
+  renderToday();
+  updateBadges();
+  closeModalDirect();
+  showToast('Pinned for tomorrow', 'success');
 }
 
 // ═══════════════════════════════════════════════════════
@@ -3474,13 +3849,14 @@ function updateHeroStats() {
 // ═══════════════════════════════════════════════════════
 function navigate(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.nav-item, .mobile-nav-btn').forEach(n => n.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
-  document.querySelector(`[onclick="navigate('${page}')"]`).classList.add('active');
+  document.querySelectorAll(`[data-page="${page}"]`).forEach(el => el.classList.add('active'));
   if (page === 'problems') renderProblems();
   if (page === 'dashboard') renderDashboard();
   if (page === 'sysdesign') renderSD();
   if (page === 'today') renderToday();
+  updateMobileHuntFab(page);
 }
 
 function openDungeonDoor() {
@@ -3502,6 +3878,164 @@ function enterDungeon(topicName) {
   document.getElementById('filter-topic').value = topicName;
   applyFilters();
   showToast(`Entering dungeon: ${topicName}`, 'info');
+}
+
+function updateMobileHuntFab(page = null) {
+  const fab = document.getElementById('mobile-hunt-fab');
+  if (!fab) return;
+  const activePage = page || (document.querySelector('.page.active')?.id || '').replace('page-', '');
+  const shouldShow = window.innerWidth <= 980 && activePage === 'today';
+  fab.classList.toggle('show', shouldShow);
+  fab.textContent = todayPlan.length ? 'Resume Hunt' : 'Start Hunt';
+}
+
+function initMobileGestures() {
+  const main = document.getElementById('main');
+  if (!main || window._mobileGesturesBound) return;
+  window._mobileGesturesBound = true;
+  let sx = 0, sy = 0;
+  main.addEventListener('touchstart', (e) => {
+    if (!e.touches || !e.touches[0]) return;
+    sx = e.touches[0].clientX;
+    sy = e.touches[0].clientY;
+  }, { passive: true });
+  main.addEventListener('touchend', (e) => {
+    if (window.innerWidth > 980 || !sx) return;
+    if (document.querySelector('.modal-overlay.open')) return;
+    const t = e.changedTouches && e.changedTouches[0];
+    if (!t) return;
+    const dx = t.clientX - sx;
+    const dy = t.clientY - sy;
+    sx = 0; sy = 0;
+    if (Math.abs(dx) < 55 || Math.abs(dy) > 45) return;
+    const pages = ['dashboard', 'today', 'problems', 'sysdesign'];
+    const current = (document.querySelector('.page.active')?.id || '').replace('page-', '');
+    const idx = pages.indexOf(current);
+    if (idx < 0) return;
+    const next = dx < 0 ? idx + 1 : idx - 1;
+    if (next >= 0 && next < pages.length) navigate(pages[next]);
+  }, { passive: true });
+  window.addEventListener('resize', () => updateMobileHuntFab(), { passive: true });
+}
+
+function getReviewEvents() {
+  const diffXP = { Easy: 1, Medium: 2, Hard: 3 };
+  const events = [];
+  const problemById = new Map(RAW_PROBLEMS.map(p => [String(p.id), p]));
+  Object.keys(userData).forEach(key => {
+    if (key.startsWith('sd_')) return;
+    const ud = userData[key];
+    if (!ud) return;
+    const p = problemById.get(String(key));
+    const dm = p ? (diffXP[p.diff] || 1) : 1;
+    (ud.history || []).forEach(h => {
+      if (!h || !h.date) return;
+      events.push({
+        date: h.date,
+        rating: h.rating || 0,
+        xp: (h.rating || 0) * dm
+      });
+    });
+  });
+  return events;
+}
+
+function setAnalyticsReadout(targetId, text) {
+  const el = document.getElementById(targetId);
+  if (el) el.textContent = text;
+}
+
+function renderProgressAnalytics() {
+  const events = getReviewEvents();
+  const dayMs = 86400000;
+  const today = new Date();
+  const nowMs = today.getTime();
+  const RECENT_MASTERY_DAYS = 180;
+  const RECENT_MASTERY_MS = RECENT_MASTERY_DAYS * dayMs;
+  const toIso = d => d.toISOString().split('T')[0];
+
+  const dayKeys = [];
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(today.getTime() - i * dayMs);
+    dayKeys.push(toIso(d));
+  }
+  const byDay = {};
+  dayKeys.forEach(k => { byDay[k] = { reviews: 0, xp: 0 }; });
+  events.forEach(e => {
+    if (!byDay[e.date]) return;
+    byDay[e.date].reviews += 1;
+    byDay[e.date].xp += e.xp;
+  });
+
+  const reviewVals = dayKeys.map(k => byDay[k].reviews);
+  const maxReviews = Math.max(1, ...reviewVals);
+  document.getElementById('reviews-trend').innerHTML = dayKeys.map(k => {
+    const v = byDay[k].reviews;
+    const h = Math.max(6, Math.round(v / maxReviews * 92));
+    return `<div class="mini-bar" style="height:${h}px;background:rgba(92,184,92,0.85)" title="${k}: ${v} reviews" onclick="setAnalyticsReadout('reviews-readout', '${k}: ${v} reviews')"></div>`;
+  }).join('');
+
+  const weekBuckets = [];
+  for (let w = 7; w >= 0; w--) {
+    const end = new Date(today.getTime() - w * 7 * dayMs);
+    const start = new Date(end.getTime() - 6 * dayMs);
+    weekBuckets.push({ start: toIso(start), end: toIso(end), xp: 0 });
+  }
+  events.forEach(e => {
+    const t = new Date(e.date).getTime();
+    weekBuckets.forEach(b => {
+      const s = new Date(b.start).getTime();
+      const en = new Date(b.end).getTime();
+      if (t >= s && t <= en) b.xp += e.xp;
+    });
+  });
+  const maxXP = Math.max(1, ...weekBuckets.map(w => w.xp));
+  document.getElementById('xp-trend').innerHTML = weekBuckets.map(w => {
+    const h = Math.max(6, Math.round(w.xp / maxXP * 92));
+    return `<div class="mini-bar" style="height:${h}px;background:rgba(245,166,35,0.85)" title="${w.start} to ${w.end}: ${w.xp} XP" onclick="setAnalyticsReadout('xp-readout', '${w.start} to ${w.end}: ${w.xp} XP')"></div>`;
+  }).join('');
+
+  const topicMap = {};
+  RAW_PROBLEMS.forEach(p => {
+    const t = p.topic.split('/')[0].trim();
+    if (!topicMap[t]) topicMap[t] = { total: 0, recent: 0, overdue: 0 };
+    topicMap[t].total++;
+    const lastMs = getLastReviewMs(p);
+    if (lastMs !== null && (nowMs - lastMs) <= RECENT_MASTERY_MS) topicMap[t].recent++;
+    const due = getDueInfo(p);
+    if (due.days < 0) topicMap[t].overdue++;
+  });
+  const topics = Object.entries(topicMap).map(([name, d]) => ({
+    name,
+    total: d.total,
+    recent: d.recent,
+    overdue: d.overdue,
+    pct: d.total ? Math.round(d.recent / d.total * 100) : 0
+  })).sort((a, b) => b.pct - a.pct);
+
+  const strongest = topics[0];
+  const worstOverdue = [...topics].sort((a, b) => b.overdue - a.overdue)[0];
+  const recent7 = reviewVals.slice(7).reduce((a, b) => a + b, 0);
+  const prev7 = reviewVals.slice(0, 7).reduce((a, b) => a + b, 0);
+  const momentum = prev7 === 0 ? (recent7 > 0 ? 100 : 0) : Math.round(((recent7 - prev7) / prev7) * 100);
+  const avgDaily = (reviewVals.reduce((a, b) => a + b, 0) / 14).toFixed(1);
+
+  document.getElementById('analytics-kpis').innerHTML = `
+    <div class="analytics-title">Performance Snapshot</div>
+    <div class="analytics-kpi-grid">
+      <div class="analytics-kpi"><div class="analytics-kpi-label">Avg daily reviews</div><div class="analytics-kpi-val">${avgDaily}</div></div>
+      <div class="analytics-kpi"><div class="analytics-kpi-label">Strongest topic</div><div class="analytics-kpi-val">${strongest ? strongest.name : 'N/A'}</div></div>
+      <div class="analytics-kpi"><div class="analytics-kpi-label">Most overdue</div><div class="analytics-kpi-val">${worstOverdue ? worstOverdue.name : 'N/A'}</div></div>
+      <div class="analytics-kpi"><div class="analytics-kpi-label">Momentum</div><div class="analytics-kpi-val">${momentum >= 0 ? '+' : ''}${momentum}%</div></div>
+    </div>
+  `;
+
+  document.getElementById('topic-heatmap').innerHTML = topics.slice(0, 10).map(t => {
+    const bg = t.pct >= 80 ? 'rgba(63,207,180,0.20)' : t.pct >= 50 ? 'rgba(245,166,35,0.18)' : 'rgba(245,95,95,0.16)';
+    return `<div class="topic-chip" style="background:${bg}" onclick="navigate('problems');document.getElementById('filter-topic').value='${t.name.replace(/'/g, "\\'")}';applyFilters();">
+      ${t.name}<br><small>${t.recent}/${t.total} recent • ${t.pct}%</small>
+    </div>`;
+  }).join('');
 }
 
 // ═══════════════════════════════════════════════════════
@@ -3827,6 +4361,7 @@ function renderDashboard() {
       <div class="conf-dist-bar-inner" style="height:${h}px;background:${confColors[i]};"></div>
     </div>`;
   }).join('');
+  renderProgressAnalytics();
 
   updateHeroStats();
 }
@@ -4028,6 +4563,17 @@ function openModal(id) {
   document.getElementById('modal-links').innerHTML = lc + repo || '<span style="color:var(--muted);font-size:12px">No intel available</span>';
 
   const currentConf = ud.conf || p.conf || 0;
+  const due = getDueInfo(p);
+  const intervalDays = currentConf > 0 ? SR_INTERVALS[Math.min(currentConf, 5)] : 30;
+  const lastSeen = ud.lastReviewed || p.date || 'Never';
+  const inPlan = todayPlan.find(x => x.id === p.id);
+  const planReason = inPlan && inPlan.why ? inPlan.why : 'Not in today\'s quest';
+  document.getElementById('modal-sr-info').innerHTML = `
+    <div><strong>Last reviewed:</strong> ${lastSeen}</div>
+    <div><strong>Interval:</strong> ${intervalDays}d &nbsp;•&nbsp; <strong>Due:</strong> ${due.label}</div>
+    <div><strong>Quest reason:</strong> ${planReason}</div>
+  `;
+
   const labels = ['?','Fled','Shaky','Won','Dominated','Mastered'];
   document.getElementById('conf-buttons').innerHTML = [0,1,2,3,4,5].map(i => `
     <button class="conf-btn c${i} ${currentConf===i?'sel':''}" onclick="selectConf(${i})">${i===0?'?':i}<br><span style="font-size:9px;font-weight:400">${labels[i]}</span></button>
@@ -4039,6 +4585,7 @@ function openModal(id) {
   if (confLabelRow) {
     confLabelRow.innerHTML = '<span>?</span><span>Fled</span><span>Shaky</span><span>Won</span><span>Dominated</span><span>Mastered</span>';
   }
+  document.querySelector('.modal-plan-actions').style.display = '';
 
   document.getElementById('modal-overlay').classList.add('open');
 }
@@ -4128,8 +4675,10 @@ function saveModal() {
 // ═══════════════════════════════════════════════════════
 function generatePlan() {
   const n = Math.min(50, Math.max(1, parseInt(document.getElementById('rev-count').value)||10));
+  const minReviewsRequested = Math.min(n, Math.max(0, parseInt(document.getElementById('rev-min-reviews')?.value)||0));
   const now = Date.now();
   const DAY = 86400000;
+  const todayIso = new Date().toISOString().split('T')[0];
 
   const slainByDiff = { Easy: 0, Medium: 0, Hard: 0 };
   const slainByTopic = {};
@@ -4149,10 +4698,15 @@ function generatePlan() {
   const unseen = [];
 
   RAW_PROBLEMS.forEach(p => {
-    const c = getConf(p);
     const ud = getUD(p.id);
+    const c = getConf(p);
     const t = p.topic.split('/')[0].trim();
     const topicMastery = (slainByTopic[t] || 0) / (totalByTopic[t] || 1);
+    const snoozeUntilMs = ud.snoozeUntil ? new Date(ud.snoozeUntil).getTime() : 0;
+    const isSnoozed = snoozeUntilMs > now;
+    const isPinned = !!ud.pinTomorrow;
+
+    if (isSnoozed && !isPinned) return;
 
     if (c > 0) {
       let daysSince = 999;
@@ -4170,7 +4724,8 @@ function generatePlan() {
       if (overdue >= 0) {
         const urgency = Math.min(overdue, 90) * 2;
         const weaknessBonus = (5 - c) * 10;
-        reviews.push({ ...p, _score: urgency + weaknessBonus + Math.random() * 2, _conf: c, _type: 'review' });
+        const why = overdue > 0 ? `Overdue ${overdue}d` : (c <= 2 ? `Low confidence (${c}/5)` : 'Due review');
+        reviews.push({ ...p, _score: urgency + weaknessBonus + Math.random() * 2, _conf: c, _type: 'review', _why: why });
       }
     } else {
       // Difficulty gating based on overall + per-topic progression
@@ -4193,7 +4748,7 @@ function generatePlan() {
       }
 
       if (eligible) {
-        unseen.push({ ...p, _score: priority + Math.random() * 5, _conf: 0, _type: 'new' });
+        unseen.push({ ...p, _score: priority + Math.random() * 5, _conf: 0, _type: 'new', _why: 'New unlock' });
       }
     }
   });
@@ -4201,14 +4756,16 @@ function generatePlan() {
   reviews.sort((a, b) => b._score - a._score);
   unseen.sort((a, b) => b._score - a._score);
 
-  // Allocation: reviews get priority, fill remainder with new problems
-  // At least 70% reviews if available, rest new problems
-  const reviewSlots = Math.min(reviews.length, Math.ceil(n * 0.7));
-  const newSlots = n - reviewSlots;
+  // Allocation: reviews get priority, fill remainder with new problems.
+  // Enforce user-selected minimum reviews when available.
+  const targetReviewSlots = Math.max(Math.ceil(n * 0.7), minReviewsRequested);
 
   const picked = [];
   const topicCount = {};
   const maxPerTopic = Math.max(2, Math.ceil(n / 4));
+  const pinnedPool = RAW_PROBLEMS
+    .filter(p => getUD(p.id).pinTomorrow)
+    .map(p => ({ ...p, _score: 9999, _conf: getConf(p), _type: 'pinned', _why: 'Pinned for tomorrow' }));
 
   function pickFrom(pool, limit) {
     let added = 0;
@@ -4224,8 +4781,12 @@ function generatePlan() {
     return added;
   }
 
-  const reviewsPicked = pickFrom(reviews, reviewSlots);
-  pickFrom(unseen, newSlots);
+  pickFrom(pinnedPool, n);
+  const reviewCapacity = Math.max(0, n - picked.length);
+  const reviewLimit = Math.min(reviews.length, targetReviewSlots, reviewCapacity);
+  pickFrom(reviews, reviewLimit);
+  const remainingSlots = Math.max(0, n - picked.length);
+  pickFrom(unseen, remainingSlots);
 
   // If we didn't fill enough, relax topic limits
   if (picked.length < n) {
@@ -4242,12 +4803,22 @@ function generatePlan() {
   const diffOrder = { Easy: 0, Medium: 1, Hard: 2 };
   picked.sort((a, b) => (diffOrder[a.diff] || 1) - (diffOrder[b.diff] || 1));
 
-  todayPlan = picked.map(p => ({ id: p.id, done: false }));
+  todayPlan = picked.map(p => ({ id: p.id, done: false, why: p._why || '', questType: p._type || 'new' }));
+  let updatedPins = false;
+  picked.forEach(p => {
+    const ud = userData[p.id];
+    if (ud && ud.pinTomorrow) {
+      ud.pinTomorrow = false;
+      updatedPins = true;
+    }
+  });
+  if (updatedPins) saveState();
   savePlan();
   renderToday();
   const rc = picked.filter(x => x._type === 'review').length;
   const nc = picked.filter(x => x._type === 'new').length;
-  showToast(`Quest accepted: ${rc} review${rc!==1?'s':''}, ${nc} new encounter${nc!==1?'s':''}`, 'info');
+  const pc = picked.filter(x => x._type === 'pinned').length;
+  showToast(`Quest accepted: ${rc} review${rc!==1?'s':''}, ${nc} new encounter${nc!==1?'s':''}${pc ? `, ${pc} pinned` : ''}`, 'info');
   updateBadges();
 }
 
@@ -4283,7 +4854,7 @@ function renderTodayCommandCenter(done = 0, total = 0) {
   if (!el) return;
 
   const reviewed = RAW_PROBLEMS.filter(p => getDueInfo(p).cls !== 'due-new');
-  const dueNow = reviewed.filter(p => getDueInfo(p).days <= 0).length;
+  const dueNow = reviewed.filter(p => getDueInfo(p).days === 0).length;
   const overdue = reviewed.filter(p => getDueInfo(p).days < 0).length;
   const today = new Date().toISOString().split('T')[0];
 
@@ -4307,13 +4878,14 @@ function renderTodayCommandCenter(done = 0, total = 0) {
   });
 
   const hasPlan = total > 0;
+  updateMobileHuntFab('today');
   el.innerHTML = `
     <div class="today-command-top">
       <div class="today-command-title">&#9876; Today's Command Center</div>
-      <button class="btn btn-primary btn-sm" onclick="startTodayHunt()">${hasPlan ? 'Resume Hunt' : 'Start Today\\'s Hunt'}</button>
+      <button class="btn btn-primary btn-sm" onclick="startTodayHunt()">${hasPlan ? 'Resume Hunt' : "Start Today's Hunt"}</button>
     </div>
     <div class="today-kpis">
-      <div class="today-kpi"><div class="today-kpi-label">Due Now</div><div class="today-kpi-val">${dueNow}</div></div>
+      <div class="today-kpi"><div class="today-kpi-label">Due Today</div><div class="today-kpi-val">${dueNow}</div></div>
       <div class="today-kpi"><div class="today-kpi-label">Overdue</div><div class="today-kpi-val">${overdue}</div></div>
       <div class="today-kpi"><div class="today-kpi-label">Completed Today</div><div class="today-kpi-val">${completedToday}</div></div>
       <div class="today-kpi"><div class="today-kpi-label">Streak</div><div class="today-kpi-val">${streak}d</div></div>
@@ -4441,6 +5013,7 @@ function renderToday() {
     const xp = Math.round(baseXP * sMult);
     const xpDisplay = item.done ? xp : (c > 0 ? xp : `${dm}-${5*dm}`);
     const ratingLabel = item.rating ? ['','Again','Hard','Good','','Easy'][item.rating] || '' : '';
+    const why = item.why || (item.questType === 'review' ? 'Due review' : 'New unlock');
     return `<div class="quest-item ${item.done?'done':''}" data-quest-id="${p.id}" onclick="openModal(${p.id})">
       <div class="quest-item-num">${i+1}.</div>
       <div style="font-size:16px;">${monsterSprite(p.diff, 22)}</div>
@@ -4449,8 +5022,13 @@ function renderToday() {
       <div class="quest-item-diff" style="color:${diffColor}">${p.diff}</div>
       ${item.done
         ? `<div class="quest-item-rated">\u2714 ${ratingLabel}</div>`
-        : `<div class="quest-item-check" onclick="event.stopPropagation();showRating(${p.id})" title="Rate recall">&#9876;</div>`
+        : `<div class="quest-item-actions">
+            <button class="quest-mini-act" onclick="event.stopPropagation();snoozeProblem(${p.id}, 7)" title="Snooze 7 days">S+7</button>
+            <button class="quest-mini-act" onclick="event.stopPropagation();pinProblemTomorrow(${p.id})" title="Pin for tomorrow">Pin</button>
+            <div class="quest-item-check" onclick="event.stopPropagation();showRating(${p.id})" title="Rate recall">&#9876;</div>
+          </div>`
       }
+      <div class="quest-item-why">Why: ${why}</div>
     </div>`;
   }).join('');
 }
@@ -4489,6 +5067,8 @@ function openSDModal(sdId) {
   document.getElementById('modal-badges').innerHTML = `<span class="badge badge-topic">Boss Raid</span>${p.tags.map(t=>`<span class="boss-tag">${t}</span>`).join('')}`;
   document.getElementById('modal-hint').textContent = p.desc;
   document.getElementById('modal-links').innerHTML = `<span style="color:var(--muted);font-size:12px">No external intel \u2014 study from memory</span>`;
+  document.getElementById('modal-sr-info').innerHTML = '';
+  document.querySelector('.modal-plan-actions').style.display = 'none';
   const attempted = ud.attempted || false;
   document.getElementById('conf-buttons').innerHTML = `
     <button class="conf-btn ${!attempted?'c0 sel':'c4'}" onclick="selectSDConf(false)" style="flex:1">\u25CB<br><span style="font-size:10px;font-weight:400">Undefeated</span></button>
@@ -4598,6 +5178,7 @@ function initFloatingDecorations() {
 // ═══════════════════════════════════════════════════════
 function init() {
   initTheme();
+  initMobileGestures();
   initParticles();
   initFloatingDecorations();
   document.getElementById('hero-avatar-img').src = IMG.knight;
@@ -4610,6 +5191,7 @@ function init() {
   renderToday();
   updateBadges();
   updateHeroStats();
+  updateMobileHuntFab('dashboard');
 }
 
 init();
