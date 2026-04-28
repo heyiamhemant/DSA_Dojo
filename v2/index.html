@@ -611,6 +611,90 @@ a:hover { color: var(--gold-bright); }
 .dsb { height: 3px; background: rgba(0,0,0,0.4); border-radius: 2px; overflow: hidden; }
 .dsb-fill { height: 100%; transition: width 1s ease; opacity: .85; }
 
+/* ── Realms of Conquest card ── */
+.realms-toolbar { display: flex; justify-content: flex-end; align-items: center; margin-bottom: 14px; gap: 12px; }
+.realms-sort label { font-family: var(--mono); font-size: 10px; color: var(--text-dim); letter-spacing: .2em; text-transform: uppercase; margin-right: 8px; }
+.realms-sort select {
+  background: linear-gradient(180deg, rgba(40,28,18,0.6), rgba(15,10,6,0.85));
+  border: 1px solid rgba(232,200,122,0.25); color: var(--gold);
+  font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+  padding: 6px 26px 6px 10px; border-radius: 4px; cursor: pointer;
+  appearance: none; background-image:
+    linear-gradient(180deg, rgba(40,28,18,0.6), rgba(15,10,6,0.85)),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0 L5 6 L10 0' stroke='%23e8c87a' stroke-width='1.5' fill='none'/></svg>");
+  background-repeat: no-repeat, no-repeat;
+  background-position: 0 0, calc(100% - 8px) 50%;
+  background-size: 100% 100%, 10px 6px;
+}
+
+.realm-card {
+  position: relative; padding: clamp(16px, 1.6vw, 22px);
+  border: 1px solid rgba(232,200,122,0.18); border-radius: 6px;
+  background:
+    linear-gradient(180deg, rgba(11,8,7,0.55) 0%, rgba(11,8,7,0.95) 80%),
+    var(--bg-img, none) center/cover no-repeat,
+    linear-gradient(180deg, rgba(31,24,18,0.85), rgba(11,8,7,0.95));
+  cursor: pointer; transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+  overflow: hidden;
+  display: flex; flex-direction: column; gap: 14px;
+  min-height: 220px;
+}
+.realm-card::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 70% 60% at 50% 0%, var(--col, rgba(232,200,122,0.12)), transparent 70%);
+  opacity: .6; transition: opacity .3s ease;
+}
+.realm-card:hover { transform: translateY(-3px); border-color: rgba(232,200,122,0.45); box-shadow: 0 18px 40px rgba(0,0,0,0.6); }
+.realm-card:hover::before { opacity: 1; }
+.realm-card > * { position: relative; }
+.rl-conq {
+  position: absolute; top: 10px; right: 10px; z-index: 2;
+  font-family: var(--medieval); color: var(--gold); font-size: 10px; letter-spacing: .25em; text-transform: uppercase;
+  background: linear-gradient(180deg, rgba(232,200,122,0.18), rgba(122,31,31,0.18));
+  border: 1px solid rgba(232,200,122,0.45);
+  padding: 3px 9px; border-radius: 4px;
+  box-shadow: 0 0 12px rgba(232,200,122,0.3);
+  text-shadow: 0 0 8px rgba(232,200,122,0.6);
+}
+.rl-alert {
+  position: absolute; top: 10px; left: 10px; z-index: 2;
+  font-family: var(--mono); color: #ffb86a; font-size: 11px; font-weight: 700; letter-spacing: .12em;
+  background: linear-gradient(180deg, rgba(122,31,31,0.6), rgba(40,12,8,0.85));
+  border: 1px solid rgba(255,138,58,0.5);
+  padding: 3px 9px; border-radius: 4px;
+  box-shadow: 0 0 12px rgba(201,42,42,0.45);
+  animation: alertThrob 1.8s ease-in-out infinite;
+}
+@keyframes alertThrob { 0%,100% { box-shadow: 0 0 8px rgba(201,42,42,0.3); } 50% { box-shadow: 0 0 18px rgba(255,140,60,0.7); } }
+
+.rl-head { display: flex; align-items: center; gap: 14px; }
+.rl-icon { font-size: 32px; line-height: 1; filter: drop-shadow(0 0 8px currentColor); flex-shrink: 0; }
+.rl-titles { min-width: 0; flex: 1; }
+.rl-name { font-family: var(--serif); font-weight: 700; font-size: 16px; color: var(--gold); letter-spacing: .06em; text-transform: uppercase; line-height: 1.2; }
+.rl-sub { font-family: var(--mono); font-size: 10px; color: var(--text-dim); letter-spacing: .12em; margin-top: 4px; text-transform: uppercase; }
+
+.rl-progress { display: flex; flex-direction: column; gap: 6px; }
+.rl-prog-row { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--mono); font-size: 11px; }
+.rl-prog-row-sub { margin-top: 4px; opacity: .9; }
+.rl-prog-label { color: var(--text-dim); letter-spacing: .14em; text-transform: uppercase; font-size: 9px; }
+.rl-prog-val { color: var(--gold-bright); font-weight: 600; }
+.rl-bar { height: 8px; background: linear-gradient(180deg, #050300, #0e0a06); border: 1px solid rgba(232,200,122,0.18); border-radius: 99px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.6); }
+.rl-bar-sub { height: 6px; }
+.rl-bar-fill {
+  height: 100%; background: linear-gradient(180deg, var(--col-bar2, var(--gold)), var(--col-bar, var(--gold-deep)));
+  border-right: 1px solid rgba(255,255,255,0.25);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 0 8px var(--col-bar2, rgba(232,200,122,0.4));
+  transition: width 1.2s cubic-bezier(.4,0,.2,1);
+}
+.rl-bar-fill.momentum { background: linear-gradient(180deg, #ff8a3a, #b8651a); box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 0 6px rgba(255,138,58,0.5); }
+
+.rl-tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding-top: 10px; border-top: 1px dashed rgba(232,200,122,0.15); }
+.rl-tier { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.rl-tier-ico { font-size: 14px; }
+.rl-tier-stats { font-family: var(--mono); font-size: 11px; color: var(--text); }
+.rl-tier-bar { height: 4px; background: rgba(0,0,0,0.5); border-radius: 99px; overflow: hidden; }
+.rl-tier-bar > div { height: 100%; background: var(--tc, var(--gold)); transition: width 1s ease; }
+
 /* ═════════════════════════════════════════════════════════════════════════
    QUEST BOARD
    ═════════════════════════════════════════════════════════════════════════ */
@@ -2176,18 +2260,7 @@ textarea.modal-comment {
           </details>
         </div>
 
-        <div class="bento-cell panel" data-tab="map">
-          <details open data-pkey="mastery">
-            <summary>
-              <span class="summary-chev">▶</span>
-              <h3 class="panel-title">📜 Topic Mastery</h3>
-              <span class="summary-meta">last 180 days</span>
-            </summary>
-            <div class="details-body">
-              <div class="mastery-grid" id="mastery-grid"></div>
-            </div>
-          </details>
-        </div>
+
 
         <div class="bento-cell span-4 panel" data-tab="progress">
           <details open data-pkey="analytics">
@@ -2214,13 +2287,25 @@ textarea.modal-comment {
         </div>
 
         <div class="bento-cell span-4 panel" data-tab="map">
-          <details open data-pkey="dungeon">
+          <details open data-pkey="realms">
             <summary>
               <span class="summary-chev">▶</span>
-              <h3 class="panel-title">⚜ Dungeon Mastery</h3>
+              <h3 class="panel-title">⚜ Realms of Conquest</h3>
               <span class="summary-meta" id="meta-dungeon"></span>
             </summary>
             <div class="details-body">
+              <div class="realms-toolbar">
+                <div class="realms-sort">
+                  <label>Sort</label>
+                  <select id="realms-sort" onchange="renderDungeons()">
+                    <option value="conquest">Conquest %</option>
+                    <option value="momentum">Recent momentum</option>
+                    <option value="due">Due / Overdue</option>
+                    <option value="size">Realm size</option>
+                    <option value="alpha">Alphabetical</option>
+                  </select>
+                </div>
+              </div>
               <div class="dungeon-grid" id="dungeon-grid"></div>
             </div>
           </details>
@@ -2785,7 +2870,6 @@ function setDashTab(tab) {
     if (typeof renderHeatmap === 'function') renderHeatmap();
     if (typeof renderAnalytics === 'function') renderAnalytics();
   } else if (tab === 'map') {
-    if (typeof renderTopicMastery === 'function') renderTopicMastery();
     if (typeof renderDungeons === 'function') renderDungeons();
   } else if (tab === 'overview') {
     if (typeof renderTodayCommandCenter === 'function') renderTodayCommandCenter();
@@ -2812,8 +2896,7 @@ function bindDetailsPersistence() {
       const map = {
         heatmap: () => renderHeatmap(),
         analytics: () => renderAnalytics(),
-        mastery: () => renderTopicMastery(),
-        dungeon: () => (typeof renderDungeons === 'function' ? renderDungeons() : null),
+        realms: () => (typeof renderDungeons === 'function' ? renderDungeons() : null),
         power: () => renderPowerLevels(),
         today: () => renderTodayCommandCenter(),
         slain: () => (typeof renderKPI === 'function' ? renderKPI() : null),
@@ -2932,29 +3015,77 @@ function renderDashboard() {
     const c = getConf(p);
     if (c > 0) { topics[p.topic].solved++; topics[p.topic].conf += c; }
   });
-  document.getElementById('dungeon-grid').innerHTML = Object.entries(topics)
-    .sort((a, b) => b[1].total - a[1].total)
-    .map(([t, d]) => {
-      const v = visualOf(t);
-      const pp = d.total ? Math.round(d.solved / d.total * 100) : 0;
-      // Per-difficulty sub-bars
-      const probsT = RAW_PROBLEMS.filter(p => p.topic === t);
-      const e = probsT.filter(p => p.diff === 'Easy'), em = probsT.filter(p => p.diff === 'Medium'), eh = probsT.filter(p => p.diff === 'Hard');
-      const eD = (e.filter(p=>getConf(p)>0).length / Math.max(1, e.length)) * 100;
-      const mD = (em.filter(p=>getConf(p)>0).length / Math.max(1, em.length)) * 100;
-      const hD = (eh.filter(p=>getConf(p)>0).length / Math.max(1, eh.length)) * 100;
-      const subBars = `<div class="dungeon-subbars">
-        ${e.length ? `<div class="dsb"><div class="dsb-fill" style="width:${eD}%;background:var(--easy)"></div></div>` : ''}
-        ${em.length ? `<div class="dsb"><div class="dsb-fill" style="width:${mD}%;background:var(--medium)"></div></div>` : ''}
-        ${eh.length ? `<div class="dsb"><div class="dsb-fill" style="width:${hD}%;background:var(--hard)"></div></div>` : ''}
-      </div>`;
-      return `<div class="dungeon-card" onclick="filterByTopic('${t.replace(/'/g,"\\'")}')" style="--col:${v.color}30;--col-bar:${v.color}80;--col-bar2:${v.color};--bg-img:url('${sceneFor(t)}')">
-        <div class="dungeon-card-head"><span class="dungeon-icon" style="color:${v.color}">${v.icon}</span><span class="dungeon-name">${t}</span></div>
-        <div class="dungeon-progress">${d.solved} / ${d.total} slain · ${pp}%</div>
-        <div class="dungeon-bar"><div class="dungeon-bar-fill" style="width:${pp}%"></div></div>
-        ${subBars}
-      </div>`;
-    }).join('');
+  // Build rich realm rows
+  const RECENT_MS = 180 * 86400000;
+  const now = Date.now();
+  const sortMode = (document.getElementById('realms-sort') && document.getElementById('realms-sort').value) || 'conquest';
+  const rows = Object.entries(topics).map(([t, d]) => {
+    const v = visualOf(t);
+    const probsT = RAW_PROBLEMS.filter(p => p.topic === t);
+    const tc = countTiers(probsT);
+    const pp = d.total ? d.solved / d.total : 0;
+    let recent = 0, lastReviewMs = 0, dueNow = 0, overdueNow = 0;
+    probsT.forEach(p => {
+      const last = getLastReviewMsLocal(p);
+      if (last) {
+        if (last > lastReviewMs) lastReviewMs = last;
+        if ((now - last) <= RECENT_MS && getConf(p) > 0) recent++;
+      }
+      if (getConf(p) > 0) {
+        const di = getDueInfo(p);
+        if (di.cls !== 'due-new') {
+          if (di.days === 0) dueNow++;
+          else if (di.days < 0) overdueNow++;
+        }
+      }
+    });
+    const recentPct = d.total ? recent / d.total : 0;
+    return { t, d, v, probsT, tc, pp, recent, recentPct, lastReviewMs, dueNow, overdueNow };
+  });
+  if (sortMode === 'conquest')      rows.sort((a, b) => b.pp - a.pp || b.d.total - a.d.total);
+  else if (sortMode === 'momentum') rows.sort((a, b) => b.recentPct - a.recentPct || b.recent - a.recent);
+  else if (sortMode === 'due')      rows.sort((a, b) => (b.dueNow + b.overdueNow * 2) - (a.dueNow + a.overdueNow * 2));
+  else if (sortMode === 'size')     rows.sort((a, b) => b.d.total - a.d.total);
+  else                              rows.sort((a, b) => a.t.localeCompare(b.t));
+  document.getElementById('dungeon-grid').innerHTML = rows.map(r => {
+    const { t, d, v, tc, pp, recent, recentPct, lastReviewMs, dueNow, overdueNow } = r;
+    const ppPct = Math.round(pp * 100);
+    const recentPctR = Math.round(recentPct * 100);
+    const tier = (slain, total, col, ico) => total
+      ? `<div class="rl-tier" style="--tc:${col}"><span class="rl-tier-ico">${ico}</span><span class="rl-tier-stats">${slain}/${total}</span><div class="rl-tier-bar"><div style="width:${total ? slain/total*100 : 0}%"></div></div></div>`
+      : '';
+    const lastTxt = lastReviewMs ? new Date(lastReviewMs).toLocaleDateString(undefined, { day: '2-digit', month: 'short' }) : 'never';
+    const conqBadge = pp >= 1 ? `<div class="rl-conq">⚜ Conquered</div>` : '';
+    const alertBadge = (dueNow + overdueNow) > 0 ? `<div class="rl-alert" title="${dueNow} due · ${overdueNow} overdue">${overdueNow ? '⚠' : '⏰'} ${dueNow + overdueNow}</div>` : '';
+    return `<div class="realm-card" onclick="filterByTopic('${t.replace(/'/g,"\\'")}')" style="--col:${v.color}55;--col-bar:${v.color}80;--col-bar2:${v.color};--bg-img:url('${sceneFor(t)}')">
+      ${conqBadge}
+      ${alertBadge}
+      <div class="rl-head">
+        <span class="rl-icon" style="color:${v.color}">${v.icon}</span>
+        <div class="rl-titles">
+          <div class="rl-name">${t}</div>
+          <div class="rl-sub">${d.total} encounters · last ${lastTxt}</div>
+        </div>
+      </div>
+      <div class="rl-progress">
+        <div class="rl-prog-row">
+          <span class="rl-prog-label">Conquest</span>
+          <span class="rl-prog-val">${d.solved} / ${d.total} · ${ppPct}%</span>
+        </div>
+        <div class="rl-bar"><div class="rl-bar-fill" style="width:${ppPct}%"></div></div>
+        <div class="rl-prog-row rl-prog-row-sub">
+          <span class="rl-prog-label">Momentum (180d)</span>
+          <span class="rl-prog-val">${recent} recent · ${recentPctR}%</span>
+        </div>
+        <div class="rl-bar rl-bar-sub"><div class="rl-bar-fill momentum" style="width:${recentPctR}%"></div></div>
+      </div>
+      <div class="rl-tiers">
+        ${tier(tc.slainSlime, tc.Slime, '#6fa86b', '🟢')}
+        ${tier(tc.slainDrake, tc.Drake, '#c89c4a', '🐉')}
+        ${tier(tc.slainDemon, tc.Demon, '#b04545', '👹')}
+      </div>
+    </div>`;
+  }).join('');
 
   renderHeroPowerBars();
   renderSummaryMetas();
@@ -2967,7 +3098,6 @@ function renderDashboard() {
   renderTodayCommandCenter();
   renderStreakTrack();
   renderPowerLevels();
-  renderTopicMastery();
   renderAnalytics();
   renderHeatmap();
 }
