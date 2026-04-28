@@ -2104,7 +2104,7 @@ textarea.modal-comment {
         </div>
 
         <div class="bento-cell span-4 panel" data-tab="progress">
-          <details data-pkey="heatmap">
+          <details open data-pkey="heatmap">
             <summary>
               <span class="summary-chev">▶</span>
               <h3 class="panel-title">📅 Chronicle Heatmap — Last 180 Days</h3>
@@ -2152,7 +2152,7 @@ textarea.modal-comment {
         </div>
 
         <div class="bento-cell span-4 panel" data-tab="progress">
-          <details data-pkey="analytics">
+          <details open data-pkey="analytics">
             <summary>
               <span class="summary-chev">▶</span>
               <h3 class="panel-title">📈 Chronicle of Battle — Last 14 Days</h3>
@@ -2165,11 +2165,11 @@ textarea.modal-comment {
                   <div class="mini-bars" id="reviews-trend"></div>
                   <div class="mini-readout" id="reviews-readout">Click any bar to see details</div>
                 </div>
-              <div>
-                <div class="panel-sub">XP EARNED</div>
-                <div class="mini-bars" id="xp-trend"></div>
-                <div class="mini-readout" id="xp-readout">Click any bar to see details</div>
-              </div>
+                <div>
+                  <div class="panel-sub">XP EARNED</div>
+                  <div class="mini-bars" id="xp-trend"></div>
+                  <div class="mini-readout" id="xp-readout">Click any bar to see details</div>
+                </div>
               </div>
             </div>
           </details>
@@ -2723,6 +2723,19 @@ function setDashTab(tab) {
   page.classList.add('tab-' + tab);
   document.querySelectorAll('.dash-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
   try { localStorage.setItem('dsa_dojo_dash_tab', tab); } catch (e) {}
+  // Re-render data for the visible tab so freshly-shown panels populate
+  if (tab === 'progress') {
+    if (typeof renderHeatmap === 'function') renderHeatmap();
+    if (typeof renderAnalytics === 'function') renderAnalytics();
+  } else if (tab === 'map') {
+    if (typeof renderTopicMastery === 'function') renderTopicMastery();
+    if (typeof renderDungeons === 'function') renderDungeons();
+  } else if (tab === 'overview') {
+    if (typeof renderTodayCommandCenter === 'function') renderTodayCommandCenter();
+    if (typeof renderHeroPowerBars === 'function') renderHeroPowerBars();
+    if (typeof renderPowerLevels === 'function') renderPowerLevels();
+  }
+  if (typeof renderSummaryMetas === 'function') renderSummaryMetas();
 }
 
 function bindDetailsPersistence() {
@@ -2736,6 +2749,19 @@ function bindDetailsPersistence() {
     else if (saved === '0') d.open = false;
     d.addEventListener('toggle', () => {
       try { localStorage.setItem(k, d.open ? '1' : '0'); } catch (e) {}
+      if (!d.open) return;
+      // Lazy re-render the panel content when its details opens
+      const key = d.dataset.pkey;
+      const map = {
+        heatmap: () => renderHeatmap(),
+        analytics: () => renderAnalytics(),
+        mastery: () => renderTopicMastery(),
+        dungeon: () => (typeof renderDungeons === 'function' ? renderDungeons() : null),
+        power: () => renderPowerLevels(),
+        today: () => renderTodayCommandCenter(),
+        slain: () => (typeof renderKPI === 'function' ? renderKPI() : null),
+      };
+      if (map[key]) try { map[key](); } catch (e) {}
     });
   });
 }
