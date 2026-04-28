@@ -3070,7 +3070,8 @@ document.getElementById('dungeon-grid').innerHTML = rows.map(r => {
   const lastTxt = lastReviewMs ? new Date(lastReviewMs).toLocaleDateString(undefined, { day: '2-digit', month: 'short' }) : 'never';
   const conqBadge = pp >= 1 ? `<div class="rl-conq">⚜ Conquered</div>` : '';
   const alertBadge = (dueNow + overdueNow) > 0 ? `<div class="rl-alert" title="${dueNow} due · ${overdueNow} overdue">${overdueNow ? '⚠' : '⏰'} ${dueNow + overdueNow}</div>` : '';
-  return `<div class="realm-card" onclick="filterByTopic('${t.replace(/'/g,"\\'")}')" style="--col:${v.color}55;--col-bar:${v.color}80;--col-bar2:${v.color};--bg-img:url(${sceneFor(t)})">
+  const _scene = sceneFor(t);
+  return `<div class="realm-card" onclick="filterByTopic('${t.replace(/'/g,"\\'")}')" style="--col:${v.color}55;--col-bar:${v.color}80;--col-bar2:${v.color};background-image:linear-gradient(180deg,rgba(11,8,7,0.25) 0%,rgba(11,8,7,0.6) 55%,rgba(11,8,7,0.92) 100%),url(${_scene});background-size:auto,cover;background-position:0 0,center;background-repeat:no-repeat,no-repeat;">
     ${conqBadge}
     ${alertBadge}
     <div class="rl-head">
@@ -3496,7 +3497,8 @@ function renderTopicDeepDive() {
   document.getElementById('topic-problems').innerHTML = probs.map(p => {
     const conf = getConf(p);
     const diffCol = p.diff === 'Easy' ? 'var(--easy)' : p.diff === 'Medium' ? 'var(--medium)' : 'var(--hard)';
-    return `<div class="monster-card ${conf > 0 ? 'solved' : ''}" onclick="openModal(${p.id})" style="--diff-col:${diffCol};--bg-img:url(${sceneFor(p.topic)})">
+    const _scene = sceneFor(p.topic);
+    return `<div class="monster-card ${conf > 0 ? 'solved' : ''}" onclick="openModal(${p.id})" style="--diff-col:${diffCol};background-image:linear-gradient(180deg,rgba(11,8,7,0.35) 0%,rgba(11,8,7,0.85) 75%,rgba(11,8,7,0.95) 100%),url(${_scene});background-size:auto,cover;background-position:0 0,center;background-repeat:no-repeat,no-repeat;">
       <div class="mc-head"><div class="mc-sprite">${monsterFor(p)}</div>
         <div><h4 class="mc-name">${p.name}</h4><div class="mc-num">#${p.num} · ${tierNameOf(p)} · ${p.diff}</div></div></div>
       <div class="mc-hint">${(p.hint||'').slice(0,110)}${(p.hint||'').length>110?'…':''}</div>
@@ -3562,7 +3564,8 @@ function renderQuests() {
     const rateRow = q.done ? '' : `<div class="quest-rate" onclick="event.stopPropagation()">
       ${[1,2,3,4,5].map(c => `<button class="quest-rate-btn c${c} ${curRating === c ? 'sel' : ''}" title="Rate ${c}/5 and log victory" onclick="event.stopPropagation();quickRate(${p.id}, ${c})">${c}</button>`).join('')}
     </div>`;
-    return `<div class="quest-card ${q.done ? 'done' : ''}" data-id="${p.id}" style="--mc:${v.color}40;--bg-img:url(${sceneFor(p.topic)})">
+    const _scene = sceneFor(p.topic);
+    return `<div class="quest-card ${q.done ? 'done' : ''}" data-id="${p.id}" style="--mc:${v.color}40;background-image:linear-gradient(180deg,rgba(11,8,7,0.40) 0%,rgba(11,8,7,0.88) 75%,rgba(11,8,7,0.95) 100%),url(${_scene});background-size:auto,cover;background-position:0 0,center;background-repeat:no-repeat,no-repeat;">
       <div class="quest-monster" onclick="openModal(${p.id})" title="${tierNameOf(p)}">${monsterFor(p)}</div>
       <div class="quest-info" onclick="openModal(${p.id})">
         <h4 class="quest-name">${p.name}</h4>
@@ -3790,7 +3793,7 @@ function renderPathway() {
     node.style.left = p.x + '%'; node.style.top = p.y + 'px';
     node.dataset.topic = t;
     node.innerHTML = `
-      <div class="keep-medallion ${sizeClass}" style="--seal-col:${sealCol};--seal-glow:${sealGlow};--seal-rim:${sealRim};--keep-bg:url(${sceneFor(t)});">
+      <div class="keep-medallion ${sizeClass}" style="--seal-col:${sealCol};--seal-glow:${sealGlow};--seal-rim:${sealRim};background-image:url(${sceneFor(t)});background-size:cover;background-position:center;">
         <svg class="keep-arc" viewBox="0 0 ${ring} ${ring}">
           <circle cx="${ring/2}" cy="${ring/2}" r="${r}" stroke="${arcCol}" stroke-width="3" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"/>
         </svg>
@@ -3876,7 +3879,8 @@ function renderBestiary() {
     const lastLbl = last ? new Date(last).toLocaleDateString() : 'Never';
     const ud = userData[p.id] || {};
     const diffCol = p.diff === 'Easy' ? 'var(--easy)' : p.diff === 'Medium' ? 'var(--medium)' : 'var(--hard)';
-    return `<div class="monster-card ${conf > 0 ? 'solved' : ''}" onclick="openModal(${p.id})" style="--diff-col:${diffCol};--bg-img:url(${sceneFor(p.topic)})">
+    const _scene = sceneFor(p.topic);
+    return `<div class="monster-card ${conf > 0 ? 'solved' : ''}" onclick="openModal(${p.id})" style="--diff-col:${diffCol};background-image:linear-gradient(180deg,rgba(11,8,7,0.35) 0%,rgba(11,8,7,0.85) 75%,rgba(11,8,7,0.95) 100%),url(${_scene});background-size:auto,cover;background-position:0 0,center;background-repeat:no-repeat,no-repeat;">
       <div class="mc-head">
         <div class="mc-sprite">${monsterFor(p)}</div>
         <div>
@@ -3918,7 +3922,8 @@ function renderBoss() {
   if (!pool.length) { grid.innerHTML = `<div class="empty-state"><div class="empty-icon">👑</div><h3>No bosses match</h3><p>Adjust your filters</p></div>`; return; }
   grid.innerHTML = pool.map(p => {
     const ud = userData['sd_' + p.id] || {};
-    return `<div class="boss-card ${ud.attempted ? 'defeated' : ''}" onclick="openSDModal('${p.id}')" style="--boss-img:url(${bossImageFor(p.id || p.title)})">
+    const _bossImg = bossImageFor(p.id || p.title);
+    return `<div class="boss-card ${ud.attempted ? 'defeated' : ''}" onclick="openSDModal('${p.id}')" style="background-image:linear-gradient(180deg,rgba(11,8,7,0.30) 0%,rgba(11,8,7,0.75) 60%,rgba(11,8,7,0.95) 100%),radial-gradient(ellipse at top right,rgba(122,31,31,0.35),transparent 60%),url(${_bossImg});background-size:auto,auto,cover;background-position:0 0,0 0,center;background-repeat:no-repeat,no-repeat,no-repeat;">
       <span class="boss-freq" style="background:${fcol[p.freq]}22;color:${fcol[p.freq]};border:1px solid ${fcol[p.freq]}55">${p.freq}</span>
       <h3 class="boss-title">👑 ${p.title}</h3>
       <p class="boss-desc">${p.desc}</p>
