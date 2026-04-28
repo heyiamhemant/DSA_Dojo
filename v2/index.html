@@ -326,6 +326,9 @@ a:hover { color: var(--gold-bright); }
   margin: 0 auto;
 }
 .main > .page { max-width: 1480px; margin: 0 auto; }
+.main > .page.is-pathway { max-width: 1820px; }
+.is-pathway .codex { padding-left: clamp(12px, 1.5vw, 28px); padding-right: clamp(12px, 1.5vw, 28px); }
+.is-pathway .codex-stage { margin: 0; }
 @media (max-width: 980px) { .main { padding: var(--space) var(--space); } }
 
 /* Page transition */
@@ -552,21 +555,111 @@ a:hover { color: var(--gold-bright); }
   color: var(--text); padding: 8px 12px; border-radius: var(--rad-sm);
   font-family: var(--mono); font-size: 13px;
 }
-.btn-primary {
-  padding: 12px 24px; background: linear-gradient(180deg, var(--gold-deep), var(--bone));
-  border: 1px solid var(--gold); color: var(--gold-bright); border-radius: var(--rad);
-  font-family: var(--serif); font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
-  font-size: 13px; transition: all .25s ease;
-  box-shadow: 0 4px 16px rgba(232,200,122,0.2), inset 0 1px 0 rgba(255,220,160,0.2);
+/* ── Rampart wall buttons ── */
+.btn-primary, .btn-secondary {
+  position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  font-family: var(--serif); font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+  cursor: pointer;
+  border: none; outline: none;
+  color: var(--gold-bright);
+  padding: 14px 26px 16px;
+  background:
+    /* mortar lines (vertical seams) */
+    linear-gradient(90deg, transparent 0, transparent calc(33% - 1px), rgba(0,0,0,0.45) calc(33% - 1px), rgba(0,0,0,0.45) calc(33% + 1px), transparent calc(33% + 1px), transparent calc(66% - 1px), rgba(0,0,0,0.45) calc(66% - 1px), rgba(0,0,0,0.45) calc(66% + 1px), transparent calc(66% + 1px)),
+    /* horizontal mortar */
+    linear-gradient(180deg, transparent 0, transparent calc(50% - 1px), rgba(0,0,0,0.4) calc(50% - 1px), rgba(0,0,0,0.4) calc(50% + 1px), transparent calc(50% + 1px)),
+    /* stone gradient */
+    linear-gradient(180deg, #4a3a28 0%, #2e2418 45%, #1a130d 100%);
+  background-blend-mode: normal;
+  /* crenellated top via clip-path: notches every 12% */
+  clip-path: polygon(
+    0 12px, 8% 12px, 8% 0, 16% 0, 16% 12px,
+    24% 12px, 24% 0, 32% 0, 32% 12px,
+    40% 12px, 40% 0, 48% 0, 48% 12px,
+    56% 12px, 56% 0, 64% 0, 64% 12px,
+    72% 12px, 72% 0, 80% 0, 80% 12px,
+    88% 12px, 88% 0, 96% 0, 96% 12px,
+    100% 12px, 100% 100%, 0 100%
+  );
+  border-radius: 0;
+  /* deep beveled side + cast shadow */
+  box-shadow:
+    inset 0 -6px 0 rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(232,200,122,0.18),
+    inset 4px 0 0 rgba(0,0,0,0.25),
+    inset -4px 0 0 rgba(0,0,0,0.25),
+    0 8px 0 #1a130d,
+    0 12px 24px rgba(0,0,0,0.6),
+    0 0 18px rgba(232,200,122,0.08);
+  text-shadow: 0 2px 4px rgba(0,0,0,0.7), 0 0 12px rgba(232,200,122,0.35);
+  font-size: 13px;
+  transition: transform .12s ease, box-shadow .12s ease, filter .2s ease;
+  will-change: transform, box-shadow;
 }
-.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(232,200,122,0.3); filter: brightness(1.1); }
+.btn-primary { font-size: 13px; }
 .btn-secondary {
-  padding: 10px 18px; background: transparent;
-  border: 1px solid rgba(232,200,122,0.3); color: var(--text-dim); border-radius: var(--rad);
-  font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
-  transition: all .2s ease;
+  padding: 10px 18px 12px; font-size: 11px; letter-spacing: .12em;
+  background:
+    linear-gradient(180deg, transparent 0, transparent calc(50% - 1px), rgba(0,0,0,0.35) calc(50% - 1px), rgba(0,0,0,0.35) calc(50% + 1px), transparent calc(50% + 1px)),
+    linear-gradient(180deg, #322619 0%, #1d1610 100%);
+  color: var(--text-dim);
+  box-shadow:
+    inset 0 -4px 0 rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(232,200,122,0.10),
+    0 5px 0 #14100b,
+    0 8px 16px rgba(0,0,0,0.55);
+  clip-path: polygon(
+    0 8px, 12% 8px, 12% 0, 24% 0, 24% 8px,
+    36% 8px, 36% 0, 48% 0, 48% 8px,
+    60% 8px, 60% 0, 72% 0, 72% 8px,
+    84% 8px, 84% 0, 96% 0, 96% 8px,
+    100% 8px, 100% 100%, 0 100%
+  );
 }
-.btn-secondary:hover { color: var(--gold); border-color: var(--gold); }
+.btn-primary:hover {
+  filter: brightness(1.08);
+  text-shadow: 0 2px 4px rgba(0,0,0,0.7), 0 0 18px rgba(255,217,140,0.6);
+  box-shadow:
+    inset 0 -6px 0 rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(232,200,122,0.25),
+    inset 4px 0 0 rgba(0,0,0,0.25),
+    inset -4px 0 0 rgba(0,0,0,0.25),
+    0 8px 0 #1a130d,
+    0 14px 32px rgba(232,200,122,0.18),
+    0 0 28px rgba(232,200,122,0.18);
+}
+.btn-secondary:hover { color: var(--gold); filter: brightness(1.15); }
+/* Press: settle into the wall — translate down by the bevel height, swallow shadow */
+.btn-primary:active {
+  transform: translateY(8px);
+  box-shadow:
+    inset 0 -2px 0 rgba(0,0,0,0.55),
+    inset 0 1px 0 rgba(232,200,122,0.18),
+    inset 4px 0 0 rgba(0,0,0,0.3),
+    inset -4px 0 0 rgba(0,0,0,0.3),
+    0 0 0 #1a130d,
+    0 4px 10px rgba(0,0,0,0.7),
+    0 0 14px rgba(232,200,122,0.10);
+}
+.btn-secondary:active {
+  transform: translateY(5px);
+  box-shadow:
+    inset 0 -2px 0 rgba(0,0,0,0.55),
+    inset 0 1px 0 rgba(232,200,122,0.10),
+    0 0 0 #14100b,
+    0 3px 8px rgba(0,0,0,0.7);
+}
+/* Banner pennants on hover for primary buttons (drape down from a notch) */
+.btn-primary::before, .btn-primary::after {
+  content: ''; position: absolute; top: 4px;
+  width: 4px; height: 12px;
+  background: linear-gradient(180deg, #6e1a1a, #3a0a0a 80%);
+  clip-path: polygon(0 0, 100% 0, 100% 80%, 50% 100%, 0 80%);
+  opacity: 0; transition: opacity .25s ease, transform .25s ease;
+}
+.btn-primary::before { left: 16%; transform-origin: top; }
+.btn-primary::after  { right: 16%; transform-origin: top; }
+.btn-primary:hover::before, .btn-primary:hover::after { opacity: .85; transform: scaleY(1.3); }
 
 .quest-list { display: flex; flex-direction: column; gap: 12px; }
 .quest-card {
@@ -691,6 +784,7 @@ a:hover { color: var(--gold-bright); }
 /* The vellum stage */
 .codex-stage {
   position: relative; z-index: 2;
+  contain: paint layout;
   margin: 0 clamp(8px, 2vw, 28px);
   border-radius: 4px;
   background:
@@ -712,12 +806,8 @@ a:hover { color: var(--gold-bright); }
     radial-gradient(ellipse 40% 30% at 20% 80%, rgba(120,80,40,0.06), transparent 70%),
     radial-gradient(ellipse 40% 30% at 80% 20%, rgba(120,80,40,0.06), transparent 70%);
 }
-/* Noise via SVG turbulence (sharp grain feel) */
-.codex-noise {
-  position: absolute; inset: 0; pointer-events: none; z-index: 0; opacity: .35;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .35 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
-  mix-blend-mode: overlay;
-}
+/* Static noise via tiny CSS gradient pattern (cheap) */
+.codex-noise { display: none; }
 /* Burnt edge vignette inside the paper */
 .codex-burn {
   position: absolute; inset: 0; pointer-events: none; z-index: 0;
@@ -862,14 +952,14 @@ a:hover { color: var(--gold-bright); }
   stroke-dasharray: 0.4 0.7; vector-effect: non-scaling-stroke; opacity: .85; }
 .road-edge { fill: none; stroke: #0a0604; stroke-width: 0.8; vector-effect: non-scaling-stroke; opacity: .9; }
 .road-light {
-  fill: none; stroke: rgba(255,170,80,0.35); stroke-width: 2.5;
+  fill: none; stroke: rgba(255,170,80,0.45); stroke-width: 4;
   stroke-linecap: round; vector-effect: non-scaling-stroke;
-  filter: blur(2px); opacity: 0;
-  animation: roadGlow 4s ease-in-out infinite;
+  opacity: .5;
+  animation: roadGlow 5s ease-in-out infinite;
 }
-.road-light.active { animation-delay: -1s; opacity: 1; }
-.road-light.cleared { stroke: rgba(255,210,130,0.55); animation-delay: -2s; opacity: 1; }
-@keyframes roadGlow { 0%,100% { opacity: .25; } 50% { opacity: .9; } }
+.road-light.active { opacity: .55; animation-delay: -1.5s; }
+.road-light.cleared { stroke: rgba(255,210,130,0.6); opacity: .7; animation-delay: -2.5s; }
+@keyframes roadGlow { 0%,100% { opacity: .35; } 50% { opacity: .85; } }
 
 /* Torch sconces along the road */
 .torch {
@@ -895,22 +985,23 @@ a:hover { color: var(--gold-bright); }
   width: 14px; height: 22px; border-radius: 50% 50% 30% 30%;
   background:
     radial-gradient(ellipse at 50% 95%, #fff5d8 0%, #ffd07a 25%, #ff8a3a 55%, #c9421a 80%, transparent 95%);
-  filter: blur(0.4px) drop-shadow(0 0 10px rgba(255,160,60,0.85)) drop-shadow(0 0 22px rgba(255,120,40,0.55));
-  animation: torchFlick .42s ease-in-out infinite alternate;
+  box-shadow: 0 0 10px rgba(255,160,60,0.7);
+  will-change: transform, opacity;
+  animation: torchFlick .55s ease-in-out infinite alternate;
 }
 .torch-halo {
   position: absolute; left: 50%; top: -2px; transform: translate(-50%, -50%);
-  width: 110px; height: 110px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,180,90,0.35) 0%, rgba(255,140,60,0.18) 30%, transparent 70%);
+  width: 80px; height: 80px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,180,90,0.30) 0%, rgba(255,140,60,0.10) 35%, transparent 70%);
   pointer-events: none; z-index: -1;
-  animation: torchHaloPulse 3s ease-in-out infinite;
+  will-change: opacity;
+  animation: torchHaloPulse 4s ease-in-out infinite;
 }
 @keyframes torchFlick {
-  0%   { transform: translateX(-50%) scaleY(1)    scaleX(1)   skewX(0deg); opacity: .92; }
-  40%  { transform: translateX(-52%) scaleY(1.1)  scaleX(.95) skewX(-3deg); opacity: 1; }
-  100% { transform: translateX(-48%) scaleY(.95)  scaleX(1.05) skewX(2deg); opacity: .96; }
+  0%   { transform: translateX(-50%) scaleY(1)    scaleX(1); opacity: .92; }
+  100% { transform: translateX(-50%) scaleY(.95) scaleX(1.05); opacity: 1; }
 }
-@keyframes torchHaloPulse { 0%,100% { opacity: .7; transform: translate(-50%, -50%) scale(.95); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); } }
+@keyframes torchHaloPulse { 0%,100% { opacity: .55; } 50% { opacity: 1; } }
 
 /* Spark embers shooting from torches */
 .torch-spark {
@@ -929,16 +1020,15 @@ a:hover { color: var(--gold-bright); }
 
 /* Ground fog drifting along the road */
 .road-fog {
-  position: absolute; left: 0; right: 0; height: 24px;
-  pointer-events: none; z-index: 2; opacity: .4;
-  background: radial-gradient(ellipse 60% 100% at 50% 50%, rgba(220,210,200,0.35), transparent 70%);
-  filter: blur(8px);
-  animation: fogDrift 20s linear infinite;
+  position: absolute; left: -10%; right: -10%; height: 50px;
+  pointer-events: none; z-index: 2; opacity: .35;
+  background: linear-gradient(90deg, transparent, rgba(220,210,200,0.18), rgba(220,210,200,0.30), rgba(220,210,200,0.18), transparent);
+  will-change: transform;
+  animation: fogDrift 24s linear infinite;
 }
 @keyframes fogDrift {
-  0%   { transform: translateX(-8%); opacity: .35; }
-  50%  { transform: translateX(8%);  opacity: .55; }
-  100% { transform: translateX(-8%); opacity: .35; }
+  0%   { transform: translateX(-6%); }
+  100% { transform: translateX(6%); }
 }
 
 /* Footer */
@@ -1886,7 +1976,7 @@ textarea.modal-comment {
     </section>
 
     <!-- ═════════ PATHWAY ═════════ -->
-    <section class="page" id="page-pathway">
+    <section class="page is-pathway" id="page-pathway">
       <div class="page-header">
         <div>
           <h1 class="page-title">The Pathway</h1>
@@ -2927,28 +3017,26 @@ function renderPathway() {
     torch.style.left = xPct + '%';
     torch.style.top = yPx + 'px';
     if (lit) {
-      const dx1 = ((di * 7) % 9) - 4, dx2 = ((di * 11) % 9) - 4, dx3 = ((di * 13) % 9) - 4;
+      const dx1 = ((di * 7) % 9) - 4;
       torch.innerHTML = `
         <div class="torch-halo"></div>
         <div class="torch-pole"></div>
         <div class="torch-bowl"></div>
         <div class="torch-flame"></div>
-        <div class="torch-spark" style="--sp-dur:${(2 + (di % 5) * 0.3).toFixed(1)}s;--sp-delay:0s;--sp-dx:${dx1}px"></div>
-        <div class="torch-spark" style="--sp-dur:${(2.4 + (di % 4) * 0.4).toFixed(1)}s;--sp-delay:.6s;--sp-dx:${dx2}px"></div>
-        <div class="torch-spark" style="--sp-dur:${(2.8 + (di % 3) * 0.5).toFixed(1)}s;--sp-delay:1.2s;--sp-dx:${dx3}px"></div>`;
+        <div class="torch-spark" style="--sp-dur:${(2.4 + (di % 5) * 0.4).toFixed(1)}s;--sp-delay:0s;--sp-dx:${dx1}px"></div>`;
     } else {
       torch.innerHTML = `<div class="torch-pole"></div><div class="torch-bowl"></div>`;
       torch.style.opacity = '.5';
     }
     stage.appendChild(torch);
   };
-  segments.forEach((seg, i) => torchAt(seg.mx, seg.my, !!seg.cls, i));
+  // Cap torch count for perf — every other midpoint torch + one torch per lit keep
+  segments.forEach((seg, i) => { if (i % 2 === 0 || seg.cls) torchAt(seg.mx, seg.my, !!seg.cls, i); });
   ordered.forEach(([t, d], ix) => {
     const conf = d.total ? (d.confSum / d.total) / 5 : 0;
     if (conf <= 0) return;
     const p = pos.get(t);
-    torchAt(p.x - 7, p.y + 80, true, ix * 2);
-    torchAt(p.x + 7, p.y + 80, true, ix * 2 + 1);
+    torchAt(p.x, p.y + 82, true, ix);
   });
 
   // Ground fog every couple rows
