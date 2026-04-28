@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Algorithm Dungeon</title>
+<title>Algorithm Dungeon — v2 Cinematic</title>
 <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700;900&family=Press+Start+2P&family=JetBrains+Mono:wght@300;400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ── Dark Theme (Enchanted Forest Night) ── */
@@ -2882,7 +2882,159 @@ td { padding: 11px 14px; vertical-align: middle; }
 }
 </style>
 </head>
-<body>
+<body class="v2-cinematic">
+
+<!-- ===== V2 CINEMATIC LAYER ===== -->
+<style>
+  /* Cinematic overrides — strictly additive, won't break v1 logic */
+  .v2-cinematic { --v2-ink:#0a0d14; --v2-gold:#d9b56b; --v2-blood:#7a1f1f; --v2-mist:rgba(180,200,220,0.08); }
+  .v2-cinematic body, .v2-cinematic { background: radial-gradient(1200px 800px at 50% -10%, #1a1410 0%, #0a0d14 55%, #05060a 100%) fixed !important; }
+  /* Ambient FX layers */
+  .v2-fx { position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+  .v2-fx.fog { background:
+      radial-gradient(900px 400px at 20% 30%, rgba(120,140,160,0.10), transparent 60%),
+      radial-gradient(700px 350px at 80% 70%, rgba(160,120,90,0.08), transparent 60%);
+      animation: v2FogDrift 60s ease-in-out infinite alternate; mix-blend-mode: screen; }
+  @keyframes v2FogDrift { 0%{transform:translate3d(0,0,0)} 100%{transform:translate3d(-40px,20px,0)} }
+  .v2-fx.vignette { background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.55) 100%); }
+  .v2-fx.scanlines { background-image: repeating-linear-gradient(180deg, rgba(255,255,255,0.012) 0 1px, transparent 1px 3px); mix-blend-mode: overlay; opacity:.5; }
+  .v2-fx.embers { z-index:1; }
+  .v2-ember { position:absolute; bottom:-10px; width:3px; height:3px; border-radius:50%;
+    background: radial-gradient(circle, #ffd089 0%, #d97a1a 60%, transparent 70%);
+    filter: blur(.5px); box-shadow: 0 0 8px #ffb466; opacity:.0;
+    animation: v2EmberRise linear infinite; }
+  @keyframes v2EmberRise { 0%{transform:translate3d(0,0,0) scale(.6); opacity:0} 10%{opacity:.9}
+    100%{transform:translate3d(var(--dx,20px),-110vh,0) scale(.2); opacity:0} }
+  /* Torchlight cursor halo */
+  .v2-fx.torch { background: radial-gradient(220px 220px at var(--mx,50%) var(--my,50%), rgba(255,180,90,0.10), transparent 70%); transition: background-position .1s linear; mix-blend-mode: screen; z-index:2; }
+
+  /* Intro overlay */
+  .v2-intro { position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center;
+    background: radial-gradient(ellipse at center, #14100b 0%, #05060a 70%, #000 100%);
+    color:#e9d6a8; font-family:'Cinzel Decorative',serif; flex-direction:column; gap:18px; cursor:pointer;
+    animation: v2IntroIn .6s ease both; }
+  .v2-intro .crest { width:120px; height:120px; border-radius:50%;
+    background: radial-gradient(circle, rgba(217,181,107,0.35), transparent 70%);
+    border: 2px solid rgba(217,181,107,0.6); display:flex; align-items:center; justify-content:center;
+    font-size: 56px; box-shadow: 0 0 40px rgba(217,181,107,0.4), inset 0 0 30px rgba(217,181,107,0.15);
+    animation: v2CrestPulse 2.4s ease-in-out infinite; }
+  @keyframes v2CrestPulse { 0%,100%{transform:scale(1); filter:brightness(1)} 50%{transform:scale(1.05); filter:brightness(1.25)} }
+  .v2-intro .title { font-size: clamp(28px, 5vw, 56px); letter-spacing:.12em; text-shadow: 0 0 20px rgba(217,181,107,0.5); }
+  .v2-intro .subtitle { font-family:'MedievalSharp',serif; opacity:.75; letter-spacing:.2em; font-size:14px; }
+  .v2-intro .hint { font-family:'Inter',sans-serif; opacity:.55; font-size:12px; margin-top:16px; }
+  .v2-intro.fade-out { animation: v2IntroOut .8s ease forwards; }
+  @keyframes v2IntroIn { from{opacity:0; transform:scale(1.04)} to{opacity:1; transform:scale(1)} }
+  @keyframes v2IntroOut { to{opacity:0; transform:scale(.98); visibility:hidden} }
+
+  /* Ripple on click */
+  .v2-ripple { position:fixed; pointer-events:none; border-radius:50%;
+    background: radial-gradient(circle, rgba(255,200,120,.45) 0%, rgba(255,200,120,0) 70%);
+    width:8px; height:8px; transform:translate(-50%,-50%) scale(1); animation: v2Ripple .6s ease-out forwards; z-index:9998; }
+  @keyframes v2Ripple { to{ transform:translate(-50%,-50%) scale(40); opacity:0 } }
+
+  /* Milestone screen shake */
+  @keyframes v2Shake { 0%,100%{transform:translate3d(0,0,0)} 20%{transform:translate3d(-4px,2px,0)} 40%{transform:translate3d(5px,-3px,0)} 60%{transform:translate3d(-3px,4px,0)} 80%{transform:translate3d(3px,-2px,0)} }
+  .v2-shake { animation: v2Shake .5s ease both; }
+
+  /* Glow polish on key panels (additive) */
+  .v2-cinematic .quest-board, .v2-cinematic .dash-panel-card, .v2-cinematic .quest-setup,
+  .v2-cinematic .panel, .v2-cinematic .pathway-shell {
+    box-shadow: 0 0 0 1px rgba(217,181,107,0.08), 0 30px 80px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.03) !important;
+  }
+  .v2-cinematic .page-title { text-shadow: 0 0 24px rgba(217,181,107,0.35); }
+
+  /* Build tag */
+  .v2-build-tag { position:fixed; right:10px; bottom:10px; z-index:9990; font-family:'JetBrains Mono',monospace;
+    font-size:10px; letter-spacing:.18em; color:#d9b56b; opacity:.55; pointer-events:none;
+    text-shadow:0 0 8px rgba(217,181,107,.4); }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .v2-fx, .v2-ember, .v2-intro .crest { animation:none !important; }
+  }
+</style>
+
+<div class="v2-fx fog"></div>
+<div class="v2-fx embers" id="v2-embers"></div>
+<div class="v2-fx torch" id="v2-torch"></div>
+<div class="v2-fx scanlines"></div>
+<div class="v2-fx vignette"></div>
+
+<div class="v2-intro" id="v2-intro" role="button" aria-label="Enter the dungeon">
+  <div class="crest">⚔</div>
+  <div class="title">ALGORITHM DUNGEON</div>
+  <div class="subtitle">— A CINEMATIC EDITION —</div>
+  <div class="hint">Click anywhere to enter</div>
+</div>
+
+<div class="v2-build-tag">v2 · cinematic build</div>
+<a href="../" class="v2-back-link" style="position:fixed; left:10px; bottom:10px; z-index:9990; font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.18em; color:#d9b56b; opacity:.6; text-decoration:none; padding:6px 10px; border:1px solid rgba(217,181,107,0.3); border-radius:4px; background:rgba(0,0,0,0.4); backdrop-filter:blur(4px);">&larr; BACK TO CLASSIC</a>
+
+<script>
+(function v2Cinematic(){
+  // Intro overlay
+  var intro = document.getElementById('v2-intro');
+  function dismissIntro(){
+    if(!intro || intro.classList.contains('fade-out')) return;
+    intro.classList.add('fade-out');
+    setTimeout(function(){ intro && intro.parentNode && intro.parentNode.removeChild(intro); }, 850);
+  }
+  if(intro){
+    intro.addEventListener('click', dismissIntro);
+    document.addEventListener('keydown', function(e){ if(e.key==='Enter' || e.key===' ') dismissIntro(); }, {once:true});
+    setTimeout(dismissIntro, 6000); // auto-dismiss safety
+  }
+  // Embers
+  var embers = document.getElementById('v2-embers');
+  if(embers){
+    var EMBER_COUNT = window.matchMedia('(max-width: 768px)').matches ? 12 : 28;
+    for(var i=0;i<EMBER_COUNT;i++){
+      var e = document.createElement('div');
+      e.className = 'v2-ember';
+      e.style.left = (Math.random()*100)+'%';
+      e.style.animationDuration = (8 + Math.random()*10) + 's';
+      e.style.animationDelay = (Math.random()*8) + 's';
+      e.style.setProperty('--dx', ((Math.random()-.5)*120)+'px');
+      e.style.opacity = (0.4 + Math.random()*0.5);
+      embers.appendChild(e);
+    }
+  }
+  // Torch follow
+  var torch = document.getElementById('v2-torch');
+  if(torch){
+    window.addEventListener('pointermove', function(ev){
+      torch.style.setProperty('--mx', ev.clientX+'px');
+      torch.style.setProperty('--my', ev.clientY+'px');
+    }, {passive:true});
+  }
+  // Click ripple
+  document.addEventListener('click', function(ev){
+    if(ev.target.closest('input,textarea,select')) return;
+    var r = document.createElement('div');
+    r.className = 'v2-ripple';
+    r.style.left = ev.clientX+'px';
+    r.style.top  = ev.clientY+'px';
+    document.body.appendChild(r);
+    setTimeout(function(){ r.remove(); }, 650);
+  }, true);
+  // Milestone shake hook (called by app on victory / level up)
+  window.v2CelebrateShake = function(){
+    document.body.classList.remove('v2-shake');
+    void document.body.offsetWidth;
+    document.body.classList.add('v2-shake');
+    setTimeout(function(){ document.body.classList.remove('v2-shake'); }, 600);
+  };
+  // Hook into existing victory log if present (best-effort, non-breaking)
+  var origSave = window.saveModal;
+  if(typeof origSave === 'function'){
+    window.saveModal = function(){
+      try { return origSave.apply(this, arguments); }
+      finally { try { window.v2CelebrateShake(); } catch(_){} }
+    };
+  }
+})();
+</script>
+<!-- ===== /V2 CINEMATIC LAYER ===== -->
 
 <!-- SVG Template Definitions (hidden) -->
 <svg style="display:none" xmlns="http://www.w3.org/2000/svg">
@@ -3066,7 +3218,6 @@ td { padding: 11px 14px; vertical-align: middle; }
     <button class="sidebar-action-btn" onclick="exportProgress()">&#128190; Export</button>
     <button class="sidebar-action-btn" onclick="document.getElementById('import-file').click()">&#128194; Import</button>
     <button class="sidebar-action-btn" id="sync-btn-desktop" onclick="connectProgressSync()">&#9725; Sync</button>
-    <a class="sidebar-action-btn" href="v2/" style="text-decoration:none; text-align:center; background:linear-gradient(135deg, rgba(217,181,107,0.18), rgba(122,31,31,0.18)); border-color:rgba(217,181,107,0.5);">&#127914; Try v2 (Cinematic)</a>
     <input type="file" id="import-file" accept=".json" style="display:none" onchange="importProgress(event)">
   </div>
   <div class="sync-status" id="sync-status-desktop">Sync: Local only</div>
@@ -3333,7 +3484,6 @@ td { padding: 11px 14px; vertical-align: middle; }
   <button class="drawer-util-btn" onclick="document.getElementById('import-file').click()">&#128194; Import Progress</button>
   <button class="drawer-util-btn" id="sync-btn-mobile" onclick="connectProgressSync()">&#9725; Connect Sync File</button>
   <button class="drawer-util-btn" onclick="toggleTheme()">&#9788;&#65039; Toggle Theme</button>
-  <a class="drawer-util-btn" href="v2/" style="text-decoration:none; display:block; text-align:center;">&#127914; Try v2 (Cinematic)</a>
   <div class="sync-status" id="sync-status-mobile" style="padding:2px 6px 0;">Sync: Local only</div>
 </aside>
 <button class="mobile-hunt-fab" id="mobile-hunt-fab" onclick="startTodayHunt()">Start Hunt</button>
