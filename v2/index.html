@@ -622,89 +622,112 @@ a:hover { color: var(--gold-bright); }
 /* ═════════════════════════════════════════════════════════════════════════
    PATHWAY (zigzag SVG map)
    ═════════════════════════════════════════════════════════════════════════ */
+/* ─── Pathway: Stone-Altar redesign ─── */
 .pathway-shell {
-  position: relative; padding: clamp(20px, 3vw, 44px);
+  position: relative;
+  padding: clamp(24px, 3vw, 48px) clamp(16px, 3vw, 40px);
   background:
-    radial-gradient(ellipse at 30% 20%, rgba(245,225,180,0.6) 0%, transparent 50%),
-    radial-gradient(ellipse at 70% 80%, rgba(120,80,40,0.4) 0%, transparent 50%),
-    radial-gradient(ellipse at center, rgba(214,195,154,0.95) 0%, rgba(180,150,100,0.88) 60%, rgba(120,90,60,0.78) 100%),
-    linear-gradient(180deg, rgba(214,195,154,0.97), rgba(180,150,100,0.88));
-  border: 1px solid rgba(120,90,60,0.5); border-radius: var(--rad-lg);
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(232,200,122,0.10), transparent 60%),
+    radial-gradient(ellipse 60% 80% at 50% 100%, rgba(138,26,26,0.10), transparent 60%),
+    linear-gradient(180deg, #14100c 0%, #0b0807 60%, #050403 100%);
+  border: 1px solid rgba(232,200,122,0.18);
+  border-radius: var(--rad-lg);
   overflow: hidden;
   box-shadow:
-    0 30px 80px rgba(0,0,0,0.65),
-    inset 0 0 80px rgba(120,80,40,0.65),
-    inset 0 0 200px rgba(80,50,20,0.5),
-    inset 0 0 0 14px rgba(80,50,20,0.18);
+    0 40px 100px rgba(0,0,0,0.7),
+    inset 0 1px 0 rgba(232,200,122,0.08),
+    inset 0 0 120px rgba(0,0,0,0.6);
   min-height: 800px;
 }
-.pathway-clouds {
-  position: absolute; inset: -10%; pointer-events: none; z-index: 1;
-  background-repeat: repeat;
-  opacity: .35; mix-blend-mode: screen;
+.pathway-vignette {
+  position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  background: radial-gradient(ellipse 70% 90% at 50% 50%, transparent 30%, rgba(0,0,0,0.85) 100%);
 }
-.pathway-clouds.layer-a {
-  background-image:
-    radial-gradient(ellipse 200px 60px at 20% 30%, rgba(255,255,255,0.5), transparent 70%),
-    radial-gradient(ellipse 280px 80px at 70% 60%, rgba(255,255,255,0.4), transparent 70%),
-    radial-gradient(ellipse 220px 70px at 90% 20%, rgba(255,255,255,0.45), transparent 70%);
-  background-size: 1200px 600px;
-  animation: cloudDriftA 90s linear infinite;
-}
-.pathway-clouds.layer-b {
-  background-image:
-    radial-gradient(ellipse 160px 40px at 40% 80%, rgba(255,255,255,0.35), transparent 70%),
-    radial-gradient(ellipse 220px 60px at 80% 30%, rgba(255,255,255,0.3), transparent 70%);
-  background-size: 1400px 700px;
-  animation: cloudDriftB 140s linear infinite reverse;
-  opacity: .25;
-}
-@keyframes cloudDriftA { from { background-position: 0 0; } to { background-position: -1200px 0; } }
-@keyframes cloudDriftB { from { background-position: 0 0; } to { background-position: -1400px 0; } }
-.pathway-ravens { position: absolute; inset: 0; pointer-events: none; z-index: 2; overflow: hidden; }
-.raven {
-  position: absolute; width: 24px; height: 14px;
+.pathway-mist {
+  position: absolute; inset: 0; pointer-events: none; z-index: 2; opacity: .25;
   background:
-    radial-gradient(ellipse 12px 5px at 50% 50%, #1a1208 60%, transparent 70%);
-  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
-  animation: ravenFly 25s linear infinite;
+    radial-gradient(ellipse 600px 200px at 50% 30%, rgba(232,200,122,0.12), transparent 70%),
+    radial-gradient(ellipse 500px 160px at 50% 70%, rgba(93,138,168,0.10), transparent 70%);
+  filter: blur(10px);
+  animation: mistBreathe 12s ease-in-out infinite;
 }
-.raven::before { content: ''; position: absolute; left: 50%; top: 30%; width: 14px; height: 8px; transform: translateX(-50%); background: radial-gradient(ellipse 7px 4px at 50% 50%, #1a1208 60%, transparent 70%); animation: wingFlap 0.6s ease-in-out infinite; }
-@keyframes wingFlap { 0%,100% { transform: translateX(-50%) scaleY(1); } 50% { transform: translateX(-50%) scaleY(0.4); } }
-@keyframes ravenFly {
-  0% { transform: translate3d(-30px, 20vh, 0); opacity: 0; }
-  10% { opacity: .85; }
-  90% { opacity: .85; }
-  100% { transform: translate3d(110vw, -10vh, 0); opacity: 0; }
+@keyframes mistBreathe { 0%,100% { opacity: .2; } 50% { opacity: .35; } }
+.pathway-header {
+  position: relative; z-index: 3; text-align: center;
+  margin: 0 auto clamp(20px, 3vw, 36px); max-width: 640px;
 }
-.pathway-cartouche {
-  position: relative; z-index: 4; display: block; margin: 0 auto var(--space-md);
-  max-width: 600px;
-  filter: drop-shadow(0 6px 14px rgba(0,0,0,0.5));
+.pathway-eyebrow {
+  font-family: var(--medieval); color: var(--gold); letter-spacing: .35em;
+  font-size: 11px; text-transform: uppercase; opacity: .85; margin-bottom: 8px;
 }
-.pathway-cartouche svg { width: 100%; height: auto; display: block; }
+.pathway-title {
+  font-family: var(--serif-display); font-weight: 900;
+  font-size: clamp(22px, 3vw, 32px); color: var(--text);
+  letter-spacing: .04em; margin: 0 0 8px;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.6), 0 0 30px rgba(232,200,122,0.15);
+}
+.pathway-sub {
+  font-family: var(--ui); color: var(--text-dim); font-size: 13px;
+  font-style: italic; opacity: .8;
+}
 .pathway-legend {
-  position: absolute; bottom: 18px; left: 24px; z-index: 6;
-  display: flex; gap: 16px; padding: 8px 14px;
-  background: rgba(40,20,10,0.7); border: 1px solid rgba(232,200,122,0.3); border-radius: 4px;
-  font-family: var(--medieval); color: var(--gold); font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
-  backdrop-filter: blur(4px);
+  position: relative; z-index: 4;
+  display: flex; gap: 20px; justify-content: center;
+  margin-bottom: clamp(20px, 3vw, 36px);
+  font-family: var(--mono); color: var(--text-dim);
+  font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
 }
 .pathway-legend > div { display: flex; align-items: center; gap: 6px; }
-.leg-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.5); }
-.leg-dot.complete { background: #7a2a1a; }
-.leg-dot.active { background: #5a1a1a; }
-.leg-dot.uncharted { background: #3a2410; }
-.pathway-svg { position: relative; z-index: 3; }
-.path-node { transition: transform .25s ease; }
-.path-node:hover { transform: scale(1.08); transform-origin: center; }
-/* Wax drip on hover */
-.path-node:hover .wax-drip { opacity: 1; transform: translateY(0); }
-.wax-drip {
-  opacity: 0; transform: translateY(-4px);
-  transition: opacity .3s ease .15s, transform .4s cubic-bezier(.4,0,.2,1) .15s;
-  fill: #5a1a1a; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+.leg-dot {
+  display: inline-block; width: 8px; height: 8px;
+  transform: rotate(45deg); border: 1px solid rgba(232,200,122,0.4);
+  box-shadow: 0 0 8px currentColor;
 }
+.leg-dot.complete { background: var(--gold); color: var(--gold); }
+.leg-dot.active { background: var(--blood); color: var(--blood-bright); }
+.leg-dot.uncharted { background: transparent; color: transparent; opacity: .5; }
+.pathway-stage {
+  position: relative; z-index: 3;
+  max-width: 560px; margin: 0 auto;
+}
+.pathway-svg { display: block; width: 100%; height: auto; overflow: visible; }
+/* Rune-stone nodes */
+.path-node { cursor: pointer; transition: transform .3s cubic-bezier(.4,0,.2,1); }
+.path-node:hover { transform: scale(1.06); transform-origin: center; }
+.rune-base { fill: #1a1410; stroke: rgba(232,200,122,0.35); stroke-width: 1.5; transition: all .3s ease; }
+.rune-base.complete { fill: #2a1f12; stroke: var(--gold); }
+.rune-base.active { fill: #1f1410; stroke: var(--blood-bright); }
+.rune-base.uncharted { fill: #0e0a08; stroke: rgba(110,94,71,0.4); stroke-dasharray: 3 4; }
+.path-node:hover .rune-base {
+  filter: drop-shadow(0 0 16px rgba(232,200,122,0.5));
+  stroke: var(--gold-bright);
+}
+.rune-glow { fill: url(#nodeGlow); opacity: .7; pointer-events: none; }
+.rune-arc { fill: none; stroke-linecap: round; transition: stroke-dashoffset 1.5s cubic-bezier(.4,0,.2,1); }
+.rune-icon { font-size: 28px; text-anchor: middle; pointer-events: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.7)); }
+.rune-label {
+  font-family: var(--serif); font-weight: 600; font-size: 14px;
+  fill: var(--text); text-anchor: middle; letter-spacing: .03em;
+  pointer-events: none; text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+.rune-pct {
+  font-family: var(--mono); font-size: 11px; fill: var(--text-dim);
+  text-anchor: middle; pointer-events: none; letter-spacing: .1em;
+}
+.rune-num {
+  font-family: var(--mono); font-size: 9px; fill: var(--text-muted);
+  text-anchor: middle; pointer-events: none; letter-spacing: .25em;
+}
+/* Stone bridges between nodes */
+.bridge-line {
+  fill: none; stroke: rgba(232,200,122,0.18); stroke-width: 1.5;
+  stroke-dasharray: 1 6; stroke-linecap: round;
+}
+.bridge-line.complete { stroke: rgba(232,200,122,0.55); stroke-dasharray: 0; stroke-width: 2; }
+/* Due badge */
+.due-badge { fill: var(--blood-bright); filter: drop-shadow(0 0 6px rgba(201,42,42,0.6)); }
+.due-badge.warn { fill: var(--medium); filter: drop-shadow(0 0 6px rgba(200,156,74,0.6)); }
+.due-badge-text { fill: #fff; font-family: var(--mono); font-size: 10px; font-weight: 700; text-anchor: middle; pointer-events: none; }
 /* Aged paper texture via SVG noise */
 .pathway-shell::before {
   content: ''; position: absolute; inset: 0; pointer-events: none;
@@ -722,39 +745,7 @@ a:hover { color: var(--gold-bright); }
   background-size: 320px 320px;
   mix-blend-mode: multiply; opacity: .55;
 }
-.pathway-bg { display: none; } /* hidden — parchment shell handles backdrop */
-.pathway-svg { display: block; width: 100%; height: auto; position: relative; z-index: 1; }
-.path-line {
-  stroke: #3a2410; stroke-width: 2.5; fill: none; stroke-linecap: round;
-  stroke-dasharray: 4 6; animation: pathFlow 60s linear infinite; opacity: .7;
-  filter: drop-shadow(0 1px 0 rgba(0,0,0,0.3));
-}
-.path-line.thick { stroke-width: 3.5; opacity: .9; }
-@keyframes pathFlow { to { stroke-dashoffset: -300; } }
-.path-node {
-  cursor: pointer; transition: transform .25s ease;
-}
-.path-node:hover { transform: scale(1.08); transform-origin: center; }
-/* WAX SEAL nodes on parchment */
-.path-node circle.outer { fill: #5a1a1a; stroke: #2a0808; stroke-width: 2.5; transition: stroke .3s ease; filter: drop-shadow(0 3px 4px rgba(0,0,0,0.5)); }
-.path-node circle.outer.complete { fill: #7a2a1a; }
-.path-node circle.outer.unstarted { fill: #3a2410; }
-.path-node:hover circle.outer { stroke: #ffd98c; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.7)) drop-shadow(0 0 8px rgba(255,217,140,0.6)); }
-.path-node circle.seal-inner { fill: none; stroke: #2a0808; stroke-width: 1; opacity: .6; }
-.path-node circle.seal-rim { fill: none; stroke: rgba(255,200,150,0.3); stroke-width: 1; }
-.path-node circle.progress { fill: none; stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 1.5s cubic-bezier(.4,0,.2,1); transform: rotate(-90deg); transform-origin: center; opacity: .85; }
-.path-node text.label { font-family: var(--medieval), serif; font-weight: 700; font-size: 13px; fill: #fdf3c9; text-anchor: middle; letter-spacing: .04em; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
-.path-node text.icon { font-size: 24px; text-anchor: middle; pointer-events: none; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.7)); }
-.path-node text.pct { font-family: var(--mono); font-size: 11px; fill: #fdf3c9; text-anchor: middle; pointer-events: none; opacity: .8; }
-.path-node text.region-name {
-  font-family: var(--serif-display), serif; font-weight: 700; font-size: 18px;
-  fill: #2a1808; text-anchor: middle; letter-spacing: .05em; pointer-events: none;
-  text-shadow: 0 1px 0 rgba(255,240,200,0.3);
-}
-.path-node text.region-num {
-  font-family: var(--medieval), serif; font-size: 11px; letter-spacing: .25em;
-  fill: #5a3a1a; text-anchor: middle; pointer-events: none; text-transform: uppercase;
-}
+/* legacy classes removed — see new .rune-* / .bridge-* above */
 
 /* ═════════════════════════════════════════════════════════════════════════
    BESTIARY (problem list)
@@ -1570,31 +1561,22 @@ textarea.modal-comment {
           <div class="page-subtitle">Through the forest of unknowns</div>
         </div>
       </div>
-      <div class="pathway-shell fcorners">
-        <svg class="fc tl" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
-        <svg class="fc tr" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
-        <svg class="fc bl" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
-        <svg class="fc br" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
-        <div class="pathway-clouds layer-a"></div>
-        <div class="pathway-clouds layer-b"></div>
-        <div class="pathway-ravens" id="pathway-ravens"></div>
-        <div class="pathway-cartouche">
-          <svg viewBox="0 0 600 80" preserveAspectRatio="xMidYMid meet">
-            <defs>
-              <filter id="parchInk"><feTurbulence baseFrequency="0.9" numOctaves="2"/><feDisplacementMap in="SourceGraphic" scale="0.6"/></filter>
-            </defs>
-            <path d="M 50 40 Q 30 10 60 10 L 540 10 Q 570 10 550 40 L 540 70 Q 570 70 540 70 L 60 70 Q 30 70 60 70 Z"
-              fill="rgba(245,225,180,0.4)" stroke="#3a2410" stroke-width="2" filter="url(#parchInk)"/>
-            <text x="300" y="45" text-anchor="middle" font-family="Cinzel Decorative, serif" font-weight="900" font-size="22" fill="#3a1410" letter-spacing="6">ATLAS · OF · LORDRAN</text>
-            <text x="300" y="62" text-anchor="middle" font-family="MedievalSharp, serif" font-size="10" fill="#5a3a1a" letter-spacing="4" font-style="italic">— a chronicle of the slayer —</text>
-          </svg>
-        </div>
-        <svg class="pathway-svg" id="pathway-svg" viewBox="0 0 1000 1800" preserveAspectRatio="xMidYMid meet"></svg>
-        <div class="path-tooltip" id="path-tooltip"></div>
+      <div class="pathway-shell">
+        <div class="pathway-vignette"></div>
+        <div class="pathway-mist"></div>
+        <header class="pathway-header">
+          <div class="pathway-eyebrow">⚜ The Long Road ⚜</div>
+          <h2 class="pathway-title">Path of the Algorithm Slayer</h2>
+          <div class="pathway-sub">Each rune-stone marks a topic. Conquer them in order, or wander as you please.</div>
+        </header>
         <div class="pathway-legend">
           <div><span class="leg-dot complete"></span>Conquered</div>
           <div><span class="leg-dot active"></span>In progress</div>
           <div><span class="leg-dot uncharted"></span>Uncharted</div>
+        </div>
+        <div class="pathway-stage">
+          <svg class="pathway-svg" id="pathway-svg" viewBox="0 0 600 1800" preserveAspectRatio="xMidYMid meet"></svg>
+          <div class="path-tooltip" id="path-tooltip"></div>
         </div>
       </div>
     </section>
@@ -2485,17 +2467,7 @@ function updateBadges() {
 /* ═════════ PATHWAY ═════════ */
 function renderPathway() {
   const svg = document.getElementById('pathway-svg');
-  const topics = {};
-  RAW_PROBLEMS.forEach(p => {
-    if (!topics[p.topic]) topics[p.topic] = { total: 0, solved: 0 };
-    topics[p.topic].total++;
-    if (getConf(p) > 0) topics[p.topic].solved++;
-  });
-  // Compute richer per-topic stats for tooltip
-  const _ = 0;
-  // Update scroll banner
-  const banner = document.getElementById('pathway-scroll');
-  if (banner) banner.innerHTML = '⚜ Atlas of Lordran ⚜';
+  if (!svg) return;
   const stats = {};
   RAW_PROBLEMS.forEach(p => {
     if (!stats[p.topic]) stats[p.topic] = { total: 0, solved: 0, due: 0, overdue: 0 };
@@ -2509,151 +2481,100 @@ function renderPathway() {
       }
     }
   });
-  const list = Object.entries(topics).sort((a, b) => b[1].total - a[1].total);
+  const list = Object.entries(stats).sort((a, b) => b[1].total - a[1].total);
   const N = list.length;
-  const W = 1100, H = Math.max(900, 200 + Math.ceil(N / 4) * 240);
-  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
 
-  // Position nodes in a meandering map layout — gentle grid with jitter so it feels hand-placed
+  // Vertical zigzag layout
+  const W = 600;
+  const STEP = 200;
+  const H = 120 + N * STEP + 80;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
   const positions = list.map((_, i) => {
-    const col = i % 4;
-    const row = Math.floor(i / 4);
-    const baseX = 130 + col * (W - 260) / 3;
-    const baseY = 140 + row * 230;
-    // pseudo-random jitter so it looks placed, not gridded
-    const jx = ((i * 73) % 60) - 30;
-    const jy = ((i * 59) % 50) - 25;
-    return { x: baseX + jx, y: baseY + jy };
+    const side = i % 2 === 0 ? -1 : 1; // alternate
+    const x = W / 2 + side * 130;
+    const y = 120 + i * STEP;
+    return { x, y };
   });
 
-  // Compass rose (decorative)
-  const compass = `<g transform="translate(${W - 110}, ${H - 110})" opacity=".5">
-    <circle r="60" fill="none" stroke="#3a2410" stroke-width="1.5"/>
-    <circle r="50" fill="none" stroke="#3a2410" stroke-width="0.8" stroke-dasharray="2 4"/>
-    <path d="M 0 -55 L 8 0 L 0 55 L -8 0 Z" fill="#5a1a1a" stroke="#2a0808" stroke-width="1"/>
-    <path d="M -55 0 L 0 -8 L 55 0 L 0 8 Z" fill="#3a2410" opacity=".6"/>
-    <text y="-65" text-anchor="middle" font-family="serif" font-weight="700" fill="#3a2410" font-size="14">N</text>
-    <text y="74" text-anchor="middle" font-family="serif" font-weight="700" fill="#3a2410" font-size="14">S</text>
-    <text x="68" y="5" text-anchor="middle" font-family="serif" font-weight="700" fill="#3a2410" font-size="14">E</text>
-    <text x="-68" y="5" text-anchor="middle" font-family="serif" font-weight="700" fill="#3a2410" font-size="14">W</text>
-    <circle r="3" fill="#5a1a1a"/>
-  </g>`;
+  // Defs: glow gradient
+  const defs = `<defs>
+    <radialGradient id="nodeGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(232,200,122,0.45)"/>
+      <stop offset="60%" stop-color="rgba(232,200,122,0.12)"/>
+      <stop offset="100%" stop-color="rgba(232,200,122,0)"/>
+    </radialGradient>
+  </defs>`;
 
-  // Decorative ink flourishes in corners
-  const flourishes = `
-    <g opacity=".35" stroke="#3a2410" stroke-width="1.2" fill="none">
-      <path d="M 30 30 Q 60 20 90 50 Q 70 80 30 60 Q 20 40 30 30 Z"/>
-      <path d="M 50 50 Q 70 40 80 60" />
-      <path d="M ${W - 30} 30 Q ${W - 60} 20 ${W - 90} 50 Q ${W - 70} 80 ${W - 30} 60 Z"/>
-    </g>
-    <text x="${W/2}" y="${H - 20}" text-anchor="middle" font-family="serif" font-style="italic" fill="#5a3a1a" opacity=".4" font-size="12">— hic sunt leones —</text>`;
-
-  // Build inkline trails connecting nodes: dashed quill-line, slightly meandering
-  let trails = '';
+  // Bridges: smooth S-curve between consecutive nodes
+  let bridges = '';
   for (let i = 1; i < positions.length; i++) {
-    const p0 = positions[i - 1], p1 = positions[i];
-    const dx = p1.x - p0.x, dy = p1.y - p0.y;
-    const cx1 = p0.x + dx * 0.3 + (Math.sin(i * 1.3) * 40);
-    const cy1 = p0.y + dy * 0.2 - 25;
-    const cx2 = p0.x + dx * 0.7 + (Math.cos(i * 1.7) * 40);
-    const cy2 = p0.y + dy * 0.8 + 25;
-    trails += `<path class="path-line" d="M ${p0.x} ${p0.y} C ${cx1} ${cy1} ${cx2} ${cy2} ${p1.x} ${p1.y}"/>`;
-    // Footprint dots along the path
-    for (let f = 0.2; f < 1; f += 0.18) {
-      const fx = (1 - f) * (1 - f) * (1 - f) * p0.x + 3 * (1 - f) * (1 - f) * f * cx1 + 3 * (1 - f) * f * f * cx2 + f * f * f * p1.x;
-      const fy = (1 - f) * (1 - f) * (1 - f) * p0.y + 3 * (1 - f) * (1 - f) * f * cy1 + 3 * (1 - f) * f * f * cy2 + f * f * f * p1.y;
-      trails += `<circle cx="${fx}" cy="${fy}" r="1.4" fill="#3a2410" opacity=".4"/>`;
-    }
+    const a = positions[i - 1], b = positions[i];
+    const mx = (a.x + b.x) / 2;
+    const my = (a.y + b.y) / 2;
+    const c1x = a.x, c1y = my;
+    const c2x = b.x, c2y = my;
+    const isDone = (list[i - 1][1].solved / Math.max(1, list[i - 1][1].total)) >= 1;
+    bridges += `<path class="bridge-line ${isDone ? 'complete' : ''}" d="M ${a.x} ${a.y + 56} C ${c1x} ${c1y} ${c2x} ${c2y} ${b.x} ${b.y - 56}"/>`;
   }
 
-  // Weather/Region overlays — soft cloud puffs over high-progress regions
-  let weather = '';
-  positions.forEach((pos, i) => {
-    const [t, d] = list[i];
-    const pp = d.total ? d.solved / d.total : 0;
-    if (pp < 0.5) {
-      // Mist (uncharted)
-      weather += `<g opacity=".25" transform="translate(${pos.x},${pos.y - 60})">
-        <ellipse cx="-20" cy="0" rx="40" ry="14" fill="#fdf3c9"/>
-        <ellipse cx="15" cy="-5" rx="35" ry="12" fill="#fdf3c9"/>
-        <ellipse cx="0" cy="5" rx="50" ry="14" fill="#fdf3c9"/>
-      </g>`;
+  // Hex helper
+  const hexPath = (r) => {
+    const pts = [];
+    for (let k = 0; k < 6; k++) {
+      const ang = Math.PI / 6 + k * Math.PI / 3;
+      pts.push(`${(r * Math.cos(ang)).toFixed(2)} ${(r * Math.sin(ang)).toFixed(2)}`);
     }
-    if (pp >= 1) {
-      // Sun rays for fully cleared
-      weather += `<g transform="translate(${pos.x},${pos.y})" opacity=".35"><circle r="80" fill="url(#gateGlow)"/></g>`;
-    }
-  });
+    return `M ${pts[0]} L ${pts.slice(1).join(' L ')} Z`;
+  };
 
-  // Wax-seal nodes
+  // Nodes
   let nodes = '';
   list.forEach(([t, d], i) => {
     const v = visualOf(t);
     const pp = d.total ? d.solved / d.total : 0;
-    const C = 2 * Math.PI * 38;
-    const off = C - C * pp;
+    const cls = pp >= 1 ? 'complete' : (pp <= 0 ? 'uncharted' : 'active');
     const pos = positions[i];
-    const s = stats[t] || { due: 0, overdue: 0 };
-    const cls = pp >= 1 ? 'complete' : (pp <= 0 ? 'unstarted' : '');
-    const sealRing = `<circle r="46" fill="none" stroke="#2a0808" stroke-width="1" opacity=".5"/>
-      <circle r="50" fill="none" stroke="#2a0808" stroke-width="0.5" stroke-dasharray="3 3" opacity=".4"/>`;
-    const dueBadge = (s.due + s.overdue) > 0 ? `<g transform="translate(36, -36)">
-      <circle r="13" fill="${s.overdue ? '#b04545' : '#c89c4a'}" stroke="#2a0808" stroke-width="2"/>
-      <text y="4" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#fdf3c9">${s.due + s.overdue}</text>
-    </g>` : '';
-    const regionLabel = `<g transform="translate(0, ${68})">
-      <text class="region-num">REGION ${String(i + 1).padStart(2, '0')}</text>
-      <text class="region-name" y="20">${t.length > 18 ? t.slice(0, 16) + '…' : t}</text>
-    </g>`;
-    // Wax drip — appears on hover
-    const drip = `<g class="wax-drip">
-      <path d="M -4 38 Q -3 48 0 56 Q 3 48 4 38 Z"/>
-      <circle cx="0" cy="58" r="3"/>
-    </g>`;
-    nodes += `<g class="path-node" data-topic="${t.replace(/"/g,'&quot;')}" transform="translate(${pos.x},${pos.y})" onclick="filterByTopic('${t.replace(/'/g,"\\'")}')">
-      ${sealRing}
-      ${drip}
-      <circle class="outer ${cls}" r="42"/>
-      <circle class="progress" r="38" stroke="${v.color}" stroke-dasharray="${C}" stroke-dashoffset="${off}" stroke-width="5"/>
-      <text class="icon" y="-2">${v.icon}</text>
-      <text class="pct" y="20">${d.solved}/${d.total}</text>
+    const C = 2 * Math.PI * 50;
+    const off = C - C * pp;
+    const arcCol = pp >= 1 ? 'var(--gold)' : (pp <= 0 ? 'rgba(110,94,71,0.4)' : 'var(--blood-bright)');
+    const dueCount = d.due + d.overdue;
+    const dueBadge = dueCount > 0
+      ? `<g transform="translate(45, -45)">
+          <circle class="due-badge ${d.overdue ? '' : 'warn'}" r="13"/>
+          <text class="due-badge-text" y="4">${dueCount}</text>
+        </g>`
+      : '';
+    const labelText = t.length > 18 ? t.slice(0, 16) + '…' : t;
+    nodes += `<g class="path-node" data-topic="${t.replace(/"/g, '&quot;')}" transform="translate(${pos.x}, ${pos.y})" onclick="filterByTopic('${t.replace(/'/g, "\\'")}')">
+      <circle class="rune-glow" r="68"/>
+      <path class="rune-base ${cls}" d="${hexPath(56)}"/>
+      <circle class="rune-arc" r="50" stroke="${arcCol}" stroke-width="3" stroke-dasharray="${C}" stroke-dashoffset="${off}" transform="rotate(-90)"/>
+      <text class="rune-icon" y="-6">${v.icon}</text>
+      <text class="rune-pct" y="22">${d.solved}/${d.total}</text>
+      <text class="rune-num" y="-78">${String(i + 1).padStart(2, '0')}</text>
+      <text class="rune-label" y="92">${labelText}</text>
       ${dueBadge}
-      ${regionLabel}
     </g>`;
   });
 
-  // Spawn ravens
-  const ravenWrap = document.getElementById('pathway-ravens');
-  if (ravenWrap && !ravenWrap.dataset.populated) {
-    for (let i = 0; i < 3; i++) {
-      const r = document.createElement('div');
-      r.className = 'raven';
-      r.style.top = (10 + Math.random() * 60) + '%';
-      r.style.animationDelay = (Math.random() * 25) + 's';
-      r.style.animationDuration = (20 + Math.random() * 15) + 's';
-      ravenWrap.appendChild(r);
-    }
-    ravenWrap.dataset.populated = '1';
-  }
+  svg.innerHTML = `${defs}${bridges}${nodes}`;
 
-  svg.innerHTML = `${flourishes}${trails}${weather}${nodes}${compass}`;
-
-  // Tooltip wiring
+  // Tooltip
   const tip = document.getElementById('path-tooltip');
-  const shell = document.querySelector('.pathway-shell');
+  const stage = document.querySelector('.pathway-stage');
   svg.querySelectorAll('.path-node').forEach(n => {
-    n.addEventListener('pointerenter', e => {
+    n.addEventListener('pointerenter', () => {
       const t = n.dataset.topic;
       const s = stats[t]; if (!s) return;
-      const total = s.total, solved = s.solved, unseen = total - solved;
+      const unseen = s.total - s.solved;
       tip.innerHTML = `<h5>${visualOf(t).icon} ${t}</h5>
-        <div>${solved} / ${total} slain</div>
+        <div>${s.solved} / ${s.total} slain</div>
         <div style="color:${s.due || s.overdue ? 'var(--medium)' : 'var(--text-muted)'}">${s.due} due · ${s.overdue} overdue</div>
         <div style="color:var(--text-muted)">${unseen} uncharted</div>`;
       tip.classList.add('show');
     });
     n.addEventListener('pointermove', e => {
-      const r = shell.getBoundingClientRect();
+      const r = stage.getBoundingClientRect();
       tip.style.left = (e.clientX - r.left + 16) + 'px';
       tip.style.top = (e.clientY - r.top + 16) + 'px';
     });
