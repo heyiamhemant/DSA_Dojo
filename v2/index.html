@@ -1461,9 +1461,24 @@ textarea.modal-comment {
 }
 @media (max-width: 720px) { .dash-tab { padding: 6px 10px; font-size: 11px; } }
 /* Tab visibility on bento cells */
-.page.is-dashboard.tab-overview .bento-cell[data-tab]:not([data-tab~="overview"]):not([data-tab~="all"]) { display: none; }
-.page.is-dashboard.tab-progress .bento-cell[data-tab]:not([data-tab~="progress"]):not([data-tab~="all"]) { display: none; }
-.page.is-dashboard.tab-map .bento-cell[data-tab]:not([data-tab~="map"]):not([data-tab~="all"]) { display: none; }
+.page.is-dashboard.tab-overview [data-tab]:not([data-tab~="overview"]):not([data-tab~="all"]) { display: none; }
+.page.is-dashboard.tab-progress [data-tab]:not([data-tab~="progress"]):not([data-tab~="all"]) { display: none; }
+.page.is-dashboard.tab-map [data-tab]:not([data-tab~="map"]):not([data-tab~="all"]) { display: none; }
+
+/* On non-Overview tabs, drop the 4-col bento grid and let panels span full width naturally */
+.page.is-dashboard.tab-progress .bento,
+.page.is-dashboard.tab-map .bento {
+  grid-template-columns: 1fr !important;
+}
+/* Topic Mastery on the Realms tab needs a roomy multi-col tile grid */
+.page.is-dashboard.tab-map .mastery-grid {
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
+  gap: clamp(12px, 1.4vw, 22px);
+}
+/* Dungeon mastery cards on Realms tab — same auto-fill */
+.page.is-dashboard.tab-map .dungeon-grid {
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
+}
 
 /* ── Utility strip: glass chips beneath page header ── */
 .dash-utility { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
@@ -2038,7 +2053,7 @@ textarea.modal-comment {
         </div>
       </div>
 
-      <div class="hero fcorners">
+      <div class="hero fcorners" data-tab="overview">
         <svg class="fc tl" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
         <svg class="fc tr" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
         <svg class="fc bl" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
@@ -2065,7 +2080,7 @@ textarea.modal-comment {
         </div>
       </div>
 
-      <button class="cta-enter" onclick="navigate('pathway')">
+      <button class="cta-enter" data-tab="overview" onclick="navigate('pathway')">
         <span class="runes">⚔ ☩ ⚔</span>
         <span class="cta-stack">
           <span class="cta-line cta-warn">— Beyond this gate —</span>
