@@ -2085,6 +2085,136 @@ textarea.modal-comment {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+/* ═════════ Mobile overflow / responsive polish ═════════ */
+@media (max-width: 720px) {
+  /* Page-level: ensure nothing forces horizontal scroll */
+  html, body { overflow-x: hidden; }
+  .main { padding-left: clamp(12px, 3vw, 18px) !important; padding-right: clamp(12px, 3vw, 18px) !important; }
+
+  /* Page headers: stop sticking, scale down */
+  .page-header {
+    position: static !important;
+    margin-left: 0 !important; margin-right: 0 !important;
+    padding-left: 0 !important; padding-right: 0 !important;
+  }
+  .page-title { font-size: clamp(22px, 7vw, 32px) !important; line-height: 1.1; word-break: break-word; }
+  .page-subtitle { font-size: 11px !important; letter-spacing: .2em; }
+
+  /* Hero card: stack, center, allow wrap */
+  .hero { padding: 16px !important; gap: 12px !important; }
+  .hero-name { font-size: 24px !important; word-break: break-word; }
+  .hero-title { font-size: 11px !important; letter-spacing: .15em; }
+  .hero-xp-text { font-size: 10px !important; }
+  .hero-powerbars { max-width: 100% !important; }
+  .hpb-row { grid-template-columns: 78px 1fr 76px !important; gap: 8px !important; font-size: 10px !important; }
+  .hpb-stats { font-size: 10px !important; min-width: 0 !important; }
+  .hpb-label { letter-spacing: .08em !important; }
+
+  /* Streak badge wraps below */
+  .streak-badge { font-size: 11px !important; padding: 8px 12px !important; }
+  .streak-num { font-size: 26px !important; }
+
+  /* Realm cards */
+  .realm-card { padding: 14px !important; gap: 10px !important; min-height: 200px !important; }
+  .rl-name { font-size: 14px !important; word-break: break-word; line-height: 1.2; }
+  .rl-sub { font-size: 10px !important; }
+  .rl-prog-row { font-size: 10px !important; flex-wrap: wrap; }
+  .rl-prog-val { font-size: 10px !important; }
+  .rl-tier-stats { font-size: 10px !important; }
+  .rl-conq, .rl-alert { font-size: 9px !important; padding: 2px 6px !important; }
+
+  /* Dungeon mastery cards */
+  .dungeon-name { font-size: 12px !important; word-break: break-word; }
+  .dungeon-progress { font-size: 10px !important; }
+
+  /* Topic mastery */
+  .mastery-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important; }
+  .mastery-name { font-size: 11px !important; }
+
+  /* Bestiary monster cards */
+  .monster-card { padding: 14px !important; min-height: 140px !important; }
+  .mc-name { font-size: 13px !important; line-height: 1.25; word-break: break-word; }
+  .mc-num { font-size: 9px !important; }
+  .mc-hint { font-size: 11px !important; min-height: 0 !important; }
+  .mc-tag { font-size: 9px !important; padding: 2px 6px !important; }
+  .mc-stars { font-size: 11px !important; }
+  .mc-sprite { font-size: 26px !important; }
+  .bestiary-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important; gap: 10px !important; }
+
+  /* Quest cards: stack the 3-column layout vertically on mobile */
+  .quest-card {
+    grid-template-columns: 56px 1fr !important;
+    grid-template-rows: auto auto !important;
+    grid-template-areas: 'icon info' 'actions actions' !important;
+    padding: 12px !important; gap: 10px !important;
+  }
+  .quest-monster { grid-area: icon; }
+  .quest-info { grid-area: info; min-width: 0; }
+  .quest-name { font-size: 14px !important; word-break: break-word; line-height: 1.25; }
+  .quest-meta { font-size: 10px !important; flex-wrap: wrap; gap: 4px !important; }
+  .quest-tag { font-size: 9px !important; padding: 2px 6px !important; }
+  .quest-reason { font-size: 10px !important; }
+  .quest-xp { font-size: 11px !important; white-space: nowrap; }
+  .quest-action { font-size: 11px !important; padding: 6px 12px !important; }
+  .quest-card > div:last-child { grid-area: actions; justify-content: flex-end; }
+
+  /* Boss cards */
+  .boss-card { padding: 16px !important; min-height: 180px !important; }
+  .boss-title { font-size: 16px !important; line-height: 1.2; word-break: break-word; }
+  .boss-desc { font-size: 12px !important; }
+  .boss-tag { font-size: 9px !important; padding: 2px 6px !important; }
+  .boss-grid { grid-template-columns: 1fr !important; }
+
+  /* Modal */
+  .modal { width: 96vw !important; max-width: 96vw !important; max-height: 92vh !important; }
+  .modal-title { font-size: 18px !important; word-break: break-word; line-height: 1.2; }
+  .modal-meta { font-size: 10px !important; flex-wrap: wrap; gap: 6px !important; }
+
+  /* Pathway tooltip */
+  .path-tooltip { font-size: 11px !important; max-width: 80vw !important; }
+
+  /* Heatmap: shrink, allow scroll */
+  .hm-cell, .hm-cells > .hm-cell { width: 11px !important; height: 11px !important; }
+  .hm-cells { grid-auto-columns: 11px !important; grid-template-rows: repeat(7, 11px) !important; }
+
+  /* Dashboard tabs row: tighten and make scroll-friendly if needed */
+  .dash-tabs-row { padding: 0 !important; }
+  .dash-tabs { gap: 4px !important; padding: 6px !important; flex-wrap: wrap; }
+  .dash-tab { padding: 8px 10px !important; min-width: 0 !important; flex: 1; }
+  .dt-label { font-size: 11px !important; letter-spacing: .04em; }
+
+  /* Utility chips: wrap nicely, shrink */
+  .util-chip { padding: 6px 10px !important; min-width: 0 !important; }
+  .uc-val { font-size: 14px !important; }
+  .uc-label { font-size: 8px !important; letter-spacing: .15em; }
+
+  /* Generic: prevent any overflow */
+  .panel-title { font-size: 13px !important; word-break: break-word; }
+  .panel { padding: 16px !important; }
+  .summary-meta { font-size: 9px !important; letter-spacing: .04em; }
+  .bento-cell.panel > details { padding: 16px !important; }
+  .bento-cell.panel > details > summary { padding: 12px 16px !important; margin: -16px !important; margin-bottom: 0 !important; }
+  .bento-cell.panel > details[open] > summary { margin-bottom: 14px !important; }
+
+  /* Buttons inside cards: prevent crammed layouts */
+  .btn-primary, .btn-secondary { font-size: 12px !important; padding: 10px 16px !important; }
+  .cta-enter { padding: 18px !important; }
+  .cta-enter .cta-line.cta-main { font-size: 22px !important; letter-spacing: .04em; }
+  .cta-enter .cta-line.cta-warn { font-size: 9px !important; letter-spacing: .2em; }
+
+  /* Quick rate buttons */
+  .quest-rate-btn { width: 28px !important; height: 28px !important; font-size: 12px !important; }
+}
+
+/* Tighter still on very small screens */
+@media (max-width: 380px) {
+  .hpb-row { grid-template-columns: 66px 1fr 60px !important; }
+  .quest-name { font-size: 13px !important; }
+  .rl-name { font-size: 13px !important; }
+  .mc-name { font-size: 12px !important; }
+}
+
 </style>
 </head>
 <body>
