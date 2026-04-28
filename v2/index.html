@@ -3256,7 +3256,9 @@ document.getElementById('dungeon-grid').innerHTML = rows.map(r => {
 
 function renderDashboard() {
   renderUtilityStrip();
-  const xp = computeXP();
+  // computeXP() returns {totalXP, slain}; we want the number for level math.
+  const _xpData = computeXP();
+  const xp = (_xpData && typeof _xpData === 'object') ? (_xpData.totalXP || 0) : (_xpData || 0);
   // LEVEL_THRESHOLDS is array of {level, xp, rank} objects (from dojo-core.js).
   // Convert to number-XP for comparison and read the rank from the same row.
   const _xpOf = (i) => (LEVEL_THRESHOLDS[i] && typeof LEVEL_THRESHOLDS[i] === 'object')
