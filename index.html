@@ -4368,11 +4368,44 @@ function toggleTheme() {
   toast('Dark realm only — light mode forthcoming');
 }
 
+/* ═════════ THEMED QUEST CONTROLS ═════════ */
+// Update the chip-row's hidden input + visual selection.
+function setSegValue(chip) {
+  const seg = chip.closest('.qseg'); if (!seg) return;
+  const targetId = seg.dataset.target;
+  const target = targetId ? document.getElementById(targetId) : null;
+  seg.querySelectorAll('.qseg-chip').forEach(c => c.classList.toggle('is-on', c === chip));
+  if (target) {
+    target.value = chip.dataset.val || '';
+    // Fire change so any listeners (none today, but future-proof) react.
+    try { target.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) {}
+  }
+}
+
+// Keep the CSS --qsl-fill var in sync with the slider position (WebKit
+// gradient track needs this; Firefox uses ::-moz-range-progress instead).
+function syncQslFill(range) {
+  const min = +range.min || 0;
+  const max = +range.max || 100;
+  const v = +range.value;
+  const pct = max > min ? ((v - min) / (max - min)) * 100 : 0;
+  range.style.setProperty('--qsl-fill', pct.toFixed(2) + '%');
+}
+document.addEventListener('input', e => {
+  if (e.target && e.target.classList && e.target.classList.contains('qsl-range')) {
+    syncQslFill(e.target);
+  }
+});
+window.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.qsl-range').forEach(syncQslFill);
+});
+
 /* ═════════ INIT ═════════ */
 function init() {
   loadState();
   if (typeof initProgressSync === 'function') initProgressSync();
   navigate('dashboard');
+  document.querySelectorAll('.qsl-range').forEach(syncQslFill);
 }
 init();
 </script>
