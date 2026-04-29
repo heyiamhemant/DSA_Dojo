@@ -710,17 +710,147 @@ a:hover { color: var(--gold-bright); }
    QUEST BOARD
    ═════════════════════════════════════════════════════════════════════════ */
 .quest-controls {
-  display: flex; flex-wrap: wrap; gap: var(--space); align-items: center;
+  display: flex; flex-wrap: wrap; gap: var(--space-md); align-items: flex-end;
   margin-bottom: var(--space-md);
 }
 .quest-control {
-  display: flex; flex-direction: column; gap: 4px;
+  display: flex; flex-direction: column; gap: 6px;
+  min-width: 0;
 }
-.quest-control label { font-family: var(--mono); font-size: 10px; color: var(--text-dim); letter-spacing: .15em; text-transform: uppercase; }
-.quest-control input, .quest-control select {
-  background: rgba(0,0,0,0.4); border: 1px solid rgba(232,200,122,0.2);
-  color: var(--text); padding: 8px 12px; border-radius: var(--rad-sm);
-  font-family: var(--mono); font-size: 13px;
+.quest-control > label {
+  font-family: var(--mono); font-size: 10px; color: var(--text-dim);
+  letter-spacing: .18em; text-transform: uppercase;
+}
+
+/* ── Themed range sliders (Number, Min Reviews) ── */
+.quest-slider-control { flex: 1 1 200px; max-width: 280px; }
+.qsl-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+}
+.qsl-val {
+  font-family: var(--serif); font-size: 22px; font-weight: 700;
+  color: var(--gold-bright, #f0d590);
+  text-shadow: 0 0 12px rgba(217,181,107,0.45);
+  min-width: 28px; text-align: right;
+  line-height: 1;
+}
+.qsl-track-wrap {
+  position: relative; padding: 6px 2px 8px;
+}
+.qsl-ticks {
+  position: absolute; left: 0; right: 0; bottom: 4px;
+  display: flex; justify-content: space-between;
+  pointer-events: none; padding: 0 6px;
+}
+.qsl-ticks span {
+  width: 1px; height: 6px;
+  background: rgba(217,181,107,0.28);
+}
+.qsl-axis {
+  display: flex; justify-content: space-between;
+  font-family: var(--mono); font-size: 9px;
+  color: var(--text-dim); opacity: 0.65;
+  letter-spacing: .15em;
+}
+.qsl-range {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 18px; background: transparent; cursor: grab;
+  position: relative; z-index: 2;
+  margin: 0;
+}
+.qsl-range:active { cursor: grabbing; }
+.qsl-range:focus { outline: none; }
+
+/* WebKit track */
+.qsl-range::-webkit-slider-runnable-track {
+  height: 6px;
+  background:
+    linear-gradient(90deg, rgba(217,181,107,0.55) 0%, rgba(217,181,107,0.55) var(--qsl-fill, 50%), rgba(0,0,0,0.55) var(--qsl-fill, 50%), rgba(0,0,0,0.55) 100%);
+  border: 1px solid rgba(217,181,107,0.30);
+  border-radius: 99px;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,0,0,0.4);
+}
+.qsl-range::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 18px; height: 18px;
+  margin-top: -7px;
+  background: radial-gradient(circle at 30% 30%, #f5dfa3, #c89c4a 60%, #6b4a18 100%);
+  border: 1px solid rgba(0,0,0,0.7);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(217,181,107,0.55), 0 2px 4px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.4);
+  cursor: grab;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.qsl-range:hover::-webkit-slider-thumb,
+.qsl-range:focus::-webkit-slider-thumb { transform: scale(1.12); box-shadow: 0 0 16px rgba(217,181,107,0.85), 0 2px 6px rgba(0,0,0,0.7), inset 0 1px 1px rgba(255,255,255,0.5); }
+
+/* Firefox track */
+.qsl-range::-moz-range-track {
+  height: 6px;
+  background: rgba(0,0,0,0.55);
+  border: 1px solid rgba(217,181,107,0.30);
+  border-radius: 99px;
+}
+.qsl-range::-moz-range-progress {
+  height: 6px;
+  background: linear-gradient(90deg, rgba(217,181,107,0.7), rgba(217,181,107,0.45));
+  border-radius: 99px 0 0 99px;
+}
+.qsl-range::-moz-range-thumb {
+  width: 18px; height: 18px;
+  background: radial-gradient(circle at 30% 30%, #f5dfa3, #c89c4a 60%, #6b4a18 100%);
+  border: 1px solid rgba(0,0,0,0.7);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(217,181,107,0.55), 0 2px 4px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.4);
+  cursor: grab;
+  transition: transform 0.12s ease;
+}
+.qsl-range:hover::-moz-range-thumb,
+.qsl-range:focus::-moz-range-thumb { transform: scale(1.12); box-shadow: 0 0 16px rgba(217,181,107,0.85), 0 2px 6px rgba(0,0,0,0.7), inset 0 1px 1px rgba(255,255,255,0.5); }
+
+/* ── Themed segmented chip-row (Balance, Difficulty) ── */
+.quest-seg-control { flex: 0 1 auto; }
+.qseg {
+  display: inline-flex; padding: 3px;
+  background: linear-gradient(180deg, rgba(0,0,0,0.55), rgba(0,0,0,0.35));
+  border: 1px solid rgba(217,181,107,0.22);
+  border-radius: 8px;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+  gap: 2px;
+  flex-wrap: wrap;
+}
+.qseg-chip {
+  appearance: none; -webkit-appearance: none;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-dim);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .1em; text-transform: uppercase;
+  padding: 7px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease;
+  white-space: nowrap;
+}
+.qseg-chip:hover { color: var(--gold-bright, #f0d590); background: rgba(217,181,107,0.06); }
+.qseg-chip.is-on {
+  background: linear-gradient(180deg, rgba(217,181,107,0.28), rgba(122,75,18,0.30));
+  color: var(--gold-bright, #f5dfa3);
+  border-color: rgba(217,181,107,0.55);
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.45) inset, 0 1px 0 rgba(255,255,255,0.06) inset, 0 0 12px rgba(217,181,107,0.30);
+  text-shadow: 0 0 6px rgba(217,181,107,0.5);
+}
+.qseg-chip.is-on.qseg-easy { background: linear-gradient(180deg, rgba(111,168,107,0.30), rgba(46,90,40,0.30)); border-color: rgba(111,168,107,0.55); color: #cfe8c4; box-shadow: 0 0 12px rgba(111,168,107,0.30), inset 0 1px 0 rgba(255,255,255,0.06); text-shadow: 0 0 6px rgba(111,168,107,0.5); }
+.qseg-chip.is-on.qseg-hard { background: linear-gradient(180deg, rgba(176,69,69,0.32), rgba(70,18,18,0.32)); border-color: rgba(176,69,69,0.6); color: #f3c8c0; box-shadow: 0 0 12px rgba(176,69,69,0.30), inset 0 1px 0 rgba(255,255,255,0.06); text-shadow: 0 0 6px rgba(176,69,69,0.5); }
+.qseg-chip:focus-visible { outline: 1px dashed var(--gold-bright, #f0d590); outline-offset: 2px; }
+
+@media (max-width: 720px) {
+  .quest-controls { gap: 12px; }
+  .quest-slider-control { flex: 1 1 100%; max-width: none; }
+  .quest-seg-control { flex: 1 1 100%; }
+  .qseg { width: 100%; justify-content: stretch; }
+  .qseg-chip { flex: 1 1 0; min-width: 0; padding: 7px 6px; font-size: 10px; letter-spacing: .06em; }
 }
 /* ── Rampart wall buttons ── */
 .btn-primary, .btn-secondary {
@@ -2524,26 +2654,55 @@ textarea.modal-comment {
         </div>
       </div>
 
-      <div class="panel" style="margin-bottom:var(--space-md)">
+      <div class="panel quest-panel" style="margin-bottom:var(--space-md)">
         <div class="quest-controls">
-          <div class="quest-control"><label>Number</label><input type="number" id="q-count" min="1" max="20" value="5"></div>
-          <div class="quest-control"><label>Min Reviews</label><input type="number" id="q-min-reviews" min="0" max="20" value="2"></div>
-          <div class="quest-control"><label>Balance</label>
-            <select id="q-balance">
-              <option value="balanced">Balanced</option>
-              <option value="review-heavy">Review heavy</option>
-              <option value="new-heavy">New encounters</option>
-              <option value="mixed">Mixed</option>
-            </select>
+
+          <div class="quest-control quest-slider-control">
+            <div class="qsl-head"><label for="q-count">Number</label><output class="qsl-val" id="q-count-out">5</output></div>
+            <div class="qsl-track-wrap">
+              <input type="range" class="qsl-range" id="q-count" min="1" max="20" step="1" value="5"
+                     oninput="document.getElementById('q-count-out').textContent=this.value">
+              <div class="qsl-ticks" aria-hidden="true">
+                <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+              </div>
+            </div>
+            <div class="qsl-axis"><span>1</span><span>10</span><span>20</span></div>
           </div>
-          <div class="quest-control"><label>Difficulty</label>
-            <select id="q-difficulty">
-              <option value="auto">Auto (recommended)</option>
-              <option value="easy">Easy only</option>
-              <option value="mixed">Mixed</option>
-              <option value="hard">Hard focus</option>
-            </select>
+
+          <div class="quest-control quest-slider-control">
+            <div class="qsl-head"><label for="q-min-reviews">Min Reviews</label><output class="qsl-val" id="q-min-reviews-out">2</output></div>
+            <div class="qsl-track-wrap">
+              <input type="range" class="qsl-range" id="q-min-reviews" min="0" max="20" step="1" value="2"
+                     oninput="document.getElementById('q-min-reviews-out').textContent=this.value">
+              <div class="qsl-ticks" aria-hidden="true">
+                <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+              </div>
+            </div>
+            <div class="qsl-axis"><span>0</span><span>10</span><span>20</span></div>
           </div>
+
+          <div class="quest-control quest-seg-control">
+            <label>Balance</label>
+            <input type="hidden" id="q-balance" value="balanced">
+            <div class="qseg" role="tablist" data-target="q-balance">
+              <button type="button" class="qseg-chip is-on" data-val="balanced" onclick="setSegValue(this)">Balanced</button>
+              <button type="button" class="qseg-chip" data-val="review-heavy" onclick="setSegValue(this)">Review</button>
+              <button type="button" class="qseg-chip" data-val="new-heavy" onclick="setSegValue(this)">New</button>
+              <button type="button" class="qseg-chip" data-val="mixed" onclick="setSegValue(this)">Mixed</button>
+            </div>
+          </div>
+
+          <div class="quest-control quest-seg-control">
+            <label>Difficulty</label>
+            <input type="hidden" id="q-difficulty" value="auto">
+            <div class="qseg" role="tablist" data-target="q-difficulty">
+              <button type="button" class="qseg-chip is-on" data-val="auto" onclick="setSegValue(this)">Auto</button>
+              <button type="button" class="qseg-chip qseg-easy" data-val="easy" onclick="setSegValue(this)">Easy</button>
+              <button type="button" class="qseg-chip" data-val="mixed" onclick="setSegValue(this)">Mixed</button>
+              <button type="button" class="qseg-chip qseg-hard" data-val="hard" onclick="setSegValue(this)">Hard</button>
+            </div>
+          </div>
+
           <button class="btn-primary" onclick="genQuests()">⚔ Generate Today's Hunt</button>
         </div>
       </div>
