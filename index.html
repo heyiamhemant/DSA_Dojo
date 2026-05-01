@@ -3293,6 +3293,21 @@ function saveBestStreak(v) {
   try { localStorage.setItem('dsa_dojo_best_streak', String(v)); } catch (e) {}
 }
 
+// ─── HTML-escape helper for user/data fields interpolated into innerHTML.
+//     Three problem hints contain literal '<' / '>' (e.g. "left < root, right > root")
+//     which the browser parsed as start tags, breaking the bestiary card grid
+//     (cards rendered nested inside other cards, columns went blank). Always
+//     escape any data field you string-concat into HTML.
+function esc(v) {
+  if (v == null) return '';
+  return String(v)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function getStreakDays() {
   const dates = new Set();
   Object.values(userData).forEach(ud => {
@@ -3730,7 +3745,7 @@ function togglePowerDetail(diff) {
   } else {
     const renderItem = ({ p, c, xp }) => `
       <div class="pw-detail-item" onclick="event.stopPropagation(); openModal(${p.id})" title="${(p.name||'').replace(/"/g,'&quot;')}">
-        <span class="pw-detail-name">${p.num ? '#' + p.num + ' ' : ''}${p.name || ''}</span>
+        <span class="pw-detail-name">${p.num ? '#' + esc(p.num) + ' ' : ''}${esc(p.name || '')}</span>
         <span class="pw-detail-conf" style="color:${confColors[c] || confColors[0]};background:${c > 0 ? (confColors[c] || confColors[0]) + '22' : 'rgba(255,255,255,0.04)'}">${confLabels[c] || '?'}</span>
         <span class="pw-detail-xp">${xp > 0 ? '+' + xp : '—'}</span>
       </div>`;
@@ -3909,7 +3924,7 @@ function renderPowerLevels() {
       const dateLbl = last ? new Date(last).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: '2-digit' }) : '—';
       return `<li class="power-detail-item" onclick="event.stopPropagation();openModal(${p.id})">
         <span>${monsterFor(p)}</span>
-        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)">${p.name}</span>
+        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)">${esc(p.name)}</span>
         <span class="power-detail-stars">${'★'.repeat(c)}</span>
         <span class="power-detail-date">${dateLbl}</span>
       </li>`;
@@ -4067,8 +4082,8 @@ function renderTopicDeepDive() {
     const _scene = sceneFor(p.topic);
     return `<div class="monster-card ${conf > 0 ? 'solved' : ''}" onclick="openModal(${p.id})" style="--diff-col:${diffCol};background-image:linear-gradient(180deg,rgba(11,8,7,0.35) 0%,rgba(11,8,7,0.85) 75%,rgba(11,8,7,0.95) 100%),url('${_scene}');background-size:100% 100%,cover;background-position:0 0,center;background-repeat:no-repeat,no-repeat;">
       <div class="mc-head"><div class="mc-sprite">${monsterFor(p)}</div>
-        <div><h4 class="mc-name">${p.name}</h4><div class="mc-num">#${p.num} · ${tierNameOf(p)} · ${p.diff}</div></div></div>
-      <div class="mc-hint">${(p.hint||'').slice(0,110)}${(p.hint||'').length>110?'…':''}</div>
+        <div><h4 class="mc-name">${esc(p.name)}</h4><div class="mc-num">#${esc(p.num)} · ${esc(tierNameOf(p))} · ${esc(p.diff)}</div></div></div>
+      <div class="mc-hint">${esc((p.hint||'').slice(0,110))}${(p.hint||'').length>110?'…':''}</div>
       <div class="mc-foot">
         <span class="mc-stars">${'★'.repeat(conf)}${'☆'.repeat(5-conf)}</span>
       </div>
@@ -4135,10 +4150,10 @@ function renderQuests() {
     return `<div class="quest-card ${q.done ? 'done' : ''}" data-id="${p.id}" style="--mc:${v.color}40;background-image:linear-gradient(180deg,rgba(11,8,7,0.40) 0%,rgba(11,8,7,0.88) 75%,rgba(11,8,7,0.95) 100%),url('${_scene}');background-size:100% 100%,cover;background-position:0 0,center;background-repeat:no-repeat,no-repeat;">
       <div class="quest-monster" onclick="openModal(${p.id})" title="${tierNameOf(p)}">${monsterFor(p)}</div>
       <div class="quest-info" onclick="openModal(${p.id})">
-        <h4 class="quest-name">${p.name}</h4>
+        <h4 class="quest-name">${esc(p.name)}</h4>
         <div class="quest-meta">
           <span class="quest-tag ${p.diff.toLowerCase()}">${tierNameOf(p)} · ${p.diff}</span>
-          <span class="quest-tag">${visualOf(p.topic).icon} ${p.topic}</span>
+          <span class="quest-tag">${visualOf(p.topic).icon} ${esc(p.topic)}</span>
           ${isOverdue ? `<span class="quest-tag hard">⏰ ${overdueDays}d overdue</span>` : ''}
           ${p.lc_url ? `<a class="quest-tag" href="${p.lc_url}" target="_blank" onclick="event.stopPropagation()" style="text-decoration:none">🔗 LeetCode ↗</a>` : ''}
         </div>
@@ -4447,23 +4462,25 @@ function renderBestiary() {
     const ud = userData[p.id] || {};
     const diffCol = p.diff === 'Easy' ? 'var(--easy)' : p.diff === 'Medium' ? 'var(--medium)' : 'var(--hard)';
     const _scene = sceneFor(p.topic);
+    const _hint = String(p.hint || '');
+    const _hintShort = _hint.length > 110 ? _hint.slice(0, 110) + '…' : _hint;
     return `<div class="monster-card ${conf > 0 ? 'solved' : ''}" onclick="openModal(${p.id})" style="--diff-col:${diffCol};background-image:linear-gradient(180deg,rgba(11,8,7,0.35) 0%,rgba(11,8,7,0.85) 75%,rgba(11,8,7,0.95) 100%),url('${_scene}');background-size:100% 100%,cover;background-position:0 0,center;background-repeat:no-repeat,no-repeat;">
       <div class="mc-head">
         <div class="mc-sprite">${monsterFor(p)}</div>
         <div>
-          <h4 class="mc-name">${p.name}</h4>
-          <div class="mc-num">#${p.num} · ${tierNameOf(p)} · ${p.diff}</div>
+          <h4 class="mc-name">${esc(p.name)}</h4>
+          <div class="mc-num">#${esc(p.num)} · ${esc(tierNameOf(p))} · ${esc(p.diff)}</div>
         </div>
       </div>
-      <div class="mc-hint">${(p.hint || '').slice(0, 110)}${(p.hint || '').length > 110 ? '…' : ''}</div>
+      <div class="mc-hint">${esc(_hintShort)}</div>
       <div class="mc-foot">
-        <span class="mc-tag" style="color:${v.color}">${v.icon} ${p.topic}</span>
+        <span class="mc-tag" style="color:${v.color}">${v.icon} ${esc(p.topic)}</span>
         <span class="mc-stars">${'★'.repeat(conf)}${'☆'.repeat(5 - conf)}</span>
       </div>
-      ${p.lc_url ? `<a class="mc-quicklink" href="${p.lc_url}" target="_blank" onclick="event.stopPropagation()" title="Open in LeetCode">🔗</a>` : ''}
+      ${p.lc_url ? `<a class="mc-quicklink" href="${esc(p.lc_url)}" target="_blank" onclick="event.stopPropagation()" title="Open in LeetCode">🔗</a>` : ''}
       <div class="mc-tooltip">
-        <div class="mc-tooltip-row"><span>Status</span><span>${di.label}</span></div>
-        <div class="mc-tooltip-row"><span>Last reviewed</span><span>${lastLbl}</span></div>
+        <div class="mc-tooltip-row"><span>Status</span><span>${esc(di.label)}</span></div>
+        <div class="mc-tooltip-row"><span>Last reviewed</span><span>${esc(lastLbl)}</span></div>
         <div class="mc-tooltip-row"><span>Reviews</span><span>${ud.reviewed || ud.reviewCount || 0}</span></div>
         <div class="mc-tooltip-row"><span>Confidence</span><span>${conf}/5</span></div>
       </div>
@@ -4551,7 +4568,7 @@ function openModal(id) {
   const diffClass = 'diff-' + p.diff.toLowerCase();
   document.getElementById('modal-badges').innerHTML = `
     <span class="badge ${diffClass}">${p.diff}</span>
-    <span class="badge">${v.icon} ${p.topic}</span>
+    <span class="badge">${v.icon} ${esc(p.topic)}</span>
     ${p.num ? `<span class="badge">#${p.num}</span>` : ''}`;
   document.getElementById('modal-hint').textContent = p.hint || 'No intel available.';
   let links = '';
