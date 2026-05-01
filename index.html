@@ -3308,6 +3308,50 @@ function esc(v) {
     .replace(/'/g, '&#39;');
 }
 
+// ─── html`` tagged template literal: auto-escapes interpolations ───────
+//   Use everywhere you build HTML by string concatenation. Anything
+//   passed inside ${...} gets HTML-escaped by default. To inject already-
+//   trusted markup (icons from constants, output of nested html`...`,
+//   manually-built strings), wrap with safe(...). Arrays auto-flatten;
+//   null/undefined/false render as empty.
+//
+//   Why: render templates kept silently breaking when problem hints
+//   contained '<' / '>' (e.g. "left < root, right > root"). The
+//   browser interpreted them as tags and corrupted the card grid. With
+//   this tag, you literally cannot forget to escape — the only way to
+//   inject raw HTML is to opt in via safe().
+class SafeHTML {
+  constructor(s) { this._s = String(s); }
+  toString() { return this._s; }
+  valueOf() { return this._s; }
+}
+SafeHTML.prototype[Symbol.toPrimitive] = function () { return this._s; };
+
+function _interp(v) {
+  if (v == null || v === false) return '';
+  if (v instanceof SafeHTML) return v._s;
+  if (Array.isArray(v)) {
+    let s = '';
+    for (let i = 0; i < v.length; i++) s += _interp(v[i]);
+    return s;
+  }
+  return esc(String(v));
+}
+
+function html(strings, ...values) {
+  let out = '';
+  for (let i = 0; i < strings.length; i++) {
+    out += strings[i];
+    if (i < values.length) out += _interp(values[i]);
+  }
+  return new SafeHTML(out);
+}
+
+// safe(x) / raw(x) — explicit opt-in for trusted HTML
+function safe(s) { return new SafeHTML(s == null ? '' : s); }
+const raw = safe;
+
+
 function getStreakDays() {
   const dates = new Set();
   Object.values(userData).forEach(ud => {
@@ -3535,13 +3579,13 @@ document.getElementById('dungeon-grid').innerHTML = rows.map(r => {
   const ppPct = Math.round(pp * 100);
   const recentPctR = Math.round(recentPct * 100);
   const tier = (slain, total, col, ico) => total
-    ? `<div class="rl-tier" style="--tc:${col}"><span class="rl-tier-ico">${ico}</span><span class="rl-tier-stats">${slain}/${total}</span><div class="rl-tier-bar"><div style="width:${total ? slain/total*100 : 0}%"></div></div></div>`
+    ? html`<div class="rl-tier" style="--tc:${col}"><span class="rl-tier-ico">${ico}</span><span class="rl-tier-stats">${slain}/${total}</span><div class="rl-tier-bar"><div style="width:${total ? slain/total*100 : 0}%"></div></div></div>`
     : '';
   const lastTxt = lastReviewMs ? new Date(lastReviewMs).toLocaleDateString(undefined, { day: '2-digit', month: 'short' }) : 'never';
-  const conqBadge = pp >= 1 ? `<div class="rl-conq">⚜ Conquered</div>` : '';
-  const alertBadge = (dueNow + overdueNow) > 0 ? `<div class="rl-alert" title="${dueNow} due · ${overdueNow} overdue">${overdueNow ? '⚠' : '⏰'} ${dueNow + overdueNow}</div>` : '';
+  const conqBadge = pp >= 1 ? html`<div class="rl-conq">⚜ Conquered</div>` : '';
+  const alertBadge = (dueNow + overdueNow) > 0 ? html`<div class="rl-alert" title="${dueNow} due · ${overdueNow} overdue">${overdueNow ? '⚠' : '⏰'} ${dueNow + overdueNow}</div>` : '';
   const _scene = sceneFor(t);
-  return `<div class="realm-card" onclick="filterByTopic('${t.replace(/'/g,"\\'")}')" style="--col:${v.color}55;--col-bar:${v.color}80;--col-bar2:${v.color};background-image:linear-gradient(180deg,rgba(11,8,7,0.25) 0%,rgba(11,8,7,0.6) 55%,rgba(11,8,7,0.92) 100%),url('${_scene}');background-size:100% 100%,cover;background-position:0 0,center;background-repeat:no-repeat,no-repeat;">
+  return html`<div class="realm-card" data-topic="${t}" style="--col:${v.color}55;--col-bar:${v.color}80;--col-bar2:${v.color};background-image:linear-gradient(180deg,rgba(11,8,7,0.25) 0%,rgba(11,8,7,0.6) 55%,rgba(11,8,7,0.92) 100%),url('${_scene}');background-size:100% 100%,cover;background-position:0 0,center;background-repeat:no-repeat,no-repeat;">
     ${conqBadge}
     ${alertBadge}
     <div class="rl-head">
@@ -3695,7 +3739,7 @@ function renderHeroPowerBars() {
     const x = data[d];
     const tier = MONSTER_TIER[d];
     const pct = x.t ? Math.round(x.s / x.t * 100) : 0;
-    return `<div class="hpb-row pw-clickable" data-diff="${d}" onclick="togglePowerDetail('${d}')" title="Click to see ${tier.plural} slain">
+    return html`<div class="hpb-row pw-clickable" data-diff="${d}" onclick="togglePowerDetail('${d}')" title="Click to see ${tier.plural} slain">
       <div class="hpb-label"><span class="hpb-ico">${tier.icon}</span>${tier.plural}</div>
       <div class="hpb-track"><div class="hpb-fill ${x.c}" style="width:${pct}%"></div></div>
       <div class="hpb-stats">${x.s} / ${x.t} · ${pct}% <span class="pw-chevron">▾</span></div>
@@ -3741,20 +3785,20 @@ function togglePowerDetail(diff) {
   const unslain = items.filter(x => x.c === 0);
 
   if (!items.length) {
-    el.innerHTML = `<div class="pw-detail-empty">No ${tier.plural.toLowerCase()} of this tier yet</div>`;
+    el.innerHTML = html`<div class="pw-detail-empty">No ${tier.plural.toLowerCase()} of this tier yet</div>`;
   } else {
     const renderItem = ({ p, c, xp }) => `
       <div class="pw-detail-item" onclick="event.stopPropagation(); openModal(${p.id})" title="${(p.name||'').replace(/"/g,'&quot;')}">
-        <span class="pw-detail-name">${p.num ? '#' + esc(p.num) + ' ' : ''}${esc(p.name || '')}</span>
+        <span class="pw-detail-name">${p.num ? '#' + esc(p.num) + ' ' : ''}${p.name || ''}</span>
         <span class="pw-detail-conf" style="color:${confColors[c] || confColors[0]};background:${c > 0 ? (confColors[c] || confColors[0]) + '22' : 'rgba(255,255,255,0.04)'}">${confLabels[c] || '?'}</span>
         <span class="pw-detail-xp">${xp > 0 ? '+' + xp : '—'}</span>
       </div>`;
     let html = '<div class="pw-detail-list">';
     if (slain.length) html += slain.map(renderItem).join('');
     if (unslain.length) {
-      html += `<div class="pw-detail-section">Unslain (${unslain.length})</div>`;
+      html += html`<div class="pw-detail-section">Unslain (${unslain.length})</div>`;
       html += unslain.slice(0, 12).map(renderItem).join('');
-      if (unslain.length > 12) html += `<div class="pw-detail-more">+${unslain.length - 12} more</div>`;
+      if (unslain.length > 12) html += html`<div class="pw-detail-more">+${unslain.length - 12} more</div>`;
     }
     html += '</div>';
     el.innerHTML = html;
@@ -3801,8 +3845,8 @@ function renderHeatmap() {
     }
   }
 
-  const monthRow = monthLabels.map(m => `<span class="hm-mlabel">${m}</span>`).join('');
-  const dayRow = ['', 'Mon', '', 'Wed', '', 'Fri', ''].map(l => `<span class="hm-dlabel">${l}</span>`).join('');
+  const monthRow = monthLabels.map(m => html`<span class="hm-mlabel">${m}</span>`).join('');
+  const dayRow = ['', 'Mon', '', 'Wed', '', 'Fri', ''].map(l => html`<span class="hm-dlabel">${l}</span>`).join('');
 
   // Cells
   const cells = [];
@@ -3813,7 +3857,7 @@ function renderHeatmap() {
     let lvl = 0;
     if (c >= 6) lvl = 4; else if (c >= 4) lvl = 3; else if (c >= 2) lvl = 2; else if (c >= 1) lvl = 1;
     const fmt = d.toLocaleDateString(undefined, { weekday: 'short', day: '2-digit', month: 'short' });
-    cells.push(`<span class="hm-cell hm-${lvl}" data-date="${fmt}" data-count="${c}"></span>`);
+    cells.push(html`<span class="hm-cell hm-${lvl}" data-date="${fmt}" data-count="${c}"></span>`);
   }
 
   wrap.innerHTML = `
@@ -3835,7 +3879,7 @@ function renderHeatmap() {
     }
     const date = t.dataset.date || '';
     const count = +(t.dataset.count || 0);
-    tip.innerHTML = `<div class="hm-tt-date">${date}</div><div class="hm-tt-count">${count} review${count !== 1 ? 's' : ''}</div>`;
+    tip.innerHTML = html`<div class="hm-tt-date">${date}</div><div class="hm-tt-count">${count} review${count !== 1 ? 's' : ''}</div>`;
     tip.hidden = false;
     const wrapRect = wrap.getBoundingClientRect();
     const cellRect = t.getBoundingClientRect();
@@ -3894,7 +3938,7 @@ function renderStreakTrack() {
     let cls = '';
     if (reached) cls = 'reached';
     else if (!nextSet) { cls = 'next'; nextSet = true; }
-    return `<div class="streak-pip ${cls}">
+    return html`<div class="streak-pip ${cls}">
       <div class="pip-day">${m.label}</div>
       <div class="pip-bonus">+${Math.round(m.bonus * 100)}%</div>
       <div class="pip-reward">${m.reward}</div>
@@ -3922,14 +3966,14 @@ function renderPowerLevels() {
     const items = arr.slice(0, 60).map(({ p, c }) => {
       const last = getLastReviewMsLocal(p);
       const dateLbl = last ? new Date(last).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: '2-digit' }) : '—';
-      return `<li class="power-detail-item" onclick="event.stopPropagation();openModal(${p.id})">
+      return html`<li class="power-detail-item" onclick="event.stopPropagation();openModal(${p.id})">
         <span>${monsterFor(p)}</span>
-        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)">${esc(p.name)}</span>
+        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)">${p.name}</span>
         <span class="power-detail-stars">${'★'.repeat(c)}</span>
         <span class="power-detail-date">${dateLbl}</span>
       </li>`;
     }).join('');
-    return `<div class="power-row ${open ? 'open' : ''}" data-diff="${d}" style="--pcol:${cols[d].c};--pcol-dim:${cols[d].dim}">
+    return html`<div class="power-row ${open ? 'open' : ''}" data-diff="${d}" style="--pcol:${cols[d].c};--pcol-dim:${cols[d].dim}">
       <div class="power-head" onclick="togglePower('${d}')">
         <div class="power-icon">${cols[d].icon}</div>
         <div class="power-name">${d}</div>
@@ -3938,7 +3982,7 @@ function renderPowerLevels() {
         <div class="power-toggle">▶</div>
       </div>
       <div class="power-detail">
-        ${arr.length ? `<ul class="power-detail-list">${items}</ul>` : '<div style="padding:12px;color:var(--text-muted);font-family:var(--medieval);letter-spacing:.15em;text-align:center">No conquests yet</div>'}
+        ${arr.length ? html`<ul class="power-detail-list">${items}</ul>` : '<div style="padding:12px;color:var(--text-muted);font-family:var(--medieval);letter-spacing:.15em;text-align:center">No conquests yet</div>'}
       </div>
     </div>`;
   }).join('');
@@ -3972,7 +4016,7 @@ function renderTopicMastery() {
   wrap.innerHTML = list.map(([t, d]) => {
     const v = visualOf(t);
     const pct = d.total ? Math.round(d.recent / d.total * 100) : 0;
-    return `<div class="mastery-tile" onclick="filterByTopic('${t.replace(/'/g,"\\'")}')" style="--mc:${v.color};--mc-dim:${v.color}55;cursor:pointer">
+    return html`<div class="mastery-tile" data-topic="${t}" style="--mc:${v.color};--mc-dim:${v.color}55;cursor:pointer">
       <div class="mastery-head"><span class="mastery-icon">${v.icon}</span><span class="mastery-name" title="${t}">${t}</span></div>
       <div class="mastery-bar"><div class="mastery-bar-fill" style="width:${pct}%"></div></div>
       <div class="mastery-meta">${d.recent} recent · ${d.total} total · ${pct}%</div>
@@ -4011,8 +4055,8 @@ function renderAnalytics() {
   const rWrap = document.getElementById('reviews-trend');
   const xWrap = document.getElementById('xp-trend');
   if (!rWrap) return;
-  rWrap.innerHTML = days.map((d, i) => `<div class="mini-bar ${i === _analyticsActive.reviews ? 'active' : ''}" style="height:${(d.reviews / maxR * 100) || 2}%" onclick="setAnalytics('reviews',${i})" title="${d.date.toLocaleDateString()}: ${d.reviews} reviews"></div>`).join('');
-  xWrap.innerHTML = days.map((d, i) => `<div class="mini-bar ${i === _analyticsActive.xp ? 'active' : ''}" style="height:${(d.xp / maxX * 100) || 2}%" onclick="setAnalytics('xp',${i})" title="${d.date.toLocaleDateString()}: ${d.xp} XP"></div>`).join('');
+  rWrap.innerHTML = days.map((d, i) => html`<div class="mini-bar ${i === _analyticsActive.reviews ? 'active' : ''}" style="height:${(d.reviews / maxR * 100) || 2}%" onclick="setAnalytics('reviews',${i})" title="${d.date.toLocaleDateString()}: ${d.reviews} reviews"></div>`).join('');
+  xWrap.innerHTML = days.map((d, i) => html`<div class="mini-bar ${i === _analyticsActive.xp ? 'active' : ''}" style="height:${(d.xp / maxX * 100) || 2}%" onclick="setAnalytics('xp',${i})" title="${d.date.toLocaleDateString()}: ${d.xp} XP"></div>`).join('');
 }
 function setAnalytics(kind, idx) {
   _analyticsActive[kind] = idx;
@@ -4025,6 +4069,18 @@ function setAnalytics(kind, idx) {
   document.getElementById(kind + '-readout').textContent = out;
   renderAnalytics();
 }
+
+// Delegated click for any element with data-topic — replaces inline
+// onclick="filterByTopic('${t}')" which broke when topic strings
+// contained quotes (escape collisions in HTML attributes).
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-topic]');
+  if (!el) return;
+  // Don't hijack clicks inside nested interactive elements
+  if (e.target.closest('a,button,input,textarea,select')) return;
+  const t = el.dataset.topic;
+  if (t) filterByTopic(t);
+});
 
 function filterByTopic(t) {
   currentTopic = t;
@@ -4073,17 +4129,17 @@ function renderTopicDeepDive() {
   });
   const maxC = Math.max(1, ...days.map(d => d.count));
   document.getElementById('topic-activity').innerHTML = days.map(d =>
-    `<div class="mini-bar" style="height:${(d.count/maxC*100) || 2}%" title="${d.d.toLocaleDateString()}: ${d.count}"></div>`
+    html`<div class="mini-bar" style="height:${(d.count/maxC*100) || 2}%" title="${d.d.toLocaleDateString()}: ${d.count}"></div>`
   ).join('');
   // Problems list
   document.getElementById('topic-problems').innerHTML = probs.map(p => {
     const conf = getConf(p);
     const diffCol = p.diff === 'Easy' ? 'var(--easy)' : p.diff === 'Medium' ? 'var(--medium)' : 'var(--hard)';
     const _scene = sceneFor(p.topic);
-    return `<div class="monster-card ${conf > 0 ? 'solved' : ''}" onclick="openModal(${p.id})" style="--diff-col:${diffCol};background-image:linear-gradient(180deg,rgba(11,8,7,0.35) 0%,rgba(11,8,7,0.85) 75%,rgba(11,8,7,0.95) 100%),url('${_scene}');background-size:100% 100%,cover;background-position:0 0,center;background-repeat:no-repeat,no-repeat;">
+    return html`<div class="monster-card ${conf > 0 ? 'solved' : ''}" onclick="openModal(${p.id})" style="--diff-col:${diffCol};background-image:linear-gradient(180deg,rgba(11,8,7,0.35) 0%,rgba(11,8,7,0.85) 75%,rgba(11,8,7,0.95) 100%),url('${_scene}');background-size:100% 100%,cover;background-position:0 0,center;background-repeat:no-repeat,no-repeat;">
       <div class="mc-head"><div class="mc-sprite">${monsterFor(p)}</div>
-        <div><h4 class="mc-name">${esc(p.name)}</h4><div class="mc-num">#${esc(p.num)} · ${esc(tierNameOf(p))} · ${esc(p.diff)}</div></div></div>
-      <div class="mc-hint">${esc((p.hint||'').slice(0,110))}${(p.hint||'').length>110?'…':''}</div>
+        <div><h4 class="mc-name">${p.name}</h4><div class="mc-num">#${p.num} · ${tierNameOf(p)} · ${p.diff}</div></div></div>
+      <div class="mc-hint">${(p.hint||'').slice(0,110)}${(p.hint||'').length>110?'…':''}</div>
       <div class="mc-foot">
         <span class="mc-stars">${'★'.repeat(conf)}${'☆'.repeat(5-conf)}</span>
       </div>
@@ -4129,7 +4185,7 @@ window.savePlan = function() {
 function renderQuests() {
   const wrap = document.getElementById('quest-list');
   if (!todayPlan.length) {
-    wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">📜</div><h3>No quest assigned</h3><p>Generate today's hunt from the parchment above</p></div>`;
+    wrap.innerHTML = html`<div class="empty-state"><div class="empty-icon">📜</div><h3>No quest assigned</h3><p>Generate today's hunt from the parchment above</p></div>`;
     return;
   }
   wrap.innerHTML = todayPlan.map(q => {
@@ -4143,19 +4199,19 @@ function renderQuests() {
     const ud = userData[p.id] || {};
     const snoozed = ud.snoozeUntil && new Date(ud.snoozeUntil).getTime() > Date.now();
     const curRating = q.rating || 0;
-    const rateRow = q.done ? '' : `<div class="quest-rate" onclick="event.stopPropagation()">
-      ${[1,2,3,4,5].map(c => `<button class="quest-rate-btn c${c} ${curRating === c ? 'sel' : ''}" title="Rate ${c}/5 and log victory" onclick="event.stopPropagation();quickRate(${p.id}, ${c})">${c}</button>`).join('')}
+    const rateRow = q.done ? '' : html`<div class="quest-rate" onclick="event.stopPropagation()">
+      ${[1,2,3,4,5].map(c => html`<button class="quest-rate-btn c${c} ${curRating === c ? 'sel' : ''}" title="Rate ${c}/5 and log victory" onclick="event.stopPropagation();quickRate(${p.id}, ${c})">${c}</button>`).join('')}
     </div>`;
     const _scene = sceneFor(p.topic);
-    return `<div class="quest-card ${q.done ? 'done' : ''}" data-id="${p.id}" style="--mc:${v.color}40;background-image:linear-gradient(180deg,rgba(11,8,7,0.40) 0%,rgba(11,8,7,0.88) 75%,rgba(11,8,7,0.95) 100%),url('${_scene}');background-size:100% 100%,cover;background-position:0 0,center;background-repeat:no-repeat,no-repeat;">
+    return html`<div class="quest-card ${q.done ? 'done' : ''}" data-id="${p.id}" style="--mc:${v.color}40;background-image:linear-gradient(180deg,rgba(11,8,7,0.40) 0%,rgba(11,8,7,0.88) 75%,rgba(11,8,7,0.95) 100%),url('${_scene}');background-size:100% 100%,cover;background-position:0 0,center;background-repeat:no-repeat,no-repeat;">
       <div class="quest-monster" onclick="openModal(${p.id})" title="${tierNameOf(p)}">${monsterFor(p)}</div>
       <div class="quest-info" onclick="openModal(${p.id})">
-        <h4 class="quest-name">${esc(p.name)}</h4>
+        <h4 class="quest-name">${p.name}</h4>
         <div class="quest-meta">
           <span class="quest-tag ${p.diff.toLowerCase()}">${tierNameOf(p)} · ${p.diff}</span>
-          <span class="quest-tag">${visualOf(p.topic).icon} ${esc(p.topic)}</span>
-          ${isOverdue ? `<span class="quest-tag hard">⏰ ${overdueDays}d overdue</span>` : ''}
-          ${p.lc_url ? `<a class="quest-tag" href="${p.lc_url}" target="_blank" onclick="event.stopPropagation()" style="text-decoration:none">🔗 LeetCode ↗</a>` : ''}
+          <span class="quest-tag">${visualOf(p.topic).icon} ${p.topic}</span>
+          ${isOverdue ? html`<span class="quest-tag hard">⏰ ${overdueDays}d overdue</span>` : ''}
+          ${p.lc_url ? html`<a class="quest-tag" href="${p.lc_url}" target="_blank" onclick="event.stopPropagation()" style="text-decoration:none">🔗 LeetCode ↗</a>` : ''}
         </div>
         <div class="quest-reason ${isOverdue ? 'overdue' : ''}">${reason}</div>
         ${rateRow}
@@ -4249,10 +4305,10 @@ function renderPathway() {
     const c1x = f.x + ((segIdx * 11 % 7) - 3) * 0.8;
     const c2x = t.x + ((segIdx * 13 % 7) - 3) * 0.8;
     const d = `M ${f.x} ${f.y} C ${c1x} ${cy - 18}, ${c2x} ${cy + 18}, ${t.x} ${t.y}`;
-    roadHTML.base += `<path class="road-paved-base" d="${d}" vector-effect="non-scaling-stroke"/>`;
-    roadHTML.mid  += `<path class="road-paved-mid"  d="${d}" vector-effect="non-scaling-stroke"/>`;
-    roadHTML.top  += `<path class="road-paved-top"  d="${d}" vector-effect="non-scaling-stroke"/>`;
-    if (cls) roadHTML.glow += `<path class="road-light ${cls}" d="${d}" vector-effect="non-scaling-stroke" style="animation-delay:${(-segIdx * 0.4).toFixed(2)}s"/>`;
+    roadHTML.base += html`<path class="road-paved-base" d="${d}" vector-effect="non-scaling-stroke"/>`;
+    roadHTML.mid  += html`<path class="road-paved-mid"  d="${d}" vector-effect="non-scaling-stroke"/>`;
+    roadHTML.top  += html`<path class="road-paved-top"  d="${d}" vector-effect="non-scaling-stroke"/>`;
+    if (cls) roadHTML.glow += html`<path class="road-light ${cls}" d="${d}" vector-effect="non-scaling-stroke" style="animation-delay:${(-segIdx * 0.4).toFixed(2)}s"/>`;
     const mx = (f.x + t.x) / 2 + ((segIdx * 7 % 5) - 2) * 0.5;
     const my = (f.y + t.y) / 2 + ((segIdx * 11 % 5) - 2) * 4;
     segments.push({ mx, my, cls });
@@ -4283,7 +4339,7 @@ function renderPathway() {
         <div class="torch-flame"></div>
         <div class="torch-spark" style="--sp-dur:${(2.4 + (di % 5) * 0.4).toFixed(1)}s;--sp-delay:0s;--sp-dx:${dx1}px"></div>`;
     } else {
-      torch.innerHTML = `<div class="torch-pole"></div><div class="torch-bowl"></div>`;
+      torch.innerHTML = html`<div class="torch-pole"></div><div class="torch-bowl"></div>`;
       torch.style.opacity = '.5';
     }
     stage.appendChild(torch);
@@ -4369,7 +4425,7 @@ function renderPathway() {
     else if (conf > 0) { arcCol = '#c89c4a'; sealCol = 'rgba(200,156,74,0.55)'; sealGlow = 'rgba(200,156,74,0.25)'; sealRim = 'rgba(200,156,74,0.22)'; }
     else { arcCol = 'rgba(110,94,71,0.55)'; sealCol = 'rgba(110,94,71,0.4)'; sealGlow = 'rgba(110,94,71,0.12)'; sealRim = 'rgba(110,94,71,0.18)'; }
     const dueCount = d.due + d.overdue;
-    const dueBadge = dueCount > 0 ? `<div class="keep-due">${dueCount}</div>` : '';
+    const dueBadge = dueCount > 0 ? html`<div class="keep-due">${dueCount}</div>` : '';
     const node = document.createElement('div');
     node.className = 'keep';
     node.style.left = p.x + '%'; node.style.top = p.y + 'px';
@@ -4388,13 +4444,13 @@ function renderPathway() {
       ${(() => {
         const probs = RAW_PROBLEMS.filter(p => p.topic === t);
         const tc = countTiers(probs);
-        return `<div class="keep-tooltip">
+        return html`<div class="keep-tooltip">
           <strong>${t}</strong>
           ${d.solved} / ${d.total} slain · ${pct}%<br>
           <span style="color:var(--easy)">🟢 ${tc.slainSlime}/${tc.Slime} Slimes</span><br>
           <span style="color:var(--medium)">🐉 ${tc.slainDrake}/${tc.Drake} Drakes</span><br>
           <span style="color:var(--hard)">👹 ${tc.slainDemon}/${tc.Demon} Demons</span>
-          ${dueCount > 0 ? `<br><span style="color:var(--ember)">${d.due} due${d.overdue ? ` · ${d.overdue} overdue` : ''}</span>` : ''}
+          ${dueCount > 0 ? html`<br><span style="color:var(--ember)">${d.due} due${d.overdue ? ` · ${d.overdue} overdue` : ''}</span>` : ''}
         </div>`;
       })()}
     `;
@@ -4413,7 +4469,7 @@ function setFilter(f) {
 function populateTopicSelect() {
   const sel = document.getElementById('best-topic'); if (!sel || sel.dataset.filled) return;
   const topics = [...new Set(RAW_PROBLEMS.map(p => p.topic))].sort();
-  sel.innerHTML = '<option value="">All topics</option>' + topics.map(t => `<option value="${t}">${visualOf(t).icon} ${t}</option>`).join('');
+  sel.innerHTML = '<option value="">All topics</option>' + topics.map(t => html`<option value="${t}">${visualOf(t).icon} ${t}</option>`).join('');
   sel.dataset.filled = '1';
 }
 
@@ -4464,29 +4520,29 @@ function renderBestiary() {
     const _scene = sceneFor(p.topic);
     const _hint = String(p.hint || '');
     const _hintShort = _hint.length > 110 ? _hint.slice(0, 110) + '…' : _hint;
-    return `<div class="monster-card ${conf > 0 ? 'solved' : ''}" onclick="openModal(${p.id})" style="--diff-col:${diffCol};background-image:linear-gradient(180deg,rgba(11,8,7,0.35) 0%,rgba(11,8,7,0.85) 75%,rgba(11,8,7,0.95) 100%),url('${_scene}');background-size:100% 100%,cover;background-position:0 0,center;background-repeat:no-repeat,no-repeat;">
+    return html`<div class="monster-card ${conf > 0 ? 'solved' : ''}" onclick="openModal(${p.id})" style="--diff-col:${diffCol};background-image:linear-gradient(180deg,rgba(11,8,7,0.35) 0%,rgba(11,8,7,0.85) 75%,rgba(11,8,7,0.95) 100%),url('${_scene}');background-size:100% 100%,cover;background-position:0 0,center;background-repeat:no-repeat,no-repeat;">
       <div class="mc-head">
         <div class="mc-sprite">${monsterFor(p)}</div>
         <div>
-          <h4 class="mc-name">${esc(p.name)}</h4>
-          <div class="mc-num">#${esc(p.num)} · ${esc(tierNameOf(p))} · ${esc(p.diff)}</div>
+          <h4 class="mc-name">${p.name}</h4>
+          <div class="mc-num">#${p.num} · ${tierNameOf(p)} · ${p.diff}</div>
         </div>
       </div>
-      <div class="mc-hint">${esc(_hintShort)}</div>
+      <div class="mc-hint">${_hintShort}</div>
       <div class="mc-foot">
-        <span class="mc-tag" style="color:${v.color}">${v.icon} ${esc(p.topic)}</span>
+        <span class="mc-tag" style="color:${v.color}">${v.icon} ${p.topic}</span>
         <span class="mc-stars">${'★'.repeat(conf)}${'☆'.repeat(5 - conf)}</span>
       </div>
-      ${p.lc_url ? `<a class="mc-quicklink" href="${esc(p.lc_url)}" target="_blank" onclick="event.stopPropagation()" title="Open in LeetCode">🔗</a>` : ''}
+      ${p.lc_url ? html`<a class="mc-quicklink" href="${p.lc_url}" target="_blank" onclick="event.stopPropagation()" title="Open in LeetCode">🔗</a>` : ''}
       <div class="mc-tooltip">
-        <div class="mc-tooltip-row"><span>Status</span><span>${esc(di.label)}</span></div>
-        <div class="mc-tooltip-row"><span>Last reviewed</span><span>${esc(lastLbl)}</span></div>
+        <div class="mc-tooltip-row"><span>Status</span><span>${di.label}</span></div>
+        <div class="mc-tooltip-row"><span>Last reviewed</span><span>${lastLbl}</span></div>
         <div class="mc-tooltip-row"><span>Reviews</span><span>${ud.reviewed || ud.reviewCount || 0}</span></div>
         <div class="mc-tooltip-row"><span>Confidence</span><span>${conf}/5</span></div>
       </div>
     </div>`;
   }).join('');
-  if (!list.length) grid.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><h3>No monsters found</h3><p>Adjust your filters</p></div>`;
+  if (!list.length) grid.innerHTML = html`<div class="empty-state"><div class="empty-icon">🔍</div><h3>No monsters found</h3><p>Adjust your filters</p></div>`;
 }
 
 /* ═════════ BOSS RAIDS ═════════ */
@@ -4503,15 +4559,15 @@ function renderBoss() {
   if (['Very High','High','Medium','Low'].includes(bossFilter)) pool = pool.filter(p => p.freq === bossFilter);
   if (bossFilter === 'defeated') pool = pool.filter(p => (userData['sd_'+p.id] || {}).attempted);
   if (bossFilter === 'undefeated') pool = pool.filter(p => !(userData['sd_'+p.id] || {}).attempted);
-  if (!pool.length) { grid.innerHTML = `<div class="empty-state"><div class="empty-icon">👑</div><h3>No bosses match</h3><p>Adjust your filters</p></div>`; return; }
+  if (!pool.length) { grid.innerHTML = html`<div class="empty-state"><div class="empty-icon">👑</div><h3>No bosses match</h3><p>Adjust your filters</p></div>`; return; }
   grid.innerHTML = pool.map(p => {
     const ud = userData['sd_' + p.id] || {};
     const _bossImg = bossImageFor(p.id || p.title);
-    return `<div class="boss-card ${ud.attempted ? 'defeated' : ''}" onclick="openSDModal('${p.id}')" style="background-image:linear-gradient(180deg,rgba(11,8,7,0.30) 0%,rgba(11,8,7,0.75) 60%,rgba(11,8,7,0.95) 100%),radial-gradient(ellipse at top right,rgba(122,31,31,0.35),transparent 60%),url('${_bossImg}');background-size:100% 100%,100% 100%,cover;background-position:0 0,0 0,center;background-repeat:no-repeat,no-repeat,no-repeat;">
+    return html`<div class="boss-card ${ud.attempted ? 'defeated' : ''}" onclick="openSDModal('${p.id}')" style="background-image:linear-gradient(180deg,rgba(11,8,7,0.30) 0%,rgba(11,8,7,0.75) 60%,rgba(11,8,7,0.95) 100%),radial-gradient(ellipse at top right,rgba(122,31,31,0.35),transparent 60%),url('${_bossImg}');background-size:100% 100%,100% 100%,cover;background-position:0 0,0 0,center;background-repeat:no-repeat,no-repeat,no-repeat;">
       <span class="boss-freq" style="background:${fcol[p.freq]}22;color:${fcol[p.freq]};border:1px solid ${fcol[p.freq]}55">${p.freq}</span>
       <h3 class="boss-title">👑 ${p.title}</h3>
       <p class="boss-desc">${p.desc}</p>
-      <div class="boss-tags">${p.tags.map(t => `<span class="boss-tag">${t}</span>`).join('')}</div>
+      <div class="boss-tags">${p.tags.map(t => html`<span class="boss-tag">${t}</span>`).join('')}</div>
       <div class="boss-status ${ud.attempted ? 'defeated' : ''}">${ud.attempted ? '✓ Defeated' : '○ Undefeated'}</div>
     </div>`;
   }).join('');
@@ -4568,12 +4624,12 @@ function openModal(id) {
   const diffClass = 'diff-' + p.diff.toLowerCase();
   document.getElementById('modal-badges').innerHTML = `
     <span class="badge ${diffClass}">${p.diff}</span>
-    <span class="badge">${v.icon} ${esc(p.topic)}</span>
-    ${p.num ? `<span class="badge">#${p.num}</span>` : ''}`;
+    <span class="badge">${v.icon} ${p.topic}</span>
+    ${p.num ? html`<span class="badge">#${p.num}</span>` : ''}`;
   document.getElementById('modal-hint').textContent = p.hint || 'No intel available.';
   let links = '';
-  if (p.lc_url) links += `<a class="modal-link" target="_blank" href="${p.lc_url}">🔗 LeetCode</a>`;
-  if (p.repo_url) links += `<a class="modal-link" target="_blank" href="${p.repo_url}">📁 Solution Repo</a>`;
+  if (p.lc_url) links += html`<a class="modal-link" target="_blank" href="${p.lc_url}">🔗 LeetCode</a>`;
+  if (p.repo_url) links += html`<a class="modal-link" target="_blank" href="${p.repo_url}">📁 Solution Repo</a>`;
   document.getElementById('modal-links').innerHTML = links || '<span style="color:var(--text-muted);font-size:12px">No external intel</span>';
 
   // SR info
@@ -4584,7 +4640,7 @@ function openModal(id) {
   // Conf buttons 0..5
   const labels = ['Skip','Forgot','Hard','OK','Good','Easy'];
   document.getElementById('conf-buttons').innerHTML = [0,1,2,3,4,5].map(c =>
-    `<button class="conf-btn c${c} ${c === modalSelectedConf ? 'sel' : ''}" onclick="selectConf(${c})">${c}<br><span style="font-size:10px;font-weight:400">${labels[c]}</span></button>`
+    html`<button class="conf-btn c${c} ${c === modalSelectedConf ? 'sel' : ''}" onclick="selectConf(${c})">${c}<br><span style="font-size:10px;font-weight:400">${labels[c]}</span></button>`
   ).join('');
 
   document.getElementById('modal-comment').value = ud.notes || '';
@@ -4668,7 +4724,7 @@ function openSDModal(sdId) {
   const ud = userData['sd_' + sdId] || {};
   document.getElementById('modal-encounter').textContent = '👑 Boss Encounter';
   document.getElementById('modal-title').textContent = p.title;
-  document.getElementById('modal-badges').innerHTML = `<span class="badge">Boss Raid</span>${p.tags.map(t => `<span class="badge">${t}</span>`).join('')}`;
+  document.getElementById('modal-badges').innerHTML = html`<span class="badge">Boss Raid</span>${p.tags.map(t => html`<span class="badge">${t}</span>`).join('')}`;
   document.getElementById('modal-hint').textContent = p.desc;
   document.getElementById('modal-links').innerHTML = '<span style="color:var(--text-muted);font-size:12px">No external intel — study from memory</span>';
   document.getElementById('modal-sr-info').textContent = '';
