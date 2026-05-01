@@ -269,218 +269,59 @@ a:hover { color: var(--gold-bright); }
 .app {
   position: relative; z-index: 5;
   min-height: 100vh;
-  display: block;
+  display: grid; grid-template-columns: 260px 1fr;
 }
-/* (.app responsive override removed — block layout now) */
+@media (max-width: 980px) { .app { grid-template-columns: 1fr; } }
 
-/* ═══ CREST BANNER NAV (replaces the side rail) ═══════════════════════
-   A sticky, full-width carved-stone banner across the top of the page
-   with a centered row of glowing rune sigils (one per section). Brand
-   sits left, sigils center, utility actions right. The sigils carry
-   .nav-btn so the existing navigate() click delegate works unchanged.
-*/
-.crest-banner {
-  position: sticky; top: 0; z-index: 80;
-  display: grid; grid-template-columns: 1fr auto 1fr;
-  align-items: center; gap: var(--space);
-  padding: 10px clamp(14px, 2.4vw, 28px);
-  background:
-    repeating-linear-gradient(135deg, rgba(232,200,122,0.025) 0 1px, transparent 1px 5px),
-    radial-gradient(ellipse at center top, rgba(122,75,18,0.18), transparent 70%),
-    linear-gradient(180deg, rgba(20,16,12,0.96) 0%, rgba(11,8,7,0.94) 100%);
-  border-bottom: 1px solid rgba(232,200,122,0.22);
-  box-shadow:
-    0 2px 0 rgba(0,0,0,0.5),
-    0 12px 28px -16px rgba(0,0,0,0.85),
-    inset 0 -1px 0 rgba(232,200,122,0.10),
-    inset 0 1px 0 rgba(255,255,255,0.04);
-  -webkit-backdrop-filter: blur(8px) saturate(1.05);
-  backdrop-filter: blur(8px) saturate(1.05);
+/* Side rune rail */
+.rail {
+  background: linear-gradient(180deg, rgba(20,16,12,0.85), rgba(11,8,7,0.95));
+  border-right: 1px solid rgba(232,200,122,0.12);
+  padding: var(--space-md) var(--space-sm);
+  display: flex; flex-direction: column; gap: var(--space-sm);
+  position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
 }
-.crest-banner::before, .crest-banner::after {
-  content: ''; position: absolute; left: 0; right: 0; height: 1px;
-  background: rgba(232,200,122,0.10);
-  pointer-events: none;
+.rail-brand {
+  font-family: var(--serif-display); font-size: 18px; font-weight: 900;
+  color: var(--gold); letter-spacing: .08em; text-align: center;
+  padding: var(--space-sm) 0 var(--space); border-bottom: 1px solid rgba(232,200,122,0.12);
+  text-shadow: 0 0 18px rgba(232,200,122,0.4); margin-bottom: var(--space-sm);
 }
-.crest-banner::before { top: 4px; box-shadow: 0 1px 0 rgba(0,0,0,0.5); }
-.crest-banner::after { bottom: 4px; box-shadow: 0 -1px 0 rgba(0,0,0,0.5); }
+.rail-brand small { display:block; font-family: var(--medieval); font-size: 10px; letter-spacing: .3em; color: var(--text-muted); margin-top: 4px; font-weight: 400; }
 
-.crest-brand {
-  display: inline-flex; align-items: center; gap: 10px;
-  font-family: var(--serif-display); font-weight: 900;
-  font-size: clamp(13px, 1.4vw, 17px); letter-spacing: .14em;
-  color: var(--gold);
-  text-shadow: 0 0 14px rgba(232,200,122,0.45);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  padding-left: 4px;
+.nav-btn {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; background: transparent;
+  border: 1px solid transparent; border-radius: var(--rad);
+  color: var(--text-dim); font-family: var(--serif); font-weight: 500;
+  font-size: 13px; letter-spacing: .08em; text-transform: uppercase;
+  transition: all .25s ease; position: relative; overflow: hidden;
 }
-.crest-brand .crest-mark {
-  font-size: 1.4em; filter: drop-shadow(0 0 6px rgba(232,200,122,0.55));
-  animation: crestFlicker 4.5s ease-in-out infinite;
+.nav-btn::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: linear-gradient(180deg, transparent, var(--gold), transparent);
+  opacity: 0; transition: opacity .3s ease;
 }
-.crest-brand small {
-  font-family: var(--medieval); font-size: 9px; letter-spacing: .32em;
-  color: var(--text-muted); font-weight: 400; opacity: 0.85;
-}
-@keyframes crestFlicker {
-  0%, 100% { opacity: 1; filter: drop-shadow(0 0 6px rgba(232,200,122,0.55)); }
-  43%      { opacity: 0.78; filter: drop-shadow(0 0 4px rgba(232,200,122,0.30)); }
-  47%      { opacity: 1;    filter: drop-shadow(0 0 8px rgba(232,200,122,0.65)); }
-  72%      { opacity: 0.85; filter: drop-shadow(0 0 5px rgba(232,200,122,0.40)); }
+.nav-btn:hover { color: var(--gold); border-color: rgba(232,200,122,0.2); background: rgba(232,200,122,0.05); }
+.nav-btn:hover::before { opacity: 1; }
+.nav-btn.active { color: var(--gold); background: linear-gradient(90deg, rgba(232,200,122,0.12), rgba(232,200,122,0.02)); border-color: rgba(232,200,122,0.3); text-shadow: 0 0 12px rgba(232,200,122,0.4); }
+.nav-btn.active::before { opacity: 1; }
+.nav-btn .nav-icon { font-size: 18px; filter: drop-shadow(0 0 4px rgba(232,200,122,0.4)); }
+.nav-btn .nav-badge {
+  margin-left: auto; font-family: var(--mono); font-size: 10px;
+  background: rgba(232,200,122,0.12); padding: 2px 6px; border-radius: 99px;
+  border: 1px solid rgba(232,200,122,0.2);
 }
 
-.crest-sigils {
-  justify-self: center;
-  display: inline-flex; gap: 6px;
-  padding: 4px 6px;
-  background: linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.25));
-  border: 1px solid rgba(232,200,122,0.14);
-  border-radius: 999px;
-  box-shadow:
-    inset 0 1px 2px rgba(0,0,0,0.6),
-    0 0 0 1px rgba(0,0,0,0.4),
-    inset 0 -1px 0 rgba(232,200,122,0.08);
-  position: relative;
+.rail-utils { margin-top: auto; display: flex; flex-direction: column; gap: 6px; padding-top: var(--space); border-top: 1px solid rgba(232,200,122,0.1); }
+.util-btn {
+  background: transparent; border: 1px solid rgba(232,200,122,0.15);
+  color: var(--text-dim); padding: 8px 10px; border-radius: var(--rad-sm);
+  font-family: var(--mono); font-size: 11px; letter-spacing: .1em;
+  text-align: center; transition: all .2s ease; text-decoration: none; display: block;
 }
-.crest-sigils::before, .crest-sigils::after {
-  content: ''; position: absolute; top: 50%; width: 6px; height: 6px;
-  border-radius: 50%; background: radial-gradient(circle at 30% 30%, #f5dfa3, #6b4a18 70%);
-  box-shadow: 0 0 6px rgba(232,200,122,0.55);
-  transform: translateY(-50%);
-}
-.crest-sigils::before { left: -10px; }
-.crest-sigils::after { right: -10px; }
-
-.crest-sigils .nav-btn {
-  position: relative; display: inline-flex; align-items: center;
-  gap: 0;
-  padding: 8px 12px;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--text-dim);
-  font-family: var(--serif); font-weight: 600;
-  font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
-  cursor: pointer;
-  transition: color 0.18s ease, background 0.18s ease, border-color 0.18s ease, transform 0.12s ease, box-shadow 0.18s ease;
-  text-shadow: 0 1px 0 rgba(0,0,0,0.6);
-  overflow: visible;
-  white-space: nowrap;
-}
-.crest-sigils .nav-btn::before { display: none; }
-.crest-sigils .nav-btn .nav-icon {
-  font-size: 18px;
-  filter: drop-shadow(0 0 4px rgba(232,200,122,0.30));
-  transition: filter 0.18s ease, transform 0.18s ease;
-}
-.crest-sigils .nav-btn .nav-label {
-  margin-left: 9px;
-  max-width: 0; opacity: 0; overflow: hidden;
-  transition: max-width 0.32s ease, opacity 0.22s ease, margin-left 0.22s ease;
-}
-.crest-sigils .nav-btn:hover .nav-label,
-.crest-sigils .nav-btn.active .nav-label {
-  max-width: 220px; opacity: 1;
-}
-.crest-sigils .nav-btn:hover {
-  color: var(--gold);
-  background: rgba(232,200,122,0.08);
-  border-color: rgba(232,200,122,0.28);
-}
-.crest-sigils .nav-btn:hover .nav-icon {
-  filter: drop-shadow(0 0 8px rgba(232,200,122,0.85));
-  transform: translateY(-1px) scale(1.06);
-}
-.crest-sigils .nav-btn.active {
-  color: var(--gold-bright, #f5dfa3);
-  background:
-    radial-gradient(ellipse at center, rgba(232,200,122,0.22), rgba(232,200,122,0.06) 70%, transparent 100%),
-    linear-gradient(180deg, rgba(122,75,18,0.20), rgba(40,24,8,0.30));
-  border-color: rgba(232,200,122,0.55);
-  box-shadow:
-    0 0 18px rgba(232,200,122,0.32),
-    inset 0 1px 0 rgba(255,255,255,0.08),
-    inset 0 -1px 0 rgba(0,0,0,0.4);
-  text-shadow: 0 0 10px rgba(232,200,122,0.6), 0 1px 0 rgba(0,0,0,0.6);
-}
-.crest-sigils .nav-btn.active .nav-icon {
-  filter: drop-shadow(0 0 10px rgba(232,200,122,0.95));
-}
-.crest-sigils .nav-btn[data-tooltip]::after {
-  content: attr(data-tooltip);
-  position: absolute; left: 50%; top: calc(100% + 14px); transform: translateX(-50%);
-  font-family: var(--mono); font-size: 9px; letter-spacing: .22em; text-transform: uppercase;
-  color: #2a1d0c;
-  padding: 5px 10px;
-  background: linear-gradient(180deg, #e8d29a 0%, #d8b97a 60%, #b89154 100%);
-  border-radius: 2px;
-  box-shadow:
-    0 4px 10px rgba(0,0,0,0.55),
-    inset 0 -1px 0 rgba(0,0,0,0.18),
-    inset 0 1px 0 rgba(255,255,255,0.4);
-  opacity: 0; pointer-events: none;
-  transition: opacity 0.18s ease 0.05s, transform 0.18s ease 0.05s;
-  white-space: nowrap; z-index: 90;
-}
-.crest-sigils .nav-btn[data-tooltip]:hover::after,
-.crest-sigils .nav-btn[data-tooltip]:focus-visible::after { opacity: 1; transform: translateX(-50%) translateY(2px); }
-
-.crest-sigils .nav-btn .nav-badge {
-  position: absolute; top: -3px; right: -3px;
-  font-family: var(--mono); font-size: 9px;
-  background: linear-gradient(180deg, #b04545, #6b1f1f);
-  color: #fff;
-  padding: 1px 5px; border-radius: 99px;
-  border: 1px solid rgba(0,0,0,0.6);
-  box-shadow: 0 0 8px rgba(176,69,69,0.6);
-  margin-left: 0;
-}
-
-.crest-utils {
-  justify-self: end;
-  display: inline-flex; align-items: center; gap: 6px;
-  padding-right: 4px;
-}
-.crest-utils .util-btn {
-  display: inline-flex; align-items: center; justify-content: center;
-  background: transparent;
-  border: 1px solid rgba(232,200,122,0.18);
-  color: var(--text-dim);
-  padding: 7px 10px;
-  border-radius: 6px;
-  font-family: var(--mono); font-size: 10px; letter-spacing: .14em;
-  text-decoration: none;
-  cursor: pointer;
-  transition: color 0.18s ease, background 0.18s ease, border-color 0.18s ease;
-  white-space: nowrap;
-}
-.crest-utils .util-btn:hover {
-  color: var(--gold);
-  border-color: rgba(232,200,122,0.45);
-  background: rgba(232,200,122,0.06);
-}
-.crest-utils .util-btn .util-label { transition: max-width 0.22s ease, opacity 0.22s ease, margin-left 0.22s ease; }
-
-@media (max-width: 1180px) {
-  .crest-utils .util-btn .util-label { max-width: 0; opacity: 0; margin-left: 0; overflow: hidden; }
-}
-@media (max-width: 880px) {
-  .crest-banner { grid-template-columns: auto 1fr auto; gap: 8px; padding: 8px 10px; }
-  .crest-brand { font-size: 12px; gap: 6px; }
-  .crest-brand small { display: none; }
-  .crest-sigils { padding: 3px 4px; gap: 3px; }
-  .crest-sigils .nav-btn { padding: 7px 10px; }
-  .crest-sigils .nav-btn .nav-icon { font-size: 16px; }
-  .crest-sigils .nav-btn .nav-label { display: none; }
-  .crest-sigils .nav-btn.active .nav-label { display: none; }
-}
-@media (max-width: 520px) {
-  .crest-sigils { gap: 1px; padding: 3px; }
-  .crest-sigils .nav-btn { padding: 6px 7px; }
-  .crest-sigils .nav-btn .nav-icon { font-size: 15px; }
-  .crest-utils { gap: 3px; }
-  .crest-utils .util-btn { padding: 6px 7px; }
-}
+.util-btn:hover { color: var(--gold); border-color: rgba(232,200,122,0.4); background: rgba(232,200,122,0.06); }
 
 /* ─── Main canvas area ─── */
 .main {
@@ -563,9 +404,10 @@ a:hover { color: var(--gold-bright); }
    DASHBOARD
    ═════════════════════════════════════════════════════════════════════════ */
 .hero {
-  display: grid; grid-template-columns: auto 1fr auto; gap: var(--space-lg);
-  align-items: center;
-  padding: var(--space-lg) var(--space-xl);
+  display: grid; grid-template-columns: minmax(220px, 360px) 1fr;
+  gap: var(--space-lg);
+  align-items: stretch;
+  padding: clamp(20px, 2.4vw, 36px) clamp(20px, 2.6vw, 44px);
   background: linear-gradient(135deg, rgba(31,24,18,0.85), rgba(11,8,7,0.95));
   border: 1px solid rgba(232,200,122,0.22);
   border-radius: var(--rad-lg);
@@ -575,8 +417,18 @@ a:hover { color: var(--gold-bright); }
   min-height: 220px;
 }
 .hero::before {
-  content: ''; position: absolute; top: 0; right: 0; width: 300px; height: 100%;
-  background: radial-gradient(ellipse at right, rgba(232,200,122,0.06), transparent 70%);
+  content: ''; position: absolute; top: -20%; left: -10%; width: 60%; height: 140%;
+  background: radial-gradient(ellipse at center, rgba(255,90,30,0.18), rgba(255,90,30,0.04) 40%, transparent 75%);
+  pointer-events: none;
+  animation: heroEmberPulse 5s ease-in-out infinite;
+}
+@keyframes heroEmberPulse {
+  0%, 100% { opacity: 0.65; transform: scale(1); }
+  50%      { opacity: 1;    transform: scale(1.08); }
+}
+.hero::after {
+  content: ''; position: absolute; top: 0; right: 0; width: 40%; height: 100%;
+  background: radial-gradient(ellipse at right, rgba(232,200,122,0.08), transparent 70%);
   pointer-events: none;
 }
 @media (max-width: 760px) { .hero { grid-template-columns: 1fr; text-align: center; } }
@@ -616,18 +468,139 @@ a:hover { color: var(--gold-bright); }
 @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
 .hero-xp-text { font-family: var(--mono); font-size: 11px; color: var(--text-dim); margin-top: 6px; letter-spacing: .1em; }
 
-.streak-badge {
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
-  padding: var(--space); border: 1px solid rgba(232,200,122,0.25); border-radius: var(--rad);
-  background: linear-gradient(180deg, rgba(255,138,58,0.08), rgba(0,0,0,0.3));
-  min-width: 100px;
+/* Streak-prime — the big left column of the hero card. The streak is the
+   engagement loop, so it gets the loudest treatment: huge ember number,
+   live flame, milestone progress ring around it. */
+.streak-prime {
+  position: relative; z-index: 2;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px;
+  padding: clamp(14px, 1.6vw, 22px);
+  background:
+    radial-gradient(ellipse at 50% 110%, rgba(255,90,30,0.32), rgba(255,90,30,0.08) 45%, transparent 75%),
+    linear-gradient(180deg, rgba(40,22,12,0.55), rgba(15,8,4,0.65));
+  border: 1px solid rgba(255,138,58,0.30);
+  border-radius: var(--rad);
+  box-shadow:
+    inset 0 1px 0 rgba(255,200,140,0.18),
+    inset 0 -2px 0 rgba(0,0,0,0.5),
+    0 0 32px rgba(255,90,30,0.18);
+  overflow: hidden;
 }
-.streak-flame { font-size: 36px; animation: flameFlicker 1.2s ease-in-out infinite; filter: drop-shadow(0 0 8px var(--ember)); }
-@keyframes flameFlicker { 0%,100% { transform: scale(1) rotate(-1deg); } 25% { transform: scale(1.05) rotate(2deg); } 50% { transform: scale(.97) rotate(-2deg); } 75% { transform: scale(1.03) rotate(1deg); } }
-.streak-num { font-family: var(--serif-display); font-size: 32px; font-weight: 900; color: var(--ember); line-height: 1; }
-.streak-label { font-family: var(--mono); font-size: 10px; color: var(--text-dim); letter-spacing: .15em; text-transform: uppercase; }
-.streak-best { font-family: var(--mono); font-size: 10px; color: var(--gold); margin-top: 6px; padding-top: 6px; border-top: 1px dashed rgba(232,200,122,0.2); width: 100%; text-align: center; letter-spacing: .12em; }
+.streak-prime::before {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 35% at 50% 100%, rgba(255,140,40,0.55), transparent 70%);
+  pointer-events: none; animation: heroEmberPulse 3.4s ease-in-out infinite;
+}
+.streak-flame-row { position: relative; display: flex; align-items: baseline; gap: 8px; }
+.streak-flame {
+  font-size: clamp(52px, 6.5vw, 80px); line-height: 1;
+  animation: flameFlicker 1.2s ease-in-out infinite;
+  filter: drop-shadow(0 0 14px rgba(255,140,40,0.85)) drop-shadow(0 0 28px rgba(255,90,30,0.45));
+}
+@keyframes flameFlicker {
+  0%,100% { transform: scale(1) rotate(-1deg); filter: drop-shadow(0 0 14px rgba(255,140,40,0.85)) drop-shadow(0 0 28px rgba(255,90,30,0.45)); }
+  25%     { transform: scale(1.06) rotate(2deg); filter: drop-shadow(0 0 18px rgba(255,170,60,0.95)) drop-shadow(0 0 36px rgba(255,90,30,0.55)); }
+  50%     { transform: scale(.95) rotate(-2deg); filter: drop-shadow(0 0 10px rgba(255,120,40,0.7)) drop-shadow(0 0 20px rgba(255,90,30,0.35)); }
+  75%     { transform: scale(1.03) rotate(1deg); }
+}
+.streak-num {
+  font-family: var(--serif-display); font-weight: 900;
+  font-size: clamp(64px, 8vw, 108px); line-height: .95;
+  color: #ffb96a;
+  text-shadow:
+    0 0 28px rgba(255,140,40,0.85),
+    0 0 56px rgba(255,90,30,0.45),
+    0 2px 0 #2a0a02;
+  letter-spacing: -.02em;
+  background: linear-gradient(180deg, #ffd28a 0%, #ff9c45 45%, #b04a14 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 10px rgba(255,90,30,0.55));
+}
+.streak-label {
+  font-family: var(--medieval); font-size: clamp(11px, 1.1vw, 14px);
+  letter-spacing: .32em; text-transform: uppercase;
+  color: var(--gold); opacity: .92;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.6);
+}
+.streak-best {
+  font-family: var(--mono); font-size: 10px; color: var(--text-dim);
+  letter-spacing: .15em; text-transform: uppercase;
+  padding-top: 8px; margin-top: 4px;
+  border-top: 1px dashed rgba(232,200,122,0.18);
+  width: 100%; text-align: center;
+}
 .streak-best span { color: var(--gold-bright); font-weight: 700; }
+.streak-mult {
+  position: absolute; top: 8px; right: 10px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .14em;
+  color: #ffb96a;
+  background: linear-gradient(180deg, rgba(255,140,40,0.22), rgba(122,31,31,0.30));
+  border: 1px solid rgba(255,138,58,0.55);
+  padding: 3px 8px; border-radius: 999px;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.6);
+  box-shadow: 0 0 10px rgba(255,90,30,0.30);
+  z-index: 3;
+}
+@media (max-width: 760px) { .streak-mult { position: static; margin-top: 6px; align-self: center; } }
+
+/* Right-side rank/level/XP cluster (now secondary to the big streak) */
+.hero-side {
+  position: relative; z-index: 2;
+  display: flex; flex-direction: column; justify-content: center;
+  gap: 14px; min-width: 0;
+}
+.hero-side-top {
+  display: flex; align-items: center; gap: clamp(14px, 1.6vw, 22px);
+}
+.hero-side .hero-crest { width: clamp(78px, 8vw, 110px); height: clamp(78px, 8vw, 110px); flex-shrink: 0; }
+.hero-side .level-num { font-size: clamp(28px, 3.4vw, 44px); }
+.hero-side .hero-name { font-size: clamp(22px, 2.6vw, 34px); margin: 0; }
+.hero-side .hero-title { font-size: 12px; margin-bottom: 10px; }
+
+/* Streak-themed CTA — embeds milestone progress + multiplier into the
+   existing fortress-gate button shell. */
+.cta-stack-streak {
+  display: flex; flex-direction: column; align-items: center; gap: 8px; line-height: 1;
+}
+.cta-eyebrow {
+  font-family: var(--mono); font-size: clamp(9px, 1vw, 11px);
+  letter-spacing: .35em; text-transform: uppercase;
+  color: rgba(255,180,100,0.85);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.7);
+}
+.cta-eyebrow .cta-mult {
+  display: inline-block; margin-left: 8px;
+  padding: 2px 8px; border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255,140,40,0.25), rgba(122,31,31,0.30));
+  border: 1px solid rgba(255,138,58,0.5);
+  color: #ffd28a;
+  letter-spacing: .14em;
+}
+.cta-mile {
+  margin-top: 6px;
+  font-family: var(--mono); font-size: clamp(9px, 1vw, 11px);
+  letter-spacing: .25em; text-transform: uppercase;
+  color: rgba(255,200,150,0.78);
+  display: inline-flex; align-items: center; gap: 10px;
+}
+.cta-mile-bar {
+  width: clamp(120px, 18vw, 220px); height: 5px;
+  background: rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,138,58,0.45);
+  border-radius: 99px; overflow: hidden;
+  box-shadow: inset 0 1px 1px rgba(0,0,0,0.5);
+}
+.cta-mile-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff9c45, #ffd28a);
+  border-radius: 99px;
+  box-shadow: 0 0 8px rgba(255,140,40,0.7);
+  transition: width 1.2s cubic-bezier(.4,0,.2,1);
+}
+
 
 .kpi-grid {
   display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -1615,8 +1588,9 @@ textarea.modal-comment {
 /* (Mobile drawer styles removed — replaced by always-visible .crest-banner) */
 
 @media (max-width: 980px) {
-  /* .crest-banner is responsive on its own; just keep main padding tight */
-  .main { padding-top: var(--space); }
+  .rail { display: none; }
+  .mobile-topbar { display: flex; }
+  .main { padding-top: 70px; }
 }
 
 /* Build tag + back link */
@@ -1703,44 +1677,62 @@ textarea.modal-comment {
   border-radius: 8px;
   mask-image: linear-gradient(180deg, #000 0%, #000 70%, transparent 100%);
 }
-/* ── Dashboard tabs row ── */
+/* ── Dashboard tab chips (formerly the heavy sticky pill) ── */
 .dash-tabs-row {
-  display: flex; justify-content: center;
-  margin: clamp(8px, 1vw, 14px) 0 clamp(20px, 2.4vw, 32px);
-  position: sticky; top: 0; z-index: 12;
-  background: linear-gradient(180deg, rgba(11,8,7,0.95) 0%, rgba(11,8,7,0.6) 80%, transparent 100%);
-  padding: 8px 0;
-  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  display: inline-flex; padding: 3px;
+  background: linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.25));
+  border: 1px solid rgba(232,200,122,0.18);
+  border-radius: 999px;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,0,0,0.4);
+  gap: 2px; flex-wrap: wrap;
+  margin: 0; position: static;
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+  background-image:
+    linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.25));
 }
-.dash-tabs {
-  display: inline-flex; gap: 0;
-  background: linear-gradient(180deg, rgba(40,28,18,0.85), rgba(15,10,6,0.95));
-  border: 1px solid rgba(232,200,122,0.32);
-  border-radius: 6px; padding: 6px;
-  box-shadow: 0 10px 28px rgba(0,0,0,0.6), inset 0 1px 0 rgba(232,200,122,0.12), 0 0 30px rgba(232,200,122,0.08);
-}
+.dash-tabs { display: contents; }
 .dash-tab {
-  display: inline-flex; flex-direction: column; align-items: center; gap: 2px;
-  padding: 10px 22px; background: transparent; border: 0;
-  font-family: var(--serif); font-weight: 700; font-size: 13px;
-  letter-spacing: .16em; text-transform: uppercase;
-  color: var(--text-dim); border-radius: 4px;
-  transition: all .2s ease; cursor: pointer;
-  min-width: 130px; line-height: 1.1;
+  position: relative; display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px;
+  background: transparent; border: 1px solid transparent;
+  border-radius: 999px;
+  font-family: var(--serif); font-weight: 600;
+  font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--text-dim); cursor: pointer;
+  transition: color 0.18s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.6);
+  min-width: 0; line-height: 1;
 }
-.dt-ico { font-size: 18px; line-height: 1; opacity: .85; }
-.dt-label { display: block; }
-.dt-meta { font-family: var(--mono); font-size: 9px; color: var(--text-muted); letter-spacing: .15em; text-transform: none; opacity: .8; min-height: 12px; }
-.dash-tab:hover { color: var(--gold); background: rgba(232,200,122,0.06); }
-.dash-tab:hover .dt-ico { opacity: 1; }
+.dt-ico { font-size: 13px; line-height: 1; opacity: .8; transition: filter 0.18s ease; }
+.dt-label { display: inline-block; }
+.dt-meta {
+  font-family: var(--mono); font-size: 8.5px; letter-spacing: .14em;
+  color: var(--text-muted); opacity: .8;
+  margin-left: 6px; padding-left: 6px;
+  border-left: 1px solid rgba(232,200,122,0.18);
+  text-transform: none; line-height: 1;
+}
+.dash-tab:hover {
+  color: var(--gold);
+  background: rgba(232,200,122,0.08);
+  border-color: rgba(232,200,122,0.28);
+}
+.dash-tab:hover .dt-ico {
+  filter: drop-shadow(0 0 6px rgba(232,200,122,0.6));
+}
 .dash-tab.active {
   color: var(--gold-bright);
-  background: linear-gradient(180deg, rgba(232,200,122,0.22), rgba(122,31,31,0.18));
-  box-shadow: inset 0 1px 0 rgba(232,200,122,0.28), inset 0 -2px 0 rgba(0,0,0,0.45), 0 0 16px rgba(232,200,122,0.22);
-  text-shadow: 0 0 10px rgba(232,200,122,0.5);
+  background:
+    radial-gradient(ellipse at center, rgba(232,200,122,0.20), rgba(232,200,122,0.04) 70%, transparent 100%),
+    linear-gradient(180deg, rgba(122,75,18,0.18), rgba(40,24,8,0.28));
+  border-color: rgba(232,200,122,0.52);
+  box-shadow: 0 0 14px rgba(232,200,122,0.30), inset 0 1px 0 rgba(255,255,255,0.06);
+  text-shadow: 0 0 8px rgba(232,200,122,0.5);
 }
-.dash-tab.active .dt-ico { opacity: 1; transform: scale(1.05); }
-.dash-tab.active .dt-meta { color: var(--gold); }
+.dash-tab.active .dt-ico {
+  filter: drop-shadow(0 0 8px rgba(232,200,122,0.85));
+}
+.dash-tab.active .dt-meta { color: var(--gold); border-left-color: rgba(232,200,122,0.40); }
 @media (max-width: 720px) {
   /* Mobile-only sizing tweaks for cards. NOTE: do NOT re-set background-image
      here. The inline style on each card already carries the full literal
@@ -2464,43 +2456,44 @@ textarea.modal-comment {
 <!-- ═════════ APP SHELL ═════════ -->
 <div class="app">
 
-  <!-- ═════════ CREST BANNER NAV ═════════
-       Always-visible top banner of carved sigils. Uses .nav-btn so the
-       existing global navigate() click delegate fires unchanged. -->
-  <header class="crest-banner" role="banner">
-    <div class="crest-brand">
-      <span class="crest-mark">⚔</span>
-      <span>ALGORITHM DUNGEON<br><small>Cinematic Edition</small></span>
+  <!-- Mobile topbar -->
+  <div class="mobile-topbar">
+    <button class="hamburger" id="hamburger" aria-label="Menu">☰</button>
+    <div class="mobile-brand">⚔ ALGORITHM DUNGEON</div>
+    <button class="hamburger" onclick="toggleTheme()" aria-label="Theme">☾</button>
+  </div>
+  <div class="drawer-overlay" id="drawer-overlay"></div>
+  <aside class="mobile-drawer" id="mobile-drawer">
+    <div class="rail-brand">⚔ ALGORITHM DUNGEON<small>Cinematic Edition</small></div>
+    <button class="nav-btn drawer-nav" data-page="dashboard"><span class="nav-icon">🗺️</span> Dungeon Map</button>
+    <button class="nav-btn drawer-nav" data-page="quest"><span class="nav-icon">📜</span> Quest Board</button>
+    <button class="nav-btn drawer-nav" data-page="pathway"><span class="nav-icon">🌲</span> Pathway</button>
+    <button class="nav-btn drawer-nav" data-page="bestiary"><span class="nav-icon">📖</span> Bestiary</button>
+    <button class="nav-btn drawer-nav" data-page="boss"><span class="nav-icon">👑</span> Boss Raids</button>
+    <div class="rail-utils">
+      <button class="util-btn" onclick="exportProgress()">💾 Export</button>
+      <button class="util-btn" onclick="document.getElementById('import-file').click()">📂 Import</button>
+      <button class="util-btn" id="sync-btn-mobile" onclick="connectProgressSync()">⏺ Connect Sync</button>
+      <a class="util-btn" href="https://heyiamhemant.github.io/DSA_Dojo_legacy/">← Back to Classic (V1)</a>
     </div>
+  </aside>
 
-    <nav class="crest-sigils" role="navigation" aria-label="Sections">
-      <button class="nav-btn" data-page="dashboard" data-tooltip="Dungeon Map">
-        <span class="nav-icon">🗺️</span><span class="nav-label">Map</span>
-      </button>
-      <button class="nav-btn" data-page="quest" data-tooltip="Quest Board">
-        <span class="nav-icon">📜</span><span class="nav-label">Quests</span>
-        <span class="nav-badge" id="quest-badge" style="display:none">0</span>
-      </button>
-      <button class="nav-btn" data-page="pathway" data-tooltip="The Pathway">
-        <span class="nav-icon">🌲</span><span class="nav-label">Pathway</span>
-      </button>
-      <button class="nav-btn" data-page="bestiary" data-tooltip="Bestiary">
-        <span class="nav-icon">📖</span><span class="nav-label">Bestiary</span>
-      </button>
-      <button class="nav-btn" data-page="boss" data-tooltip="Boss Raids">
-        <span class="nav-icon">👑</span><span class="nav-label">Bosses</span>
-      </button>
-    </nav>
-
-    <div class="crest-utils">
-      <button class="util-btn" onclick="exportProgress()" title="Export progress">💾<span class="util-label" style="margin-left:6px">Export</span></button>
-      <button class="util-btn" onclick="document.getElementById('import-file').click()" title="Import progress">📂<span class="util-label" style="margin-left:6px">Import</span></button>
-      <button class="util-btn" id="sync-btn-desktop" onclick="connectProgressSync()" title="Connect file sync">⏺<span class="util-label" style="margin-left:6px">Sync</span></button>
-      <button class="util-btn" onclick="toggleTheme()" title="Toggle theme">☾</button>
-      <a class="util-btn" href="https://heyiamhemant.github.io/DSA_Dojo_legacy/" title="Back to V1">← V1</a>
+  <!-- Desktop rail -->
+  <nav class="rail">
+    <div class="rail-brand">⚔ ALGORITHM DUNGEON<small>Cinematic Edition</small></div>
+    <button class="nav-btn" data-page="dashboard"><span class="nav-icon">🗺️</span> Dungeon Map</button>
+    <button class="nav-btn" data-page="quest"><span class="nav-icon">📜</span> Quest Board <span class="nav-badge" id="quest-badge" style="display:none">0</span></button>
+    <button class="nav-btn" data-page="pathway"><span class="nav-icon">🌲</span> Pathway</button>
+    <button class="nav-btn" data-page="bestiary"><span class="nav-icon">📖</span> Bestiary</button>
+    <button class="nav-btn" data-page="boss"><span class="nav-icon">👑</span> Boss Raids</button>
+    <div class="rail-utils">
+      <button class="util-btn" onclick="exportProgress()">💾 Export</button>
+      <button class="util-btn" onclick="document.getElementById('import-file').click()">📂 Import</button>
+      <button class="util-btn" id="sync-btn-desktop" onclick="connectProgressSync()">⏺ Connect Sync</button>
       <input type="file" id="import-file" accept=".json" style="display:none" onchange="importProgress(event)">
+      <a class="util-btn" href="https://heyiamhemant.github.io/DSA_Dojo_legacy/">← Back to Classic (V1)</a>
     </div>
-  </header>
+  </nav>
 
   <!-- Main pages -->
   <main class="main">
@@ -2513,57 +2506,68 @@ textarea.modal-comment {
           <h1 class="page-title">Dungeon Map</h1>
           <div class="page-subtitle">Your realm, your conquest</div>
         </div>
+        <nav class="dash-tabs-row" role="tablist" aria-label="Dashboard sections">
+          <button class="dash-tab active" data-tab="overview" role="tab" aria-selected="true" onclick="setDashTab('overview')"><span class="dt-ico">⚔</span><span class="dt-label">Overview</span><span class="dt-meta" id="tab-meta-overview"></span></button>
+          <button class="dash-tab" data-tab="progress" role="tab" aria-selected="false" onclick="setDashTab('progress')"><span class="dt-ico">📈</span><span class="dt-label">Progress</span><span class="dt-meta" id="tab-meta-progress"></span></button>
+          <button class="dash-tab" data-tab="map" role="tab" aria-selected="false" onclick="setDashTab('map')"><span class="dt-ico">⚜</span><span class="dt-label">Realms</span><span class="dt-meta" id="tab-meta-map"></span></button>
+        </nav>
         <div class="dash-utility">
           <div class="util-chip"><span class="uc-label">Level</span><span class="uc-val" id="util-level">1</span></div>
           <div class="util-chip"><span class="uc-label">Today</span><span class="uc-val" id="util-today-xp">0 XP</span></div>
           <div class="util-chip alert"><span class="uc-label">Due</span><span class="uc-val" id="util-due">0</span></div>
-          <button class="util-btn" onclick="document.getElementById('import-input').click()">⇪ Import</button>
         </div>
       </div>
-
-      <nav class="dash-tabs-row" role="tablist" aria-label="Dashboard sections">
-        <div class="dash-tabs">
-          <button class="dash-tab active" data-tab="overview" role="tab" aria-selected="true" onclick="setDashTab('overview')"><span class="dt-ico">⚔</span><span class="dt-label">Overview</span><span class="dt-meta" id="tab-meta-overview"></span></button>
-          <button class="dash-tab" data-tab="progress" role="tab" aria-selected="false" onclick="setDashTab('progress')"><span class="dt-ico">📈</span><span class="dt-label">Progress</span><span class="dt-meta" id="tab-meta-progress"></span></button>
-          <button class="dash-tab" data-tab="map" role="tab" aria-selected="false" onclick="setDashTab('map')"><span class="dt-ico">⚜</span><span class="dt-label">Realms</span><span class="dt-meta" id="tab-meta-map"></span></button>
-        </div>
-      </nav>
 
       <div class="hero fcorners" data-tab="overview">
         <svg class="fc tl" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
         <svg class="fc tr" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
         <svg class="fc bl" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
         <svg class="fc br" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
-        <div class="hero-crest">
-          <svg class="level-ring" viewBox="0 0 110 110">
-            <circle class="bg" cx="55" cy="55" r="50"/>
-            <circle class="fg" id="level-fg" cx="55" cy="55" r="50" stroke-dasharray="314" stroke-dashoffset="314"/>
-          </svg>
-          <div class="level-num" id="level-num">1</div>
-        </div>
-        <div class="hero-info">
-          <h2 class="hero-name" id="hero-title">Wanderer</h2>
-          <div class="hero-title" id="hero-rank">Apprentice of the Code</div>
-          <div class="hero-xp-bar"><div class="hero-xp-fill" id="xp-fill" style="width:0%"></div></div>
-          <div class="hero-xp-text" id="xp-text">0 / 100 XP</div>
-          <div class="hero-powerbars" id="hero-powerbars"></div>
-        </div>
-        <div class="streak-badge">
-          <div class="streak-flame">🔥</div>
-          <div class="streak-num" id="streak-num">0</div>
+
+        <!-- LEFT: streak as primary focal point -->
+        <div class="streak-prime">
+          <span class="streak-mult" id="streak-mult">+0% XP</span>
+          <div class="streak-flame-row">
+            <span class="streak-flame">🔥</span>
+            <span class="streak-num" id="streak-num">0</span>
+          </div>
           <div class="streak-label">Day Streak</div>
           <div class="streak-best">Best: <span id="streak-best">0</span></div>
         </div>
+
+        <!-- RIGHT: level / rank / XP / powerbars (now secondary) -->
+        <div class="hero-side">
+          <div class="hero-side-top">
+            <div class="hero-crest">
+              <svg class="level-ring" viewBox="0 0 110 110">
+                <circle class="bg" cx="55" cy="55" r="50"/>
+                <circle class="fg" id="level-fg" cx="55" cy="55" r="50" stroke-dasharray="314" stroke-dashoffset="314"/>
+              </svg>
+              <div class="level-num" id="level-num">1</div>
+            </div>
+            <div class="hero-info">
+              <h2 class="hero-name" id="hero-title">Wanderer</h2>
+              <div class="hero-title" id="hero-rank">Apprentice of the Code</div>
+              <div class="hero-xp-bar"><div class="hero-xp-fill" id="xp-fill" style="width:0%"></div></div>
+              <div class="hero-xp-text" id="xp-text">0 / 100 XP</div>
+            </div>
+          </div>
+          <div class="hero-powerbars" id="hero-powerbars"></div>
+        </div>
       </div>
 
-      <button class="cta-enter" data-tab="overview" onclick="navigate('pathway')">
-        <span class="runes">⚔ ☩ ⚔</span>
-        <span class="cta-stack">
-          <span class="cta-line cta-warn">— Beyond this gate —</span>
-          <span class="cta-line cta-main">Enter the Dungeon</span>
-          <span class="cta-line cta-warn">— No retreat —</span>
+      <button class="cta-enter" data-tab="overview" onclick="navigate('quest')">
+        <span class="runes">🔥 ☩ 🔥</span>
+        <span class="cta-stack-streak">
+          <span class="cta-eyebrow">— Continue your streak <span class="cta-mult" id="cta-streak-mult">+0% XP</span> —</span>
+          <span class="cta-line cta-main">Forge Today’s Hunt</span>
+          <span class="cta-mile">
+            <span id="cta-mile-text">Light a bonfire to begin</span>
+            <span class="cta-mile-bar"><span class="cta-mile-fill" id="cta-mile-fill" style="width:0%"></span></span>
+            <span id="cta-mile-target">3d</span>
+          </span>
         </span>
-        <span class="runes">⚔ ☩ ⚔</span>
+        <span class="runes">🔥 ☩ 🔥</span>
       </button>
 
       <div class="bento">
@@ -3038,8 +3042,8 @@ function toggleDrawer(open) {
   d.classList.toggle('open', open);
   o.classList.toggle('open', open);
 }
-(function(){var h=document.getElementById('hamburger'); if(h) h.addEventListener('click', function(){ toggleDrawer(); });})();
-(function(){var o=document.getElementById('drawer-overlay'); if(o) o.addEventListener('click', function(){ toggleDrawer(false); });})();
+document.getElementById('hamburger').addEventListener('click', () => toggleDrawer());
+document.getElementById('drawer-overlay').addEventListener('click', () => toggleDrawer(false));
 
 /* Per-topic Dark Souls scene thumbnails */
 const TOPIC_SCENES = [
@@ -3431,6 +3435,7 @@ function renderDashboard() {
   document.getElementById('streak-num').textContent = cur;
   const bestEl = document.getElementById('streak-best');
   if (bestEl) bestEl.textContent = best;
+  try { renderStreakCTA(); } catch (e) {}
 
   // KPIs
   const total = RAW_PROBLEMS.length;
@@ -3466,6 +3471,48 @@ function renderDashboard() {
   renderStreakTrack();
   renderAnalytics();
   renderHeatmap();
+}
+
+
+// Compute and render the streak-themed CTA copy: current XP multiplier
+// from streak milestones, days remaining to the next milestone, plus a
+// progress bar measuring progress within the current segment.
+function renderStreakCTA() {
+  try {
+    const cur = (typeof getStreakDays === 'function') ? getStreakDays() : 0;
+    const milestones = (typeof STREAK_MILESTONES !== 'undefined') ? STREAK_MILESTONES : [];
+    let curBonus = 0, prevDays = 0, nextMilestone = null;
+    for (const m of milestones) {
+      if (cur >= m.days) { curBonus = m.bonus; prevDays = m.days; }
+      else if (!nextMilestone) { nextMilestone = m; }
+    }
+    const multPct = Math.round(curBonus * 100);
+    // Update multiplier chips (hero card + CTA eyebrow)
+    const mEl = document.getElementById('streak-mult');
+    if (mEl) mEl.textContent = (multPct > 0 ? '+' : '±') + multPct + '% XP';
+    const ctaMultEl = document.getElementById('cta-streak-mult');
+    if (ctaMultEl) ctaMultEl.textContent = (multPct > 0 ? '+' : '±') + multPct + '% XP';
+    // Progress to next milestone
+    const txt = document.getElementById('cta-mile-text');
+    const tgt = document.getElementById('cta-mile-target');
+    const bar = document.getElementById('cta-mile-fill');
+    if (nextMilestone) {
+      const span = nextMilestone.days - prevDays;
+      const into = cur - prevDays;
+      const pct = span > 0 ? Math.max(0, Math.min(100, (into / span) * 100)) : 0;
+      const remain = Math.max(0, nextMilestone.days - cur);
+      if (txt) txt.textContent = remain === 0
+        ? 'Milestone within reach — strike now'
+        : remain + ' day' + (remain === 1 ? '' : 's') + ' to ' + nextMilestone.label
+          + (nextMilestone.reward ? ' · ' + nextMilestone.reward : '');
+      if (tgt) tgt.textContent = nextMilestone.label;
+      if (bar) bar.style.width = pct.toFixed(1) + '%';
+    } else {
+      if (txt) txt.textContent = 'Grand Overlord — the chronicle is yours';
+      if (tgt) tgt.textContent = '∞';
+      if (bar) bar.style.width = '100%';
+    }
+  } catch (e) { /* no-op */ }
 }
 
 function renderHeroPowerBars() {
