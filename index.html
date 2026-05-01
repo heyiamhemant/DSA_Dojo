@@ -269,59 +269,218 @@ a:hover { color: var(--gold-bright); }
 .app {
   position: relative; z-index: 5;
   min-height: 100vh;
-  display: grid; grid-template-columns: 260px 1fr;
+  display: block;
 }
-@media (max-width: 980px) { .app { grid-template-columns: 1fr; } }
+/* (.app responsive override removed — block layout now) */
 
-/* Side rune rail */
-.rail {
-  background: linear-gradient(180deg, rgba(20,16,12,0.85), rgba(11,8,7,0.95));
-  border-right: 1px solid rgba(232,200,122,0.12);
-  padding: var(--space-md) var(--space-sm);
-  display: flex; flex-direction: column; gap: var(--space-sm);
-  position: sticky; top: 0; height: 100vh; overflow-y: auto;
-  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+/* ═══ CREST BANNER NAV (replaces the side rail) ═══════════════════════
+   A sticky, full-width carved-stone banner across the top of the page
+   with a centered row of glowing rune sigils (one per section). Brand
+   sits left, sigils center, utility actions right. The sigils carry
+   .nav-btn so the existing navigate() click delegate works unchanged.
+*/
+.crest-banner {
+  position: sticky; top: 0; z-index: 80;
+  display: grid; grid-template-columns: 1fr auto 1fr;
+  align-items: center; gap: var(--space);
+  padding: 10px clamp(14px, 2.4vw, 28px);
+  background:
+    repeating-linear-gradient(135deg, rgba(232,200,122,0.025) 0 1px, transparent 1px 5px),
+    radial-gradient(ellipse at center top, rgba(122,75,18,0.18), transparent 70%),
+    linear-gradient(180deg, rgba(20,16,12,0.96) 0%, rgba(11,8,7,0.94) 100%);
+  border-bottom: 1px solid rgba(232,200,122,0.22);
+  box-shadow:
+    0 2px 0 rgba(0,0,0,0.5),
+    0 12px 28px -16px rgba(0,0,0,0.85),
+    inset 0 -1px 0 rgba(232,200,122,0.10),
+    inset 0 1px 0 rgba(255,255,255,0.04);
+  -webkit-backdrop-filter: blur(8px) saturate(1.05);
+  backdrop-filter: blur(8px) saturate(1.05);
 }
-.rail-brand {
-  font-family: var(--serif-display); font-size: 18px; font-weight: 900;
-  color: var(--gold); letter-spacing: .08em; text-align: center;
-  padding: var(--space-sm) 0 var(--space); border-bottom: 1px solid rgba(232,200,122,0.12);
-  text-shadow: 0 0 18px rgba(232,200,122,0.4); margin-bottom: var(--space-sm);
+.crest-banner::before, .crest-banner::after {
+  content: ''; position: absolute; left: 0; right: 0; height: 1px;
+  background: rgba(232,200,122,0.10);
+  pointer-events: none;
 }
-.rail-brand small { display:block; font-family: var(--medieval); font-size: 10px; letter-spacing: .3em; color: var(--text-muted); margin-top: 4px; font-weight: 400; }
+.crest-banner::before { top: 4px; box-shadow: 0 1px 0 rgba(0,0,0,0.5); }
+.crest-banner::after { bottom: 4px; box-shadow: 0 -1px 0 rgba(0,0,0,0.5); }
 
-.nav-btn {
-  display: flex; align-items: center; gap: 12px;
-  padding: 12px 14px; background: transparent;
-  border: 1px solid transparent; border-radius: var(--rad);
-  color: var(--text-dim); font-family: var(--serif); font-weight: 500;
-  font-size: 13px; letter-spacing: .08em; text-transform: uppercase;
-  transition: all .25s ease; position: relative; overflow: hidden;
+.crest-brand {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--serif-display); font-weight: 900;
+  font-size: clamp(13px, 1.4vw, 17px); letter-spacing: .14em;
+  color: var(--gold);
+  text-shadow: 0 0 14px rgba(232,200,122,0.45);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  padding-left: 4px;
 }
-.nav-btn::before {
-  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
-  background: linear-gradient(180deg, transparent, var(--gold), transparent);
-  opacity: 0; transition: opacity .3s ease;
+.crest-brand .crest-mark {
+  font-size: 1.4em; filter: drop-shadow(0 0 6px rgba(232,200,122,0.55));
+  animation: crestFlicker 4.5s ease-in-out infinite;
 }
-.nav-btn:hover { color: var(--gold); border-color: rgba(232,200,122,0.2); background: rgba(232,200,122,0.05); }
-.nav-btn:hover::before { opacity: 1; }
-.nav-btn.active { color: var(--gold); background: linear-gradient(90deg, rgba(232,200,122,0.12), rgba(232,200,122,0.02)); border-color: rgba(232,200,122,0.3); text-shadow: 0 0 12px rgba(232,200,122,0.4); }
-.nav-btn.active::before { opacity: 1; }
-.nav-btn .nav-icon { font-size: 18px; filter: drop-shadow(0 0 4px rgba(232,200,122,0.4)); }
-.nav-btn .nav-badge {
-  margin-left: auto; font-family: var(--mono); font-size: 10px;
-  background: rgba(232,200,122,0.12); padding: 2px 6px; border-radius: 99px;
-  border: 1px solid rgba(232,200,122,0.2);
+.crest-brand small {
+  font-family: var(--medieval); font-size: 9px; letter-spacing: .32em;
+  color: var(--text-muted); font-weight: 400; opacity: 0.85;
+}
+@keyframes crestFlicker {
+  0%, 100% { opacity: 1; filter: drop-shadow(0 0 6px rgba(232,200,122,0.55)); }
+  43%      { opacity: 0.78; filter: drop-shadow(0 0 4px rgba(232,200,122,0.30)); }
+  47%      { opacity: 1;    filter: drop-shadow(0 0 8px rgba(232,200,122,0.65)); }
+  72%      { opacity: 0.85; filter: drop-shadow(0 0 5px rgba(232,200,122,0.40)); }
 }
 
-.rail-utils { margin-top: auto; display: flex; flex-direction: column; gap: 6px; padding-top: var(--space); border-top: 1px solid rgba(232,200,122,0.1); }
-.util-btn {
-  background: transparent; border: 1px solid rgba(232,200,122,0.15);
-  color: var(--text-dim); padding: 8px 10px; border-radius: var(--rad-sm);
-  font-family: var(--mono); font-size: 11px; letter-spacing: .1em;
-  text-align: center; transition: all .2s ease; text-decoration: none; display: block;
+.crest-sigils {
+  justify-self: center;
+  display: inline-flex; gap: 6px;
+  padding: 4px 6px;
+  background: linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.25));
+  border: 1px solid rgba(232,200,122,0.14);
+  border-radius: 999px;
+  box-shadow:
+    inset 0 1px 2px rgba(0,0,0,0.6),
+    0 0 0 1px rgba(0,0,0,0.4),
+    inset 0 -1px 0 rgba(232,200,122,0.08);
+  position: relative;
 }
-.util-btn:hover { color: var(--gold); border-color: rgba(232,200,122,0.4); background: rgba(232,200,122,0.06); }
+.crest-sigils::before, .crest-sigils::after {
+  content: ''; position: absolute; top: 50%; width: 6px; height: 6px;
+  border-radius: 50%; background: radial-gradient(circle at 30% 30%, #f5dfa3, #6b4a18 70%);
+  box-shadow: 0 0 6px rgba(232,200,122,0.55);
+  transform: translateY(-50%);
+}
+.crest-sigils::before { left: -10px; }
+.crest-sigils::after { right: -10px; }
+
+.crest-sigils .nav-btn {
+  position: relative; display: inline-flex; align-items: center;
+  gap: 0;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-dim);
+  font-family: var(--serif); font-weight: 600;
+  font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.18s ease, background 0.18s ease, border-color 0.18s ease, transform 0.12s ease, box-shadow 0.18s ease;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.6);
+  overflow: visible;
+  white-space: nowrap;
+}
+.crest-sigils .nav-btn::before { display: none; }
+.crest-sigils .nav-btn .nav-icon {
+  font-size: 18px;
+  filter: drop-shadow(0 0 4px rgba(232,200,122,0.30));
+  transition: filter 0.18s ease, transform 0.18s ease;
+}
+.crest-sigils .nav-btn .nav-label {
+  margin-left: 9px;
+  max-width: 0; opacity: 0; overflow: hidden;
+  transition: max-width 0.32s ease, opacity 0.22s ease, margin-left 0.22s ease;
+}
+.crest-sigils .nav-btn:hover .nav-label,
+.crest-sigils .nav-btn.active .nav-label {
+  max-width: 220px; opacity: 1;
+}
+.crest-sigils .nav-btn:hover {
+  color: var(--gold);
+  background: rgba(232,200,122,0.08);
+  border-color: rgba(232,200,122,0.28);
+}
+.crest-sigils .nav-btn:hover .nav-icon {
+  filter: drop-shadow(0 0 8px rgba(232,200,122,0.85));
+  transform: translateY(-1px) scale(1.06);
+}
+.crest-sigils .nav-btn.active {
+  color: var(--gold-bright, #f5dfa3);
+  background:
+    radial-gradient(ellipse at center, rgba(232,200,122,0.22), rgba(232,200,122,0.06) 70%, transparent 100%),
+    linear-gradient(180deg, rgba(122,75,18,0.20), rgba(40,24,8,0.30));
+  border-color: rgba(232,200,122,0.55);
+  box-shadow:
+    0 0 18px rgba(232,200,122,0.32),
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    inset 0 -1px 0 rgba(0,0,0,0.4);
+  text-shadow: 0 0 10px rgba(232,200,122,0.6), 0 1px 0 rgba(0,0,0,0.6);
+}
+.crest-sigils .nav-btn.active .nav-icon {
+  filter: drop-shadow(0 0 10px rgba(232,200,122,0.95));
+}
+.crest-sigils .nav-btn[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute; left: 50%; top: calc(100% + 14px); transform: translateX(-50%);
+  font-family: var(--mono); font-size: 9px; letter-spacing: .22em; text-transform: uppercase;
+  color: #2a1d0c;
+  padding: 5px 10px;
+  background: linear-gradient(180deg, #e8d29a 0%, #d8b97a 60%, #b89154 100%);
+  border-radius: 2px;
+  box-shadow:
+    0 4px 10px rgba(0,0,0,0.55),
+    inset 0 -1px 0 rgba(0,0,0,0.18),
+    inset 0 1px 0 rgba(255,255,255,0.4);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.18s ease 0.05s, transform 0.18s ease 0.05s;
+  white-space: nowrap; z-index: 90;
+}
+.crest-sigils .nav-btn[data-tooltip]:hover::after,
+.crest-sigils .nav-btn[data-tooltip]:focus-visible::after { opacity: 1; transform: translateX(-50%) translateY(2px); }
+
+.crest-sigils .nav-btn .nav-badge {
+  position: absolute; top: -3px; right: -3px;
+  font-family: var(--mono); font-size: 9px;
+  background: linear-gradient(180deg, #b04545, #6b1f1f);
+  color: #fff;
+  padding: 1px 5px; border-radius: 99px;
+  border: 1px solid rgba(0,0,0,0.6);
+  box-shadow: 0 0 8px rgba(176,69,69,0.6);
+  margin-left: 0;
+}
+
+.crest-utils {
+  justify-self: end;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding-right: 4px;
+}
+.crest-utils .util-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: transparent;
+  border: 1px solid rgba(232,200,122,0.18);
+  color: var(--text-dim);
+  padding: 7px 10px;
+  border-radius: 6px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .14em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+  white-space: nowrap;
+}
+.crest-utils .util-btn:hover {
+  color: var(--gold);
+  border-color: rgba(232,200,122,0.45);
+  background: rgba(232,200,122,0.06);
+}
+.crest-utils .util-btn .util-label { transition: max-width 0.22s ease, opacity 0.22s ease, margin-left 0.22s ease; }
+
+@media (max-width: 1180px) {
+  .crest-utils .util-btn .util-label { max-width: 0; opacity: 0; margin-left: 0; overflow: hidden; }
+}
+@media (max-width: 880px) {
+  .crest-banner { grid-template-columns: auto 1fr auto; gap: 8px; padding: 8px 10px; }
+  .crest-brand { font-size: 12px; gap: 6px; }
+  .crest-brand small { display: none; }
+  .crest-sigils { padding: 3px 4px; gap: 3px; }
+  .crest-sigils .nav-btn { padding: 7px 10px; }
+  .crest-sigils .nav-btn .nav-icon { font-size: 16px; }
+  .crest-sigils .nav-btn .nav-label { display: none; }
+  .crest-sigils .nav-btn.active .nav-label { display: none; }
+}
+@media (max-width: 520px) {
+  .crest-sigils { gap: 1px; padding: 3px; }
+  .crest-sigils .nav-btn { padding: 6px 7px; }
+  .crest-sigils .nav-btn .nav-icon { font-size: 15px; }
+  .crest-utils { gap: 3px; }
+  .crest-utils .util-btn { padding: 6px 7px; }
+}
 
 /* ─── Main canvas area ─── */
 .main {
@@ -710,147 +869,17 @@ a:hover { color: var(--gold-bright); }
    QUEST BOARD
    ═════════════════════════════════════════════════════════════════════════ */
 .quest-controls {
-  display: flex; flex-wrap: wrap; gap: var(--space-md); align-items: flex-end;
+  display: flex; flex-wrap: wrap; gap: var(--space); align-items: center;
   margin-bottom: var(--space-md);
 }
 .quest-control {
-  display: flex; flex-direction: column; gap: 6px;
-  min-width: 0;
+  display: flex; flex-direction: column; gap: 4px;
 }
-.quest-control > label {
-  font-family: var(--mono); font-size: 10px; color: var(--text-dim);
-  letter-spacing: .18em; text-transform: uppercase;
-}
-
-/* ── Themed range sliders (Number, Min Reviews) ── */
-.quest-slider-control { flex: 1 1 200px; max-width: 280px; }
-.qsl-head {
-  display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
-}
-.qsl-val {
-  font-family: var(--serif); font-size: 22px; font-weight: 700;
-  color: var(--gold-bright, #f0d590);
-  text-shadow: 0 0 12px rgba(217,181,107,0.45);
-  min-width: 28px; text-align: right;
-  line-height: 1;
-}
-.qsl-track-wrap {
-  position: relative; padding: 6px 2px 8px;
-}
-.qsl-ticks {
-  position: absolute; left: 0; right: 0; bottom: 4px;
-  display: flex; justify-content: space-between;
-  pointer-events: none; padding: 0 6px;
-}
-.qsl-ticks span {
-  width: 1px; height: 6px;
-  background: rgba(217,181,107,0.28);
-}
-.qsl-axis {
-  display: flex; justify-content: space-between;
-  font-family: var(--mono); font-size: 9px;
-  color: var(--text-dim); opacity: 0.65;
-  letter-spacing: .15em;
-}
-.qsl-range {
-  -webkit-appearance: none; appearance: none;
-  width: 100%; height: 18px; background: transparent; cursor: grab;
-  position: relative; z-index: 2;
-  margin: 0;
-}
-.qsl-range:active { cursor: grabbing; }
-.qsl-range:focus { outline: none; }
-
-/* WebKit track */
-.qsl-range::-webkit-slider-runnable-track {
-  height: 6px;
-  background:
-    linear-gradient(90deg, rgba(217,181,107,0.55) 0%, rgba(217,181,107,0.55) var(--qsl-fill, 50%), rgba(0,0,0,0.55) var(--qsl-fill, 50%), rgba(0,0,0,0.55) 100%);
-  border: 1px solid rgba(217,181,107,0.30);
-  border-radius: 99px;
-  box-shadow: inset 0 1px 2px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,0,0,0.4);
-}
-.qsl-range::-webkit-slider-thumb {
-  -webkit-appearance: none; appearance: none;
-  width: 18px; height: 18px;
-  margin-top: -7px;
-  background: radial-gradient(circle at 30% 30%, #f5dfa3, #c89c4a 60%, #6b4a18 100%);
-  border: 1px solid rgba(0,0,0,0.7);
-  border-radius: 50%;
-  box-shadow: 0 0 10px rgba(217,181,107,0.55), 0 2px 4px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.4);
-  cursor: grab;
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
-}
-.qsl-range:hover::-webkit-slider-thumb,
-.qsl-range:focus::-webkit-slider-thumb { transform: scale(1.12); box-shadow: 0 0 16px rgba(217,181,107,0.85), 0 2px 6px rgba(0,0,0,0.7), inset 0 1px 1px rgba(255,255,255,0.5); }
-
-/* Firefox track */
-.qsl-range::-moz-range-track {
-  height: 6px;
-  background: rgba(0,0,0,0.55);
-  border: 1px solid rgba(217,181,107,0.30);
-  border-radius: 99px;
-}
-.qsl-range::-moz-range-progress {
-  height: 6px;
-  background: linear-gradient(90deg, rgba(217,181,107,0.7), rgba(217,181,107,0.45));
-  border-radius: 99px 0 0 99px;
-}
-.qsl-range::-moz-range-thumb {
-  width: 18px; height: 18px;
-  background: radial-gradient(circle at 30% 30%, #f5dfa3, #c89c4a 60%, #6b4a18 100%);
-  border: 1px solid rgba(0,0,0,0.7);
-  border-radius: 50%;
-  box-shadow: 0 0 10px rgba(217,181,107,0.55), 0 2px 4px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.4);
-  cursor: grab;
-  transition: transform 0.12s ease;
-}
-.qsl-range:hover::-moz-range-thumb,
-.qsl-range:focus::-moz-range-thumb { transform: scale(1.12); box-shadow: 0 0 16px rgba(217,181,107,0.85), 0 2px 6px rgba(0,0,0,0.7), inset 0 1px 1px rgba(255,255,255,0.5); }
-
-/* ── Themed segmented chip-row (Balance, Difficulty) ── */
-.quest-seg-control { flex: 0 1 auto; }
-.qseg {
-  display: inline-flex; padding: 3px;
-  background: linear-gradient(180deg, rgba(0,0,0,0.55), rgba(0,0,0,0.35));
-  border: 1px solid rgba(217,181,107,0.22);
-  border-radius: 8px;
-  box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
-  gap: 2px;
-  flex-wrap: wrap;
-}
-.qseg-chip {
-  appearance: none; -webkit-appearance: none;
-  border: 1px solid transparent;
-  background: transparent;
-  color: var(--text-dim);
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: .1em; text-transform: uppercase;
-  padding: 7px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease;
-  white-space: nowrap;
-}
-.qseg-chip:hover { color: var(--gold-bright, #f0d590); background: rgba(217,181,107,0.06); }
-.qseg-chip.is-on {
-  background: linear-gradient(180deg, rgba(217,181,107,0.28), rgba(122,75,18,0.30));
-  color: var(--gold-bright, #f5dfa3);
-  border-color: rgba(217,181,107,0.55);
-  box-shadow: 0 0 0 1px rgba(0,0,0,0.45) inset, 0 1px 0 rgba(255,255,255,0.06) inset, 0 0 12px rgba(217,181,107,0.30);
-  text-shadow: 0 0 6px rgba(217,181,107,0.5);
-}
-.qseg-chip.is-on.qseg-easy { background: linear-gradient(180deg, rgba(111,168,107,0.30), rgba(46,90,40,0.30)); border-color: rgba(111,168,107,0.55); color: #cfe8c4; box-shadow: 0 0 12px rgba(111,168,107,0.30), inset 0 1px 0 rgba(255,255,255,0.06); text-shadow: 0 0 6px rgba(111,168,107,0.5); }
-.qseg-chip.is-on.qseg-hard { background: linear-gradient(180deg, rgba(176,69,69,0.32), rgba(70,18,18,0.32)); border-color: rgba(176,69,69,0.6); color: #f3c8c0; box-shadow: 0 0 12px rgba(176,69,69,0.30), inset 0 1px 0 rgba(255,255,255,0.06); text-shadow: 0 0 6px rgba(176,69,69,0.5); }
-.qseg-chip:focus-visible { outline: 1px dashed var(--gold-bright, #f0d590); outline-offset: 2px; }
-
-@media (max-width: 720px) {
-  .quest-controls { gap: 12px; }
-  .quest-slider-control { flex: 1 1 100%; max-width: none; }
-  .quest-seg-control { flex: 1 1 100%; }
-  .qseg { width: 100%; justify-content: stretch; }
-  .qseg-chip { flex: 1 1 0; min-width: 0; padding: 7px 6px; font-size: 10px; letter-spacing: .06em; }
+.quest-control label { font-family: var(--mono); font-size: 10px; color: var(--text-dim); letter-spacing: .15em; text-transform: uppercase; }
+.quest-control input, .quest-control select {
+  background: rgba(0,0,0,0.4); border: 1px solid rgba(232,200,122,0.2);
+  color: var(--text); padding: 8px 12px; border-radius: var(--rad-sm);
+  font-family: var(--mono); font-size: 13px;
 }
 /* ── Rampart wall buttons ── */
 .btn-primary, .btn-secondary {
@@ -1583,28 +1612,11 @@ textarea.modal-comment {
 @keyframes toastIn { from { opacity: 0; transform: translate(-50%, 30px); } to { opacity: 1; transform: translate(-50%, 0); } }
 @keyframes toastOut { to { opacity: 0; transform: translate(-50%, 30px); } }
 
-/* Mobile drawer */
-.mobile-topbar {
-  display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 50;
-  padding: 10px 14px; background: linear-gradient(180deg, rgba(11,8,7,0.95), rgba(11,8,7,0.7));
-  border-bottom: 1px solid rgba(232,200,122,0.15); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
-  align-items: center; justify-content: space-between;
-}
-.hamburger { background: transparent; border: 1px solid rgba(232,200,122,0.3); color: var(--gold); width: 38px; height: 38px; border-radius: var(--rad-sm); font-size: 18px; }
-.mobile-brand { font-family: var(--serif-display); color: var(--gold); font-size: 16px; letter-spacing: .08em; }
-.drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 80; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
-.drawer-overlay.open { display: block; animation: modalBg .3s ease; }
-.mobile-drawer { display: none; position: fixed; top: 0; left: 0; bottom: 0; width: 280px; z-index: 90;
-  background: linear-gradient(180deg, var(--ash), var(--ink)); border-right: 1px solid rgba(232,200,122,0.2);
-  padding: var(--space-md) var(--space); flex-direction: column; gap: 8px; transform: translateX(-100%); transition: transform .35s cubic-bezier(.4,0,.2,1);
-  overflow-y: auto;
-}
-.mobile-drawer.open { display: flex; transform: translateX(0); }
+/* (Mobile drawer styles removed — replaced by always-visible .crest-banner) */
 
 @media (max-width: 980px) {
-  .rail { display: none; }
-  .mobile-topbar { display: flex; }
-  .main { padding-top: 70px; }
+  /* .crest-banner is responsive on its own; just keep main padding tight */
+  .main { padding-top: var(--space); }
 }
 
 /* Build tag + back link */
@@ -2452,44 +2464,43 @@ textarea.modal-comment {
 <!-- ═════════ APP SHELL ═════════ -->
 <div class="app">
 
-  <!-- Mobile topbar -->
-  <div class="mobile-topbar">
-    <button class="hamburger" id="hamburger" aria-label="Menu">☰</button>
-    <div class="mobile-brand">⚔ ALGORITHM DUNGEON</div>
-    <button class="hamburger" onclick="toggleTheme()" aria-label="Theme">☾</button>
-  </div>
-  <div class="drawer-overlay" id="drawer-overlay"></div>
-  <aside class="mobile-drawer" id="mobile-drawer">
-    <div class="rail-brand">⚔ ALGORITHM DUNGEON<small>Cinematic Edition</small></div>
-    <button class="nav-btn drawer-nav" data-page="dashboard"><span class="nav-icon">🗺️</span> Dungeon Map</button>
-    <button class="nav-btn drawer-nav" data-page="quest"><span class="nav-icon">📜</span> Quest Board</button>
-    <button class="nav-btn drawer-nav" data-page="pathway"><span class="nav-icon">🌲</span> Pathway</button>
-    <button class="nav-btn drawer-nav" data-page="bestiary"><span class="nav-icon">📖</span> Bestiary</button>
-    <button class="nav-btn drawer-nav" data-page="boss"><span class="nav-icon">👑</span> Boss Raids</button>
-    <div class="rail-utils">
-      <button class="util-btn" onclick="exportProgress()">💾 Export</button>
-      <button class="util-btn" onclick="document.getElementById('import-file').click()">📂 Import</button>
-      <button class="util-btn" id="sync-btn-mobile" onclick="connectProgressSync()">⏺ Connect Sync</button>
-      <a class="util-btn" href="https://heyiamhemant.github.io/DSA_Dojo_legacy/">← Back to Classic (V1)</a>
+  <!-- ═════════ CREST BANNER NAV ═════════
+       Always-visible top banner of carved sigils. Uses .nav-btn so the
+       existing global navigate() click delegate fires unchanged. -->
+  <header class="crest-banner" role="banner">
+    <div class="crest-brand">
+      <span class="crest-mark">⚔</span>
+      <span>ALGORITHM DUNGEON<br><small>Cinematic Edition</small></span>
     </div>
-  </aside>
 
-  <!-- Desktop rail -->
-  <nav class="rail">
-    <div class="rail-brand">⚔ ALGORITHM DUNGEON<small>Cinematic Edition</small></div>
-    <button class="nav-btn" data-page="dashboard"><span class="nav-icon">🗺️</span> Dungeon Map</button>
-    <button class="nav-btn" data-page="quest"><span class="nav-icon">📜</span> Quest Board <span class="nav-badge" id="quest-badge" style="display:none">0</span></button>
-    <button class="nav-btn" data-page="pathway"><span class="nav-icon">🌲</span> Pathway</button>
-    <button class="nav-btn" data-page="bestiary"><span class="nav-icon">📖</span> Bestiary</button>
-    <button class="nav-btn" data-page="boss"><span class="nav-icon">👑</span> Boss Raids</button>
-    <div class="rail-utils">
-      <button class="util-btn" onclick="exportProgress()">💾 Export</button>
-      <button class="util-btn" onclick="document.getElementById('import-file').click()">📂 Import</button>
-      <button class="util-btn" id="sync-btn-desktop" onclick="connectProgressSync()">⏺ Connect Sync</button>
+    <nav class="crest-sigils" role="navigation" aria-label="Sections">
+      <button class="nav-btn" data-page="dashboard" data-tooltip="Dungeon Map">
+        <span class="nav-icon">🗺️</span><span class="nav-label">Map</span>
+      </button>
+      <button class="nav-btn" data-page="quest" data-tooltip="Quest Board">
+        <span class="nav-icon">📜</span><span class="nav-label">Quests</span>
+        <span class="nav-badge" id="quest-badge" style="display:none">0</span>
+      </button>
+      <button class="nav-btn" data-page="pathway" data-tooltip="The Pathway">
+        <span class="nav-icon">🌲</span><span class="nav-label">Pathway</span>
+      </button>
+      <button class="nav-btn" data-page="bestiary" data-tooltip="Bestiary">
+        <span class="nav-icon">📖</span><span class="nav-label">Bestiary</span>
+      </button>
+      <button class="nav-btn" data-page="boss" data-tooltip="Boss Raids">
+        <span class="nav-icon">👑</span><span class="nav-label">Bosses</span>
+      </button>
+    </nav>
+
+    <div class="crest-utils">
+      <button class="util-btn" onclick="exportProgress()" title="Export progress">💾<span class="util-label" style="margin-left:6px">Export</span></button>
+      <button class="util-btn" onclick="document.getElementById('import-file').click()" title="Import progress">📂<span class="util-label" style="margin-left:6px">Import</span></button>
+      <button class="util-btn" id="sync-btn-desktop" onclick="connectProgressSync()" title="Connect file sync">⏺<span class="util-label" style="margin-left:6px">Sync</span></button>
+      <button class="util-btn" onclick="toggleTheme()" title="Toggle theme">☾</button>
+      <a class="util-btn" href="https://heyiamhemant.github.io/DSA_Dojo_legacy/" title="Back to V1">← V1</a>
       <input type="file" id="import-file" accept=".json" style="display:none" onchange="importProgress(event)">
-      <a class="util-btn" href="https://heyiamhemant.github.io/DSA_Dojo_legacy/">← Back to Classic (V1)</a>
     </div>
-  </nav>
+  </header>
 
   <!-- Main pages -->
   <main class="main">
@@ -2654,55 +2665,26 @@ textarea.modal-comment {
         </div>
       </div>
 
-      <div class="panel quest-panel" style="margin-bottom:var(--space-md)">
+      <div class="panel" style="margin-bottom:var(--space-md)">
         <div class="quest-controls">
-
-          <div class="quest-control quest-slider-control">
-            <div class="qsl-head"><label for="q-count">Number</label><output class="qsl-val" id="q-count-out">5</output></div>
-            <div class="qsl-track-wrap">
-              <input type="range" class="qsl-range" id="q-count" min="1" max="20" step="1" value="5"
-                     oninput="document.getElementById('q-count-out').textContent=this.value">
-              <div class="qsl-ticks" aria-hidden="true">
-                <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-              </div>
-            </div>
-            <div class="qsl-axis"><span>1</span><span>10</span><span>20</span></div>
+          <div class="quest-control"><label>Number</label><input type="number" id="q-count" min="1" max="20" value="5"></div>
+          <div class="quest-control"><label>Min Reviews</label><input type="number" id="q-min-reviews" min="0" max="20" value="2"></div>
+          <div class="quest-control"><label>Balance</label>
+            <select id="q-balance">
+              <option value="balanced">Balanced</option>
+              <option value="review-heavy">Review heavy</option>
+              <option value="new-heavy">New encounters</option>
+              <option value="mixed">Mixed</option>
+            </select>
           </div>
-
-          <div class="quest-control quest-slider-control">
-            <div class="qsl-head"><label for="q-min-reviews">Min Reviews</label><output class="qsl-val" id="q-min-reviews-out">2</output></div>
-            <div class="qsl-track-wrap">
-              <input type="range" class="qsl-range" id="q-min-reviews" min="0" max="20" step="1" value="2"
-                     oninput="document.getElementById('q-min-reviews-out').textContent=this.value">
-              <div class="qsl-ticks" aria-hidden="true">
-                <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-              </div>
-            </div>
-            <div class="qsl-axis"><span>0</span><span>10</span><span>20</span></div>
+          <div class="quest-control"><label>Difficulty</label>
+            <select id="q-difficulty">
+              <option value="auto">Auto (recommended)</option>
+              <option value="easy">Easy only</option>
+              <option value="mixed">Mixed</option>
+              <option value="hard">Hard focus</option>
+            </select>
           </div>
-
-          <div class="quest-control quest-seg-control">
-            <label>Balance</label>
-            <input type="hidden" id="q-balance" value="balanced">
-            <div class="qseg" role="tablist" data-target="q-balance">
-              <button type="button" class="qseg-chip is-on" data-val="balanced" onclick="setSegValue(this)">Balanced</button>
-              <button type="button" class="qseg-chip" data-val="review-heavy" onclick="setSegValue(this)">Review</button>
-              <button type="button" class="qseg-chip" data-val="new-heavy" onclick="setSegValue(this)">New</button>
-              <button type="button" class="qseg-chip" data-val="mixed" onclick="setSegValue(this)">Mixed</button>
-            </div>
-          </div>
-
-          <div class="quest-control quest-seg-control">
-            <label>Difficulty</label>
-            <input type="hidden" id="q-difficulty" value="auto">
-            <div class="qseg" role="tablist" data-target="q-difficulty">
-              <button type="button" class="qseg-chip is-on" data-val="auto" onclick="setSegValue(this)">Auto</button>
-              <button type="button" class="qseg-chip qseg-easy" data-val="easy" onclick="setSegValue(this)">Easy</button>
-              <button type="button" class="qseg-chip" data-val="mixed" onclick="setSegValue(this)">Mixed</button>
-              <button type="button" class="qseg-chip qseg-hard" data-val="hard" onclick="setSegValue(this)">Hard</button>
-            </div>
-          </div>
-
           <button class="btn-primary" onclick="genQuests()">⚔ Generate Today's Hunt</button>
         </div>
       </div>
@@ -3056,8 +3038,8 @@ function toggleDrawer(open) {
   d.classList.toggle('open', open);
   o.classList.toggle('open', open);
 }
-document.getElementById('hamburger').addEventListener('click', () => toggleDrawer());
-document.getElementById('drawer-overlay').addEventListener('click', () => toggleDrawer(false));
+(function(){var h=document.getElementById('hamburger'); if(h) h.addEventListener('click', function(){ toggleDrawer(); });})();
+(function(){var o=document.getElementById('drawer-overlay'); if(o) o.addEventListener('click', function(){ toggleDrawer(false); });})();
 
 /* Per-topic Dark Souls scene thumbnails */
 const TOPIC_SCENES = [
