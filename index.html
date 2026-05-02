@@ -7,7 +7,7 @@
 <title>Algorithm Dungeon — Cinematic</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600;700;900&family=MedievalSharp&family=JetBrains+Mono:wght@300;400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600;700;900&family=Crimson+Pro:wght@400;500;600;700;800;900&family=MedievalSharp&family=JetBrains+Mono:wght@300;400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 /* ═════════════════════════════════════════════════════════════════════════
@@ -48,6 +48,14 @@
   --mono: 'JetBrains Mono', ui-monospace, monospace;
   --ui: 'Inter', system-ui, sans-serif;
 
+  /* ── Font-mode-aware tokens ──
+     --body and --display-num default to the original (Herald) stack.
+     The .font-tome rule below swaps them to Crimson Pro for a cleaner,
+     book-like read while keeping the gothic frame intact. Toggle lives
+     in the crest-banner utils cluster. */
+  --body: var(--ui);
+  --display-num: var(--serif-display);
+
   --rad-sm: 4px;
   --rad: 8px;
   --rad-lg: 14px;
@@ -63,6 +71,69 @@
   --space-lg: 36px;
   --space-xl: 56px;
 }
+
+/* ═════════ FONT MODES (Tome / Herald) ═════════
+   Default 'Herald' mode keeps the original stack: Inter body, Cinzel
+   Decorative numerals, MedievalSharp captions — most theatrical.
+   Toggling to 'Tome' (html.font-tome) swaps the body to Crimson Pro
+   and the numerals to Crimson Pro 800 with tabular figures. Designed
+   for long-form reading; pairs cleanly with the Cinzel section titles
+   for a leather-bound-spellbook feel. Toggle button in crest-banner. */
+
+html.font-tome body {
+  font-family: var(--body);
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+html.font-tome {
+  --body: 'Crimson Pro', Georgia, serif;
+  --display-num: 'Crimson Pro', Georgia, serif;
+  /* Demote MedievalSharp from small-caption use (illegible at 9-11px);
+     fall back to Cinzel for the same gothic-caps texture. The intro
+     splash still uses MedievalSharp via its explicit font-family rule. */
+  --medieval: 'Cinzel', 'MedievalSharp', serif;
+}
+/* Big numerals — switch family + weight + tabular figures so columns
+   of stats line up cleanly. */
+html.font-tome .kpi-num,
+html.font-tome .hero-streak-num,
+html.font-tome .streak-prime-num,
+html.font-tome .streak-num,
+html.font-tome .hero-stat-num,
+html.font-tome .hero-name,
+html.font-tome .level-ring-num,
+html.font-tome .lvl-num,
+html.font-tome .stat-num {
+  font-family: var(--display-num);
+  font-weight: 800;
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+  letter-spacing: -0.005em;
+}
+
+/* Toggle pill (lives in .crest-utils). Mono caps keep it visually
+   subordinate to the page; the mode label uses Cinzel small-caps. */
+.font-toggle {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 9px; border-radius: 4px;
+  background: rgba(232,200,122,0.06);
+  border: 1px solid rgba(232,200,122,0.18);
+  color: var(--text-dim);
+  font-family: var(--mono); font-size: 9px; letter-spacing: .22em;
+  text-transform: uppercase; cursor: pointer;
+  transition: color .2s, border-color .2s, background .2s;
+}
+.font-toggle:hover {
+  color: var(--gold);
+  border-color: rgba(232,200,122,0.42);
+  background: rgba(232,200,122,0.1);
+}
+.font-toggle .ft-icon { font-size: 13px; filter: drop-shadow(0 0 4px rgba(232,200,122,0.35)); }
+.font-toggle .ft-mode {
+  color: var(--gold-deep); font-weight: 700;
+  font-family: var(--serif); letter-spacing: .12em; font-size: 10px;
+}
+html.font-tome .font-toggle .ft-mode::after { content: 'Tome'; }
+html:not(.font-tome) .font-toggle .ft-mode::after { content: 'Herald'; }
+
 
 /* ─── Dark Souls scene backdrop ─── */
 .scene-bg {
@@ -2645,6 +2716,7 @@ textarea.modal-comment {
       <button class="util-btn" onclick="document.getElementById('import-file').click()" title="Import progress">📂<span class="util-label" style="margin-left:6px">Import</span></button>
       <button class="util-btn" id="sync-btn-desktop" onclick="connectProgressSync()" title="Connect file sync">⏺<span class="util-label" style="margin-left:6px">Sync</span></button>
       <button class="util-btn" onclick="toggleTheme()" title="Toggle theme">☾</button>
+      <button class="font-toggle" onclick="toggleFontMode()" title="Switch typeface mode (Herald = ornate, Tome = Crimson Pro book-feel)"><span class="ft-icon">📜</span><span class="ft-mode"></span></button>
       <a class="util-btn" href="https://heyiamhemant.github.io/DSA_Dojo_legacy/" title="Back to V1">← V1</a>
       <input type="file" id="import-file" accept=".json" style="display:none" onchange="importProgress(event)">
     </div>
@@ -4779,6 +4851,21 @@ function toast(msg) {
 }
 
 /* ═════════ THEME ═════════ */
+// ─── Font-mode toggle: 'Herald' (default, ornate) | 'Tome' (Crimson Pro)
+//   Persisted to localStorage. Restore runs on script eval (before DOM
+//   ready) so we avoid a flash of Herald before Tome paints. */
+function toggleFontMode() {
+  const isTome = document.documentElement.classList.toggle('font-tome');
+  try { localStorage.setItem('dojo_font_mode', isTome ? 'tome' : 'herald'); } catch(e){}
+}
+(function restoreFontMode() {
+  try {
+    if (localStorage.getItem('dojo_font_mode') === 'tome') {
+      document.documentElement.classList.add('font-tome');
+    }
+  } catch(e){}
+})();
+
 function toggleTheme() {
   // For now, only dark theme. Slot for future light variant.
   toast('Dark realm only — light mode forthcoming');
