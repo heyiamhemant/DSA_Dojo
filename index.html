@@ -3410,6 +3410,18 @@ function _interp(v) {
   return esc(String(v));
 }
 
+// IMPORTANT: when interpolating a list of SafeHTML into ${...},
+//   pass the array directly — DO NOT call .join('') first. The tag
+//   handles arrays via _interp's flatten step. .join('') collapses
+//   the array into a plain string which the OUTER tag then escapes,
+//   so you'd see "&lt;span...&gt;" rendered verbatim on screen.
+//
+//   GOOD:  html`<ul>${items.map(i => html`<li>${i}</li>`)}</ul>`
+//   BAD:   html`<ul>${items.map(i => html`<li>${i}</li>`).join('')}</ul>`
+//
+//   When assigning the array result directly to .innerHTML (no outer
+//   html`` wrap), call .join('') because innerHTML requires a string —
+//   or wrap the whole thing in html`` for consistency. Either works.
 function html(strings, ...values) {
   let out = '';
   for (let i = 0; i < strings.length; i++) {
@@ -4272,7 +4284,7 @@ function renderQuests() {
     const snoozed = ud.snoozeUntil && new Date(ud.snoozeUntil).getTime() > Date.now();
     const curRating = q.rating || 0;
     const rateRow = q.done ? '' : html`<div class="quest-rate" onclick="event.stopPropagation()">
-      ${[1,2,3,4,5].map(c => html`<button class="quest-rate-btn c${c} ${curRating === c ? 'sel' : ''}" title="Rate ${c}/5 and log victory" onclick="event.stopPropagation();quickRate(${p.id}, ${c})">${c}</button>`).join('')}
+      ${[1,2,3,4,5].map(c => html`<button class="quest-rate-btn c${c} ${curRating === c ? 'sel' : ''}" title="Rate ${c}/5 and log victory" onclick="event.stopPropagation();quickRate(${p.id}, ${c})">${c}</button>`)}
     </div>`;
     const _scene = sceneFor(p.topic);
     return html`<div class="quest-card ${q.done ? 'done' : ''}" data-id="${p.id}" style="--mc:${v.color}40;background-image:linear-gradient(180deg,rgba(11,8,7,0.40) 0%,rgba(11,8,7,0.88) 75%,rgba(11,8,7,0.95) 100%),url('${_scene}');background-size:100% 100%,cover;background-position:0 0,center;background-repeat:no-repeat,no-repeat;">
@@ -4639,7 +4651,7 @@ function renderBoss() {
       <span class="boss-freq" style="background:${fcol[p.freq]}22;color:${fcol[p.freq]};border:1px solid ${fcol[p.freq]}55">${p.freq}</span>
       <h3 class="boss-title">👑 ${p.title}</h3>
       <p class="boss-desc">${p.desc}</p>
-      <div class="boss-tags">${p.tags.map(t => html`<span class="boss-tag">${t}</span>`).join('')}</div>
+      <div class="boss-tags">${p.tags.map(t => html`<span class="boss-tag">${t}</span>`)}</div>
       <div class="boss-status ${ud.attempted ? 'defeated' : ''}">${ud.attempted ? '✓ Defeated' : '○ Undefeated'}</div>
     </div>`;
   }).join('');
@@ -4796,7 +4808,7 @@ function openSDModal(sdId) {
   const ud = userData['sd_' + sdId] || {};
   document.getElementById('modal-encounter').textContent = '👑 Boss Encounter';
   document.getElementById('modal-title').textContent = p.title;
-  document.getElementById('modal-badges').innerHTML = html`<span class="badge">Boss Raid</span>${p.tags.map(t => html`<span class="badge">${t}</span>`).join('')}`;
+  document.getElementById('modal-badges').innerHTML = html`<span class="badge">Boss Raid</span>${p.tags.map(t => html`<span class="badge">${t}</span>`)}`;
   document.getElementById('modal-hint').textContent = p.desc;
   document.getElementById('modal-links').innerHTML = '<span style="color:var(--text-muted);font-size:12px">No external intel — study from memory</span>';
   document.getElementById('modal-sr-info').textContent = '';
