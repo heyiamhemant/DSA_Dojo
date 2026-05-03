@@ -156,9 +156,6 @@ function computeXP() {
 }
 
 function saveState() {
-  // Showcase mode: visitor browser is hosting someone else's gist data
-  // in memory. Never persist that to local storage or sync it back, or
-  // we'd corrupt their own dojo data on next load.
   if (typeof isShowcaseMode === 'function' && isShowcaseMode()) return;
   try {
     localStorage.setItem('dsa_dojo_data', JSON.stringify(userData));

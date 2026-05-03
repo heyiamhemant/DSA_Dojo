@@ -196,6 +196,115 @@ html:not(.font-tome) .font-toggle .ft-mode::after { content: 'Herald'; }
   position: relative;
 }
 
+/* ═════════ Settings Modal (sync, etc.) ═════════ */
+.settings-modal {
+  background: linear-gradient(180deg, #1a1310 0%, #100a08 100%);
+  border: 1px solid rgba(232,200,122,0.25);
+  border-radius: 6px; padding: 28px 32px; width: min(560px, 92vw);
+  max-height: 88vh; overflow: auto; position: relative;
+  box-shadow: 0 30px 90px rgba(0,0,0,0.7), 0 0 0 1px rgba(232,200,122,0.05) inset;
+}
+.settings-head { display:flex; align-items:center; gap:14px; margin-bottom:18px; padding-bottom:14px; border-bottom:1px solid rgba(232,200,122,0.15); }
+.settings-head .settings-icon { font-size:24px; filter: drop-shadow(0 0 6px rgba(232,200,122,0.4)); }
+.settings-head h2 { margin:0; font-family: var(--serif-display); font-weight:900; color: var(--gold); letter-spacing:.08em; font-size:22px; }
+.settings-section { padding:18px 0; border-bottom:1px solid rgba(232,200,122,0.08); }
+.settings-section:last-child { border-bottom:none; }
+.settings-section h3 { margin: 0 0 10px; font-family: var(--medieval); color: var(--gold-deep); letter-spacing:.18em; text-transform:uppercase; font-size:11px; }
+.settings-section p { margin: 6px 0 12px; font-size: 13px; line-height: 1.5; color: var(--text-dim); }
+.settings-section p code { font-family: var(--mono); background: rgba(232,200,122,0.08); padding: 1px 5px; border-radius: 3px; font-size: 11px; color: var(--gold); }
+.settings-section a { color: var(--gold); text-decoration: underline; text-underline-offset: 2px; }
+.settings-row { display:flex; gap: 8px; align-items:center; margin: 10px 0; flex-wrap: wrap; }
+.settings-row input[type="password"], .settings-row input[type="text"] {
+  flex: 1; min-width: 180px; padding: 9px 11px; border-radius: 4px;
+  background: rgba(11,8,7,0.7); color: var(--text);
+  border: 1px solid rgba(232,200,122,0.18);
+  font-family: var(--mono); font-size: 12px; letter-spacing: .04em;
+}
+.settings-row input:focus { outline: none; border-color: rgba(232,200,122,0.5); box-shadow: 0 0 0 2px rgba(232,200,122,0.12); }
+.settings-row .btn-secondary, .settings-row .btn-primary, .settings-row .btn-danger {
+  padding: 9px 14px; border-radius: 4px; font-family: var(--medieval); letter-spacing: .14em;
+  font-size: 11px; text-transform: uppercase; cursor: pointer; transition: all .15s;
+  border: 1px solid rgba(232,200,122,0.25);
+}
+.settings-row .btn-primary { background: linear-gradient(180deg, rgba(232,200,122,0.18), rgba(232,200,122,0.08)); color: var(--gold); }
+.settings-row .btn-primary:hover { border-color: rgba(232,200,122,0.5); }
+.settings-row .btn-secondary { background: rgba(232,200,122,0.04); color: var(--text-dim); }
+.settings-row .btn-secondary:hover { color: var(--gold); border-color: rgba(232,200,122,0.4); }
+.settings-row .btn-danger { background: rgba(176,69,69,0.12); color: #e88; border-color: rgba(176,69,69,0.4); }
+.settings-row .btn-danger:hover { background: rgba(176,69,69,0.22); }
+.sync-status-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 10px; border-radius: 999px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+}
+.sync-status-pill.disconnected { background: rgba(232,200,122,0.06); color: var(--text-dim); border: 1px solid rgba(232,200,122,0.18); }
+.sync-status-pill.synced       { background: rgba(76,175,80,0.12);  color: #9bd99b;        border: 1px solid rgba(76,175,80,0.3); }
+.sync-status-pill.connected    { background: rgba(232,200,122,0.12); color: var(--gold);   border: 1px solid rgba(232,200,122,0.35); }
+.sync-status-pill.error        { background: rgba(176,69,69,0.18);  color: #e88;          border: 1px solid rgba(176,69,69,0.45); }
+.sync-status-pill .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.sync-status-pill.synced .sync-dot { animation: syncPulse 2.4s ease-in-out infinite; }
+@keyframes syncPulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+.sync-detail { margin-top: 8px; font-family: var(--mono); font-size: 10px; color: var(--text-dim); letter-spacing: .06em; }
+.sync-detail .sync-detail-err { color: #e88; }
+
+/* ═════════ SHOWCASE MODE (read-only profile view) ═════════ */
+[data-showcase] #settings-btn,
+[data-showcase] .util-btn[onclick*="exportProgress"],
+[data-showcase] .util-btn[onclick*="import-file"],
+[data-showcase] .util-btn[onclick*="toggleTheme"],
+[data-showcase] .font-toggle,
+[data-showcase] .quest-rate,
+[data-showcase] .modal-foot .btn-primary,
+[data-showcase] .modal-comment,
+[data-showcase] #snooze-btn,
+[data-showcase] #pin-btn,
+[data-showcase] .quest-action-btn,
+[data-showcase] .qsl-range,
+[data-showcase] .qseg-chip,
+[data-showcase] #generate-plan-btn,
+[data-showcase] .quest-controls,
+[data-showcase] .conf-buttons,
+[data-showcase] .modal-extra-actions { display: none !important; }
+
+[data-showcase] .modal-section h4 + .modal-comment { display: none !important; }
+
+.showcase-banner {
+  position: relative; z-index: 100;
+  background:
+    linear-gradient(180deg, rgba(11,8,7,0.92) 0%, rgba(11,8,7,0.78) 100%),
+    radial-gradient(circle at 20% 20%, rgba(232,200,122,0.18), transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(176,69,69,0.12), transparent 60%),
+    #0c0907;
+  border-bottom: 1px solid rgba(232,200,122,0.25);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.5), inset 0 -1px 0 rgba(232,200,122,0.08);
+  padding: 18px 24px;
+}
+.showcase-banner .sb-inner { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+.showcase-banner .sb-left { display: flex; align-items: center; gap: 16px; min-width: 0; flex: 1; }
+.showcase-banner .sb-avatar { width: 64px; height: 64px; border-radius: 50%; overflow: hidden; border: 2px solid rgba(232,200,122,0.4); box-shadow: 0 0 0 4px rgba(232,200,122,0.08), 0 6px 18px rgba(0,0,0,0.6); flex-shrink: 0; background: rgba(232,200,122,0.06); }
+.showcase-banner .sb-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.showcase-banner .sb-id { min-width: 0; }
+.showcase-banner .sb-eyebrow { font-family: var(--medieval); color: var(--gold-deep); font-size: 10px; letter-spacing: .25em; text-transform: uppercase; margin-bottom: 4px; }
+.showcase-banner .sb-name { margin: 0 0 4px; font-family: var(--serif-display); font-weight: 900; color: var(--gold); font-size: clamp(20px, 2.4vw, 28px); letter-spacing: .04em; line-height: 1.1; text-shadow: 0 0 16px rgba(232,200,122,0.25); }
+.showcase-banner .sb-meta { font-family: var(--mono); font-size: 11px; color: var(--text-dim); letter-spacing: .04em; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.showcase-banner .sb-meta .sb-dot { color: rgba(232,200,122,0.4); }
+.showcase-banner .sb-meta .sb-error { color: #e88; }
+.showcase-banner .sb-right { display: flex; gap: 10px; flex-shrink: 0; }
+.showcase-banner .sb-cta { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 4px; text-decoration: none; font-family: var(--medieval); letter-spacing: .14em; font-size: 11px; text-transform: uppercase; transition: all .18s ease; border: 1px solid rgba(232,200,122,0.35); }
+.showcase-banner .sb-cta-primary { background: linear-gradient(180deg, rgba(232,200,122,0.22), rgba(232,200,122,0.10)); color: var(--gold); box-shadow: inset 0 1px 0 rgba(232,200,122,0.25), 0 4px 12px rgba(0,0,0,0.4); }
+.showcase-banner .sb-cta-primary:hover { border-color: rgba(232,200,122,0.6); box-shadow: inset 0 1px 0 rgba(232,200,122,0.35), 0 6px 20px rgba(232,200,122,0.18); transform: translateY(-1px); }
+.showcase-banner .sb-cta-ghost { background: rgba(232,200,122,0.04); color: var(--text-dim); }
+.showcase-banner .sb-cta-ghost:hover { color: var(--gold); border-color: rgba(232,200,122,0.5); background: rgba(232,200,122,0.08); }
+@media (max-width: 720px) {
+  .showcase-banner { padding: 14px 16px; }
+  .showcase-banner .sb-inner { gap: 14px; }
+  .showcase-banner .sb-avatar { width: 52px; height: 52px; }
+  .showcase-banner .sb-right { width: 100%; justify-content: stretch; }
+  .showcase-banner .sb-cta { flex: 1; justify-content: center; padding: 9px 10px; font-size: 10px; }
+}
+
+
+
 /* Buttons get a gold-braid border treatment */
 .btn-primary {
   background:
@@ -3081,6 +3190,68 @@ textarea.modal-comment {
   </div>
 </div>
 
+<!-- ═════════ SETTINGS MODAL ═════════ -->
+<div class="modal-overlay" id="settings-overlay" onclick="if(event.target===this)closeSettingsModal()" style="display:none">
+  <div class="settings-modal fcorners" id="settings-modal">
+    <svg class="fc tl" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
+    <svg class="fc tr" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
+    <svg class="fc bl" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
+    <svg class="fc br" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
+    <button class="modal-close" onclick="closeSettingsModal()" style="position:absolute;top:12px;right:12px;background:none;border:none;color:var(--text-dim);font-size:18px;cursor:pointer">✕</button>
+    <div class="settings-head">
+      <span class="settings-icon">⚙</span>
+      <h2>Settings</h2>
+    </div>
+
+    <!-- ── Cross-device sync via private GitHub Gist ── -->
+    <div class="settings-section">
+      <h3>☁ Cross-device Sync (Gist)</h3>
+      <p>Stores your progress in a <strong>private</strong> GitHub Gist, so phone / desktop / browser all stay in sync without import-export.</p>
+      <p>One-time setup: create a <a href="https://github.com/settings/tokens?type=beta" target="_blank">fine-grained personal access token</a> (or a <a href="https://github.com/settings/tokens/new?scopes=gist&amp;description=DSA%20Dojo%20Sync" target="_blank">classic token</a>) with <strong>only</strong> the <code>gist</code> scope. Paste it below — it lives in this browser's localStorage only, never on the public site.</p>
+      <div class="settings-row">
+        <span id="sync-status-pill" class="sync-status-pill disconnected"><span class="sync-dot"></span><span id="sync-status-label">Not connected</span></span>
+      </div>
+      <div class="settings-row">
+        <input type="password" id="gist-token-input" placeholder="ghp_… or github_pat_…" autocomplete="off" spellcheck="false">
+        <button class="btn-primary" onclick="saveGistTokenFromInput()">Connect</button>
+      </div>
+      <div class="settings-row">
+        <button class="btn-secondary" onclick="forceGistPull()" id="force-pull-btn" disabled>↓ Pull now</button>
+        <button class="btn-secondary" onclick="forceGistPush()" id="force-push-btn" disabled>↑ Push now</button>
+        <button class="btn-danger" onclick="disconnectGist()" id="disconnect-btn" disabled>Disconnect this device</button>
+      </div>
+      <div class="settings-row" style="border-top:1px dashed rgba(232,200,122,0.12);padding-top:14px;margin-top:6px">
+        <input type="text" id="github-username-input" placeholder="your GitHub username" autocomplete="off" spellcheck="false">
+        <button class="btn-secondary" onclick="copyShowcaseUrl()" title="Copy a public read-only URL of your profile">📤 Copy share URL</button>
+      </div>
+      <p style="font-size:11px;margin-top:8px;color:var(--text-dim)">For public sharing: make your <code>dojo-progress.json</code> gist <strong>public</strong> on gist.github.com, then enter your GitHub username and copy the share URL. Anyone with the link sees a read-only view (notes always hidden).</p>
+      <div class="sync-detail" id="sync-detail"></div>
+    </div>
+
+    <!-- ── Local file sync (file-system access API; Chrome on local) ── -->
+    <div class="settings-section">
+      <h3>📁 Local file sync (Chrome only)</h3>
+      <p>Alternative for use on a single machine: pin the site to a JSON file in your iCloud / Dropbox folder. Auto-saves on every change.</p>
+      <div class="settings-row">
+        <span id="local-sync-status" style="font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--text-dim);text-transform:uppercase">Not connected</span>
+      </div>
+      <div class="settings-row">
+        <button class="btn-secondary" onclick="connectProgressSync(); closeSettingsModal();">Connect file…</button>
+      </div>
+    </div>
+
+    <!-- ── Backup / restore via JSON file (always works) ── -->
+    <div class="settings-section">
+      <h3>💾 Manual backup</h3>
+      <p>Download or restore your progress as a JSON file. Useful as a safety net even with sync enabled.</p>
+      <div class="settings-row">
+        <button class="btn-secondary" onclick="exportProgress()">Download backup</button>
+        <button class="btn-secondary" onclick="document.getElementById('import-file').click(); closeSettingsModal();">Restore from file…</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <a href="https://heyiamhemant.github.io/DSA_Dojo_legacy/" class="back-classic">← BACK TO V1 (CLASSIC)</a>
 <div class="build-tag">v2 · cinematic build</div>
 
@@ -4263,7 +4434,6 @@ function ensureLegacyInputs(n, minRev, diff) {
 }
 
 window.savePlan = function() {
-  if (typeof isShowcaseMode === 'function' && isShowcaseMode()) return;
   try { localStorage.setItem('dsa_dojo_plan', JSON.stringify(todayPlan)); } catch(e) {}
   if (typeof scheduleSyncWrite === 'function') scheduleSyncWrite();
   if (typeof scheduleGistPush === 'function') scheduleGistPush();
@@ -4663,6 +4833,7 @@ function renderBoss() {
 
 /* ═════════ INLINE QUICK RATE ═════════ */
 function quickRate(id, conf) {
+  if (typeof isShowcaseMode === 'function' && isShowcaseMode()) { showcaseBlock('rating disabled'); return; }
   if (!userData[id]) userData[id] = {};
   const prev = userData[id].conf || 0;
   userData[id].conf = conf;
@@ -4745,6 +4916,7 @@ function openModal(id) {
 }
 
 function snoozeProblem(id) {
+  if (typeof isShowcaseMode === 'function' && isShowcaseMode()) { showcaseBlock('snooze disabled'); return; }
   if (!userData[id]) userData[id] = {};
   const d = new Date(); d.setDate(d.getDate() + 7);
   userData[id].snoozeUntil = d.toISOString();
@@ -4753,6 +4925,7 @@ function snoozeProblem(id) {
   closeModal();
 }
 function pinProblem(id) {
+  if (typeof isShowcaseMode === 'function' && isShowcaseMode()) { showcaseBlock('pin disabled'); return; }
   if (!userData[id]) userData[id] = {};
   userData[id].pinTomorrow = !userData[id].pinTomorrow;
   saveState();
@@ -4771,6 +4944,7 @@ function closeModal() {
 }
 
 function saveModal() {
+  if (typeof isShowcaseMode === 'function' && isShowcaseMode()) { showcaseBlock('logging victories disabled'); return; }
   if (activeModal == null) return;
   const id = activeModal;
   if (typeof id === 'string' && id.startsWith('sd_')) return saveSDModal(id);
@@ -4828,6 +5002,7 @@ function selectSDConf(v) {
   document.querySelectorAll('#conf-buttons .conf-btn').forEach((b, i) => b.classList.toggle('sel', i === modalSelectedConf));
 }
 function saveSDModal(modalId) {
+  if (typeof isShowcaseMode === 'function' && isShowcaseMode()) { showcaseBlock('boss tracking disabled'); return; }
   const sdId = modalId.replace('sd_', '');
   const notes = document.getElementById('modal-comment').value;
   if (!userData['sd_' + sdId]) userData['sd_' + sdId] = {};
@@ -4917,6 +5092,164 @@ document.addEventListener('input', e => {
 });
 window.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.qsl-range').forEach(syncQslFill);
+});
+
+/* ═════════ SETTINGS MODAL ═════════
+   Opens a unified Settings modal with sync (gist), local file sync,
+   and manual backup options. Status pill auto-refreshes when the gist
+   sync module fires the 'dojo:sync-status-changed' event. */
+
+function openSettingsModal() {
+  const ov = document.getElementById('settings-overlay');
+  if (!ov) return;
+  refreshSettingsModal();
+  ov.style.display = 'flex';
+  // Pre-fill input with masked token if connected (so the user can see
+  // there IS one without us echoing it in plaintext).
+  const inp = document.getElementById('gist-token-input');
+  if (inp) {
+    const tok = (typeof gistGetToken === 'function') ? gistGetToken() : '';
+    inp.value = tok ? '•'.repeat(Math.min(28, tok.length)) : '';
+    inp.dataset.masked = tok ? '1' : '';
+    if (!tok) setTimeout(() => inp.focus(), 30);
+  }
+}
+
+function closeSettingsModal() {
+  const ov = document.getElementById('settings-overlay');
+  if (ov) ov.style.display = 'none';
+}
+
+function refreshSettingsModal() {
+  if (typeof gistStatus !== 'function') return;
+  const st = gistStatus();
+  const pill = document.getElementById('sync-status-pill');
+  const lbl = document.getElementById('sync-status-label');
+  const detail = document.getElementById('sync-detail');
+  if (pill) pill.className = 'sync-status-pill ' + st.state;
+  if (lbl) lbl.textContent = st.label;
+  if (detail) {
+    let bits = [];
+    if (st.lastPush) bits.push('Last push: ' + new Date(st.lastPush).toLocaleString());
+    if (st.detail) bits.push('<span class="sync-detail-err">' + esc(st.detail) + '</span>');
+    detail.innerHTML = bits.join(' &middot; ');
+  }
+  const isConnected = (st.state !== 'disconnected');
+  ['force-pull-btn', 'force-push-btn', 'disconnect-btn'].forEach(id => {
+    const b = document.getElementById(id);
+    if (b) b.disabled = !isConnected;
+  });
+  // Local-file sync status (FSA-based, separate path)
+  const localLbl = document.getElementById('local-sync-status');
+  if (localLbl && typeof syncFileHandle !== 'undefined') {
+    localLbl.textContent = syncFileHandle ? 'Connected' : (typeof supportsProgressSync === 'function' && !supportsProgressSync() ? 'Unsupported in this browser' : 'Not connected');
+  }
+}
+window.addEventListener('dojo:sync-status-changed', refreshSettingsModal);
+
+async function saveGistTokenFromInput() {
+  const inp = document.getElementById('gist-token-input');
+  if (!inp) return;
+  const v = (inp.value || '').trim();
+  if (!v || (inp.dataset.masked === '1' && /^•+$/.test(v))) {
+    showToast('Paste a GitHub token (gist scope)', 'error');
+    return;
+  }
+  if (typeof gistSetToken !== 'function') {
+    showToast('Sync module not loaded', 'error');
+    return;
+  }
+  gistSetToken(v);
+  inp.value = '•'.repeat(Math.min(28, v.length));
+  inp.dataset.masked = '1';
+  showToast('Token saved — verifying…', 'info');
+
+  try {
+    // Pull first to merge any existing remote state. If no remote exists,
+    // gistPullAndMerge internally calls gistPushNow() to seed.
+    let changed = false;
+    if (typeof gistPullAndMerge === 'function') {
+      changed = await gistPullAndMerge();
+    }
+    // Force a fresh push so we definitively prove the token has write
+    // access AND end up with a "Synced N seconds ago" status. Without
+    // this, first-connect would show "Connected (not synced yet)" until
+    // the user happens to make a change.
+    if (typeof gistPushNow === 'function') {
+      await gistPushNow();
+    }
+    refreshSettingsModal();
+    const st = (typeof gistStatus === 'function') ? gistStatus() : {state:'unknown'};
+    if (st.state === 'error') {
+      showToast('Connect failed: ' + (st.detail || st.label), 'error');
+    } else if (st.state === 'synced') {
+      showToast(changed ? 'Synced & merged remote progress' : 'Synced', 'success');
+    } else {
+      showToast('Connected', 'success');
+    }
+  } catch (err) {
+    refreshSettingsModal();
+    showToast('Connect failed: ' + (err && err.message || err), 'error');
+  }
+}
+
+async function forceGistPull() {
+  if (typeof gistPullAndMerge !== 'function') return;
+  showToast('Pulling…', 'info');
+  const changed = await gistPullAndMerge();
+  refreshSettingsModal();
+  showToast(changed ? 'Pulled & merged' : 'Already up to date', 'success');
+}
+
+async function forceGistPush() {
+  if (typeof gistPushNow !== 'function') return;
+  showToast('Pushing…', 'info');
+  await gistPushNow();
+  refreshSettingsModal();
+  const st = gistStatus();
+  showToast(st.state === 'error' ? 'Push failed' : 'Pushed', st.state === 'error' ? 'error' : 'success');
+}
+
+function disconnectGist() {
+  if (typeof gistDisconnect !== 'function') return;
+  if (!confirm('Disconnect sync on this device? Your gist on GitHub stays — only the local token is forgotten. You can reconnect by pasting the token again.')) return;
+  gistDisconnect();
+  const inp = document.getElementById('gist-token-input');
+  if (inp) { inp.value = ''; inp.dataset.masked = ''; }
+  refreshSettingsModal();
+  showToast('Disconnected', 'info');
+}
+
+// Esc closes settings modal too
+function copyShowcaseUrl() {
+  const inp = document.getElementById('github-username-input');
+  const u = (inp && inp.value || '').trim();
+  if (!/^[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?$/.test(u)) {
+    showToast('Enter a valid GitHub username', 'error'); return;
+  }
+  const base = location.origin + location.pathname.replace(/\/index\.html$/, '/').replace(/\/+$/, '/');
+  const url = base + '?profile=' + encodeURIComponent(u);
+  const done = () => showToast('Copied: ' + url, 'success');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(done).catch(() => fallbackCopy(url, done));
+  } else { fallbackCopy(url, done); }
+}
+function fallbackCopy(text, onDone) {
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    onDone && onDone();
+  } catch (e) { showToast('Copy failed — URL: ' + text, 'info'); }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const ov = document.getElementById('settings-overlay');
+    if (ov && ov.style.display !== 'none') closeSettingsModal();
+  }
 });
 
 /* ═════════ INIT ═════════ */
