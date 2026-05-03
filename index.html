@@ -196,6 +196,58 @@ html:not(.font-tome) .font-toggle .ft-mode::after { content: 'Herald'; }
   position: relative;
 }
 
+/* ═════════ Settings Modal (sync, etc.) ═════════ */
+.settings-modal {
+  background: linear-gradient(180deg, #1a1310 0%, #100a08 100%);
+  border: 1px solid rgba(232,200,122,0.25);
+  border-radius: 6px; padding: 28px 32px; width: min(560px, 92vw);
+  max-height: 88vh; overflow: auto; position: relative;
+  box-shadow: 0 30px 90px rgba(0,0,0,0.7), 0 0 0 1px rgba(232,200,122,0.05) inset;
+}
+.settings-head { display:flex; align-items:center; gap:14px; margin-bottom:18px; padding-bottom:14px; border-bottom:1px solid rgba(232,200,122,0.15); }
+.settings-head .settings-icon { font-size:24px; filter: drop-shadow(0 0 6px rgba(232,200,122,0.4)); }
+.settings-head h2 { margin:0; font-family: var(--serif-display); font-weight:900; color: var(--gold); letter-spacing:.08em; font-size:22px; }
+.settings-section { padding:18px 0; border-bottom:1px solid rgba(232,200,122,0.08); }
+.settings-section:last-child { border-bottom:none; }
+.settings-section h3 { margin: 0 0 10px; font-family: var(--medieval); color: var(--gold-deep); letter-spacing:.18em; text-transform:uppercase; font-size:11px; }
+.settings-section p { margin: 6px 0 12px; font-size: 13px; line-height: 1.5; color: var(--text-dim); }
+.settings-section p code { font-family: var(--mono); background: rgba(232,200,122,0.08); padding: 1px 5px; border-radius: 3px; font-size: 11px; color: var(--gold); }
+.settings-section a { color: var(--gold); text-decoration: underline; text-underline-offset: 2px; }
+.settings-row { display:flex; gap: 8px; align-items:center; margin: 10px 0; flex-wrap: wrap; }
+.settings-row input[type="password"], .settings-row input[type="text"] {
+  flex: 1; min-width: 180px; padding: 9px 11px; border-radius: 4px;
+  background: rgba(11,8,7,0.7); color: var(--text);
+  border: 1px solid rgba(232,200,122,0.18);
+  font-family: var(--mono); font-size: 12px; letter-spacing: .04em;
+}
+.settings-row input:focus { outline: none; border-color: rgba(232,200,122,0.5); box-shadow: 0 0 0 2px rgba(232,200,122,0.12); }
+.settings-row .btn-secondary, .settings-row .btn-primary, .settings-row .btn-danger {
+  padding: 9px 14px; border-radius: 4px; font-family: var(--medieval); letter-spacing: .14em;
+  font-size: 11px; text-transform: uppercase; cursor: pointer; transition: all .15s;
+  border: 1px solid rgba(232,200,122,0.25);
+}
+.settings-row .btn-primary { background: linear-gradient(180deg, rgba(232,200,122,0.18), rgba(232,200,122,0.08)); color: var(--gold); }
+.settings-row .btn-primary:hover { border-color: rgba(232,200,122,0.5); }
+.settings-row .btn-secondary { background: rgba(232,200,122,0.04); color: var(--text-dim); }
+.settings-row .btn-secondary:hover { color: var(--gold); border-color: rgba(232,200,122,0.4); }
+.settings-row .btn-danger { background: rgba(176,69,69,0.12); color: #e88; border-color: rgba(176,69,69,0.4); }
+.settings-row .btn-danger:hover { background: rgba(176,69,69,0.22); }
+.sync-status-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 10px; border-radius: 999px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+}
+.sync-status-pill.disconnected { background: rgba(232,200,122,0.06); color: var(--text-dim); border: 1px solid rgba(232,200,122,0.18); }
+.sync-status-pill.synced       { background: rgba(76,175,80,0.12);  color: #9bd99b;        border: 1px solid rgba(76,175,80,0.3); }
+.sync-status-pill.connected    { background: rgba(232,200,122,0.12); color: var(--gold);   border: 1px solid rgba(232,200,122,0.35); }
+.sync-status-pill.error        { background: rgba(176,69,69,0.18);  color: #e88;          border: 1px solid rgba(176,69,69,0.45); }
+.sync-status-pill .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.sync-status-pill.synced .sync-dot { animation: syncPulse 2.4s ease-in-out infinite; }
+@keyframes syncPulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+.sync-detail { margin-top: 8px; font-family: var(--mono); font-size: 10px; color: var(--text-dim); letter-spacing: .06em; }
+.sync-detail .sync-detail-err { color: #e88; }
+
+
 /* Buttons get a gold-braid border treatment */
 .btn-primary {
   background:
@@ -2714,7 +2766,7 @@ textarea.modal-comment {
     <div class="crest-utils">
       <button class="util-btn" onclick="exportProgress()" title="Export progress">💾<span class="util-label" style="margin-left:6px">Export</span></button>
       <button class="util-btn" onclick="document.getElementById('import-file').click()" title="Import progress">📂<span class="util-label" style="margin-left:6px">Import</span></button>
-      <button class="util-btn" id="sync-btn-desktop" onclick="connectProgressSync()" title="Connect file sync">⏺<span class="util-label" style="margin-left:6px">Sync</span></button>
+      <button class="util-btn" id="settings-btn" onclick="openSettingsModal()" title="Settings &amp; sync"><span id="settings-btn-icon">⚙</span><span class="util-label" style="margin-left:6px">Settings</span></button>
       <button class="util-btn" onclick="toggleTheme()" title="Toggle theme">☾</button>
       <button class="font-toggle" onclick="toggleFontMode()" title="Switch typeface mode (Herald = ornate, Tome = Crimson Pro book-feel)"><span class="ft-icon">📜</span><span class="ft-mode"></span></button>
       <a class="util-btn" href="https://heyiamhemant.github.io/DSA_Dojo_legacy/" title="Back to V1">← V1</a>
@@ -3081,11 +3133,69 @@ textarea.modal-comment {
   </div>
 </div>
 
+<!-- ═════════ SETTINGS MODAL ═════════ -->
+<div class="modal-overlay" id="settings-overlay" onclick="if(event.target===this)closeSettingsModal()" style="display:none">
+  <div class="settings-modal fcorners" id="settings-modal">
+    <svg class="fc tl" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
+    <svg class="fc tr" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
+    <svg class="fc bl" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
+    <svg class="fc br" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
+    <button class="modal-close" onclick="closeSettingsModal()" style="position:absolute;top:12px;right:12px;background:none;border:none;color:var(--text-dim);font-size:18px;cursor:pointer">✕</button>
+    <div class="settings-head">
+      <span class="settings-icon">⚙</span>
+      <h2>Settings</h2>
+    </div>
+
+    <!-- ── Cross-device sync via private GitHub Gist ── -->
+    <div class="settings-section">
+      <h3>☁ Cross-device Sync (Gist)</h3>
+      <p>Stores your progress in a <strong>private</strong> GitHub Gist, so phone / desktop / browser all stay in sync without import-export.</p>
+      <p>One-time setup: create a <a href="https://github.com/settings/tokens?type=beta" target="_blank">fine-grained personal access token</a> (or a <a href="https://github.com/settings/tokens/new?scopes=gist&amp;description=DSA%20Dojo%20Sync" target="_blank">classic token</a>) with <strong>only</strong> the <code>gist</code> scope. Paste it below — it lives in this browser's localStorage only, never on the public site.</p>
+      <div class="settings-row">
+        <span id="sync-status-pill" class="sync-status-pill disconnected"><span class="sync-dot"></span><span id="sync-status-label">Not connected</span></span>
+      </div>
+      <div class="settings-row">
+        <input type="password" id="gist-token-input" placeholder="ghp_… or github_pat_…" autocomplete="off" spellcheck="false">
+        <button class="btn-primary" onclick="saveGistTokenFromInput()">Connect</button>
+      </div>
+      <div class="settings-row">
+        <button class="btn-secondary" onclick="forceGistPull()" id="force-pull-btn" disabled>↓ Pull now</button>
+        <button class="btn-secondary" onclick="forceGistPush()" id="force-push-btn" disabled>↑ Push now</button>
+        <button class="btn-danger" onclick="disconnectGist()" id="disconnect-btn" disabled>Disconnect this device</button>
+      </div>
+      <div class="sync-detail" id="sync-detail"></div>
+    </div>
+
+    <!-- ── Local file sync (file-system access API; Chrome on local) ── -->
+    <div class="settings-section">
+      <h3>📁 Local file sync (Chrome only)</h3>
+      <p>Alternative for use on a single machine: pin the site to a JSON file in your iCloud / Dropbox folder. Auto-saves on every change.</p>
+      <div class="settings-row">
+        <span id="local-sync-status" style="font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--text-dim);text-transform:uppercase">Not connected</span>
+      </div>
+      <div class="settings-row">
+        <button class="btn-secondary" onclick="connectProgressSync(); closeSettingsModal();">Connect file…</button>
+      </div>
+    </div>
+
+    <!-- ── Backup / restore via JSON file (always works) ── -->
+    <div class="settings-section">
+      <h3>💾 Manual backup</h3>
+      <p>Download or restore your progress as a JSON file. Useful as a safety net even with sync enabled.</p>
+      <div class="settings-row">
+        <button class="btn-secondary" onclick="exportProgress()">Download backup</button>
+        <button class="btn-secondary" onclick="document.getElementById('import-file').click(); closeSettingsModal();">Restore from file…</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <a href="https://heyiamhemant.github.io/DSA_Dojo_legacy/" class="back-classic">← BACK TO V1 (CLASSIC)</a>
 <div class="build-tag">v2 · cinematic build</div>
 
 <!-- ═════════ CORE LOGIC (extracted from v1) ═════════ -->
 <script src="./dojo-core.js"></script>
+<script src="./gist-sync.js"></script>
 
 <!-- ═════════ V2 APP CODE ═════════ -->
 <script>
@@ -4263,6 +4373,7 @@ function ensureLegacyInputs(n, minRev, diff) {
 window.savePlan = function() {
   try { localStorage.setItem('dsa_dojo_plan', JSON.stringify(todayPlan)); } catch(e) {}
   if (typeof scheduleSyncWrite === 'function') scheduleSyncWrite();
+  if (typeof scheduleGistPush === 'function') scheduleGistPush();
   updateBadges();
 };
 
@@ -4915,10 +5026,132 @@ window.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.qsl-range').forEach(syncQslFill);
 });
 
+/* ═════════ SETTINGS MODAL ═════════
+   Opens a unified Settings modal with sync (gist), local file sync,
+   and manual backup options. Status pill auto-refreshes when the gist
+   sync module fires the 'dojo:sync-status-changed' event. */
+
+function openSettingsModal() {
+  const ov = document.getElementById('settings-overlay');
+  if (!ov) return;
+  refreshSettingsModal();
+  ov.style.display = 'flex';
+  // Pre-fill input with masked token if connected (so the user can see
+  // there IS one without us echoing it in plaintext).
+  const inp = document.getElementById('gist-token-input');
+  if (inp) {
+    const tok = (typeof gistGetToken === 'function') ? gistGetToken() : '';
+    inp.value = tok ? '•'.repeat(Math.min(28, tok.length)) : '';
+    inp.dataset.masked = tok ? '1' : '';
+    if (!tok) setTimeout(() => inp.focus(), 30);
+  }
+}
+
+function closeSettingsModal() {
+  const ov = document.getElementById('settings-overlay');
+  if (ov) ov.style.display = 'none';
+}
+
+function refreshSettingsModal() {
+  if (typeof gistStatus !== 'function') return;
+  const st = gistStatus();
+  const pill = document.getElementById('sync-status-pill');
+  const lbl = document.getElementById('sync-status-label');
+  const detail = document.getElementById('sync-detail');
+  if (pill) pill.className = 'sync-status-pill ' + st.state;
+  if (lbl) lbl.textContent = st.label;
+  if (detail) {
+    let bits = [];
+    if (st.lastPush) bits.push('Last push: ' + new Date(st.lastPush).toLocaleString());
+    if (st.detail) bits.push('<span class="sync-detail-err">' + esc(st.detail) + '</span>');
+    detail.innerHTML = bits.join(' &middot; ');
+  }
+  const isConnected = (st.state !== 'disconnected');
+  ['force-pull-btn', 'force-push-btn', 'disconnect-btn'].forEach(id => {
+    const b = document.getElementById(id);
+    if (b) b.disabled = !isConnected;
+  });
+  // Local-file sync status (FSA-based, separate path)
+  const localLbl = document.getElementById('local-sync-status');
+  if (localLbl && typeof syncFileHandle !== 'undefined') {
+    localLbl.textContent = syncFileHandle ? 'Connected' : (typeof supportsProgressSync === 'function' && !supportsProgressSync() ? 'Unsupported in this browser' : 'Not connected');
+  }
+}
+window.addEventListener('dojo:sync-status-changed', refreshSettingsModal);
+
+function saveGistTokenFromInput() {
+  const inp = document.getElementById('gist-token-input');
+  if (!inp) return;
+  const v = (inp.value || '').trim();
+  if (!v || inp.dataset.masked === '1' && /^•+$/.test(v)) {
+    showToast('Paste a GitHub token (gist scope)', 'error');
+    return;
+  }
+  if (typeof gistSetToken !== 'function') {
+    showToast('Sync module not loaded', 'error');
+    return;
+  }
+  gistSetToken(v);
+  inp.value = '•'.repeat(Math.min(28, v.length));
+  inp.dataset.masked = '1';
+  showToast('Token saved — pulling progress…', 'info');
+  // Try a pull immediately so any existing remote data merges in.
+  if (typeof gistPullAndMerge === 'function') {
+    gistPullAndMerge().then(changed => {
+      refreshSettingsModal();
+      showToast(changed ? 'Synced & merged remote progress' : 'Connected', 'success');
+    }).catch(err => {
+      refreshSettingsModal();
+      showToast('Connect failed: ' + (err && err.message || err), 'error');
+    });
+  }
+}
+
+async function forceGistPull() {
+  if (typeof gistPullAndMerge !== 'function') return;
+  showToast('Pulling…', 'info');
+  const changed = await gistPullAndMerge();
+  refreshSettingsModal();
+  showToast(changed ? 'Pulled & merged' : 'Already up to date', 'success');
+}
+
+async function forceGistPush() {
+  if (typeof gistPushNow !== 'function') return;
+  showToast('Pushing…', 'info');
+  await gistPushNow();
+  refreshSettingsModal();
+  const st = gistStatus();
+  showToast(st.state === 'error' ? 'Push failed' : 'Pushed', st.state === 'error' ? 'error' : 'success');
+}
+
+function disconnectGist() {
+  if (typeof gistDisconnect !== 'function') return;
+  if (!confirm('Disconnect sync on this device? Your gist on GitHub stays — only the local token is forgotten. You can reconnect by pasting the token again.')) return;
+  gistDisconnect();
+  const inp = document.getElementById('gist-token-input');
+  if (inp) { inp.value = ''; inp.dataset.masked = ''; }
+  refreshSettingsModal();
+  showToast('Disconnected', 'info');
+}
+
+// Esc closes settings modal too
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const ov = document.getElementById('settings-overlay');
+    if (ov && ov.style.display !== 'none') closeSettingsModal();
+  }
+});
+
 /* ═════════ INIT ═════════ */
 function init() {
   loadState();
   if (typeof initProgressSync === 'function') initProgressSync();
+  if (typeof initGistSync === 'function') {
+    // Pull-merge in the background. If the remote has newer data,
+    // _safeRerender inside the module updates the UI; we don't await
+    // so the dashboard renders immediately from local cache first.
+    initGistSync();
+  }
   navigate('dashboard');
   document.querySelectorAll('.qsl-range').forEach(syncQslFill);
 }

@@ -159,6 +159,7 @@ function saveState() {
   try {
     localStorage.setItem('dsa_dojo_data', JSON.stringify(userData));
     scheduleSyncWrite();
+    if (typeof scheduleGistPush === 'function') scheduleGistPush();
   } catch(e) {
     console.warn('Failed to save state:', e);
     showToast('Storage full — export your progress!', 'error');
