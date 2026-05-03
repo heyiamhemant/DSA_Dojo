@@ -156,6 +156,10 @@ function computeXP() {
 }
 
 function saveState() {
+  // Showcase mode: visitor browser is hosting someone else's gist data
+  // in memory. Never persist that to local storage or sync it back, or
+  // we'd corrupt their own dojo data on next load.
+  if (typeof isShowcaseMode === 'function' && isShowcaseMode()) return;
   try {
     localStorage.setItem('dsa_dojo_data', JSON.stringify(userData));
     scheduleSyncWrite();
@@ -419,6 +423,10 @@ async function initProgressSync() {
 }
 
 function generatePlan() {
+  if (typeof isShowcaseMode === 'function' && isShowcaseMode()) {
+    if (typeof showcaseBlock === 'function') showcaseBlock('quest generation disabled');
+    return;
+  }
   const n = Math.min(50, Math.max(1, parseInt(document.getElementById('rev-count').value)||10));
   const minReviewsRequested = Math.min(n, Math.max(0, parseInt(document.getElementById('rev-min-reviews')?.value)||0));
   const now = Date.now();
