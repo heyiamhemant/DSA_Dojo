@@ -247,6 +247,73 @@ html:not(.font-tome) .font-toggle .ft-mode::after { content: 'Herald'; }
 .sync-detail { margin-top: 8px; font-family: var(--mono); font-size: 10px; color: var(--text-dim); letter-spacing: .06em; }
 .sync-detail .sync-detail-err { color: #e88; }
 
+/* ═════════ Stacked Power Bars (3-segment: Activity / Mastery / Streak) ═════════
+   Replaces the old single-fill bar. Visual hierarchy: each row shows a
+   composite bar where width is the final power score and the bar is
+   sub-divided into three coloured segments showing each factor's
+   contribution. Hovering reveals a tooltip with exact values. */
+.power-stack {
+  position: relative;
+  display: flex; height: 14px; border-radius: 4px;
+  background: rgba(11,8,7,0.55);
+  border: 1px solid rgba(232,200,122,0.2);
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+}
+.power-stack-seg { height: 100%; transition: width .35s ease; position: relative; }
+.power-stack-seg.act    { background: linear-gradient(180deg, rgba(120,180,255,0.85), rgba(80,140,220,0.65)); }
+.power-stack-seg.mast   { background: linear-gradient(180deg, rgba(232,200,122,0.85), rgba(190,150,70,0.65)); }
+.power-stack-seg.streak { background: linear-gradient(180deg, rgba(255,140,80,0.85), rgba(220,90,40,0.65)); }
+.power-stack-seg.empty  { background: transparent; }
+.power-stack-seg + .power-stack-seg { border-left: 1px solid rgba(11,8,7,0.5); }
+
+/* The hero powerbar variant (smaller, sits next to streak) */
+.hpb-stack {
+  display: flex; height: 10px; border-radius: 3px;
+  background: rgba(11,8,7,0.55);
+  border: 1px solid rgba(232,200,122,0.18);
+  overflow: hidden;
+}
+.hpb-stack-seg { height: 100%; transition: width .35s ease; }
+.hpb-stack-seg.act    { background: linear-gradient(180deg, rgba(120,180,255,0.8), rgba(80,140,220,0.6)); }
+.hpb-stack-seg.mast   { background: linear-gradient(180deg, rgba(232,200,122,0.8), rgba(190,150,70,0.6)); }
+.hpb-stack-seg.streak { background: linear-gradient(180deg, rgba(255,140,80,0.8), rgba(220,90,40,0.6)); }
+
+/* Streak label chip + breakdown footer for power-row */
+.power-breakdown {
+  display: flex; gap: 14px; padding: 8px 14px;
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--text-dim);
+  border-top: 1px dashed rgba(232,200,122,0.12);
+  background: rgba(11,8,7,0.45);
+  flex-wrap: wrap;
+  align-items: center;
+}
+.power-breakdown .pbd-item { display: inline-flex; align-items: center; gap: 5px; }
+.power-breakdown .pbd-dot {
+  width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0;
+  border: 1px solid rgba(11,8,7,0.6);
+}
+.power-breakdown .pbd-dot.act    { background: rgba(120,180,255,0.7); }
+.power-breakdown .pbd-dot.mast   { background: rgba(232,200,122,0.7); }
+.power-breakdown .pbd-dot.streak { background: rgba(255,140,80,0.7); }
+.power-breakdown .pbd-val { color: var(--gold); font-weight: 600; }
+.power-breakdown .pbd-streak-label { color: var(--ember); font-family: var(--medieval); letter-spacing: .18em; }
+
+/* Compact one-liner legend used above the hero powerbars */
+.hpb-legend {
+  display: flex; gap: 12px; font-family: var(--mono); font-size: 9px;
+  letter-spacing: .15em; text-transform: uppercase; color: var(--text-dim);
+  margin-bottom: 6px;
+}
+.hpb-legend .lg { display: inline-flex; align-items: center; gap: 4px; }
+.hpb-legend .lg::before {
+  content: ''; width: 8px; height: 8px; border-radius: 2px;
+}
+.hpb-legend .lg.act::before    { background: rgba(120,180,255,0.7); }
+.hpb-legend .lg.mast::before   { background: rgba(232,200,122,0.7); }
+.hpb-legend .lg.streak::before { background: rgba(255,140,80,0.7); }
+
 /* ═════════ SHOWCASE MODE (read-only profile view) ═════════ */
 [data-showcase] #settings-btn,
 [data-showcase] .util-btn[onclick*="exportProgress"],
@@ -3988,21 +4055,62 @@ function renderStreakCTA() {
 
 function renderHeroPowerBars() {
   const wrap = document.getElementById('hero-powerbars'); if (!wrap) return;
-  const data = { Easy: { s: 0, t: 0, c: 'easy' }, Medium: { s: 0, t: 0, c: 'medium' }, Hard: { s: 0, t: 0, c: 'hard' } };
-  RAW_PROBLEMS.forEach(p => {
-    if (data[p.diff]) { data[p.diff].t++; if (getConf(p) > 0) data[p.diff].s++; }
-  });
-  wrap.innerHTML = ['Easy', 'Medium', 'Hard'].map(d => {
-    const x = data[d];
+  // New formula: power = activity × mastery × streakBonus (per tier).
+  // Bar width = final power; bar is split into three coloured sub-segments
+  // showing each factor's relative contribution (proportional, not additive).
+  const tiers = ['Easy', 'Medium', 'Hard'];
+  const legend = html`<div class="hpb-legend">
+    <span class="lg act">Activity</span>
+    <span class="lg mast">Mastery</span>
+    <span class="lg streak">Streak</span>
+  </div>`;
+  const rows = tiers.map(d => {
     const tier = MONSTER_TIER[d];
-    const pct = x.t ? Math.round(x.s / x.t * 100) : 0;
-    return html`<div class="hpb-row pw-clickable" data-diff="${d}" onclick="togglePowerDetail('${d}')" title="Click to see ${tier.plural} slain">
+    const pl = (typeof computePowerLevel === 'function') ? computePowerLevel(d) : null;
+    if (!pl) {
+      return html`<div class="hpb-row pw-clickable" data-diff="${d}" onclick="togglePowerDetail('${d}')">
+        <div class="hpb-label"><span class="hpb-ico">${tier.icon}</span>${tier.plural}</div>
+        <div class="hpb-track"><div class="hpb-fill" style="width:0%"></div></div>
+        <div class="hpb-stats">— <span class="pw-chevron">▾</span></div>
+      </div>
+      <div class="pw-detail" id="pw-detail-${d}"></div>`;
+    }
+    // Compute per-segment widths so they sum to pl.power (the visible bar).
+    // Activity / Mastery split the multiplicative product proportionally;
+    // streak is the bonus cap on top.
+    const baseProduct = pl.activity * pl.mastery;     // 0..1
+    const actW = baseProduct > 0
+      ? (pl.activity / (pl.activity + pl.mastery)) * baseProduct * pl.streakBonus * 100
+      : 0;
+    const mastW = baseProduct > 0
+      ? (pl.mastery / (pl.activity + pl.mastery)) * baseProduct * pl.streakBonus * 100
+      : 0;
+    // Streak segment: only show non-zero portion if bonus > 1 (visual reward)
+    const streakW = (pl.streakBonus > 1 && baseProduct > 0)
+      ? baseProduct * (pl.streakBonus - 1) * 100
+      : 0;
+    // Renormalise so segments sum to actual visible power (clamps overflow)
+    const sum = actW + mastW + streakW;
+    const target = pl.power;
+    const scale = sum > 0 ? target / sum : 0;
+    const a = (actW * scale).toFixed(2);
+    const m = (mastW * scale).toFixed(2);
+    const s = (streakW * scale).toFixed(2);
+    const tt = `Activity ${pl.parts.activityPct}% × Mastery ${pl.parts.masteryPct}% × Streak ×${pl.streakBonus} (${pl.streakLabel}) = ${pl.power}`;
+    return html`<div class="hpb-row pw-clickable" data-diff="${d}" onclick="togglePowerDetail('${d}')" title="${tt}">
       <div class="hpb-label"><span class="hpb-ico">${tier.icon}</span>${tier.plural}</div>
-      <div class="hpb-track"><div class="hpb-fill ${x.c}" style="width:${pct}%"></div></div>
-      <div class="hpb-stats">${x.s} / ${x.t} · ${pct}% <span class="pw-chevron">▾</span></div>
+      <div class="hpb-track" style="background:transparent;border:none;padding:0">
+        <div class="hpb-stack">
+          <div class="hpb-stack-seg act"    style="width:${a}%"></div>
+          <div class="hpb-stack-seg mast"   style="width:${m}%"></div>
+          <div class="hpb-stack-seg streak" style="width:${s}%"></div>
+        </div>
+      </div>
+      <div class="hpb-stats">${pl.power}% <span class="pw-chevron">▾</span></div>
     </div>
     <div class="pw-detail" id="pw-detail-${d}"></div>`;
-  }).join('');
+  });
+  wrap.innerHTML = '' + legend + rows.join('');
 }
 
 // V1-style click-to-reveal: lists every monster of this tier, slain first
@@ -4207,19 +4315,39 @@ function renderStreakTrack() {
 const _powerOpen = { Easy: false, Medium: false, Hard: false };
 function renderPowerLevels() {
   const wrap = document.getElementById('power-rows'); if (!wrap) return;
+  // New formula-driven render. Bar shows total power (Activity × Mastery
+  // × StreakBonus); a small breakdown footer below explains each factor.
+  // The accordion still expands to show recent slain monsters.
   const groups = { Easy: [], Medium: [], Hard: [] };
   RAW_PROBLEMS.forEach(p => {
     const c = getConf(p);
     if (c > 0) groups[p.diff].push({ p, c });
   });
   Object.values(groups).forEach(arr => arr.sort((a, b) => (getLastReviewMsLocal(b.p) || 0) - (getLastReviewMsLocal(a.p) || 0)));
-  const totals = { Easy: groups.Easy.length, Medium: groups.Medium.length, Hard: groups.Hard.length };
-  const grand = { Easy: RAW_PROBLEMS.filter(p => p.diff === 'Easy').length, Medium: RAW_PROBLEMS.filter(p => p.diff === 'Medium').length, Hard: RAW_PROBLEMS.filter(p => p.diff === 'Hard').length };
-  const cols = { Easy: { c: 'var(--easy)', dim: 'rgba(111,168,107,0.3)', icon: '🦗' }, Medium: { c: 'var(--medium)', dim: 'rgba(200,156,74,0.3)', icon: '🐲' }, Hard: { c: 'var(--hard)', dim: 'rgba(176,69,69,0.3)', icon: '🐉' } };
+  const cols = {
+    Easy:   { c: 'var(--easy)',   dim: 'rgba(111,168,107,0.3)', icon: '🦗' },
+    Medium: { c: 'var(--medium)', dim: 'rgba(200,156,74,0.3)',  icon: '🐲' },
+    Hard:   { c: 'var(--hard)',   dim: 'rgba(176,69,69,0.3)',   icon: '🐉' }
+  };
   wrap.innerHTML = ['Easy', 'Medium', 'Hard'].map(d => {
     const arr = groups[d];
-    const pct = grand[d] ? Math.round(totals[d] / grand[d] * 100) : 0;
     const open = _powerOpen[d];
+    const pl = (typeof computePowerLevel === 'function') ? computePowerLevel(d) : null;
+    const power = pl ? pl.power : 0;
+
+    // Stacked-bar segment widths (proportional to factor contribution)
+    let actW = 0, mastW = 0, streakW = 0;
+    if (pl && pl.activity > 0 && pl.mastery > 0) {
+      const baseProduct = pl.activity * pl.mastery;
+      const actRaw   = (pl.activity / (pl.activity + pl.mastery)) * baseProduct * pl.streakBonus * 100;
+      const mastRaw  = (pl.mastery  / (pl.activity + pl.mastery)) * baseProduct * pl.streakBonus * 100;
+      const streakRaw = (pl.streakBonus > 1) ? baseProduct * (pl.streakBonus - 1) * 100 : 0;
+      const sum = actRaw + mastRaw + streakRaw;
+      const scale = sum > 0 ? power / sum : 0;
+      actW = actRaw * scale;
+      mastW = mastRaw * scale;
+      streakW = streakRaw * scale;
+    }
     const items = arr.slice(0, 60).map(({ p, c }) => {
       const last = getLastReviewMsLocal(p);
       const dateLbl = last ? new Date(last).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: '2-digit' }) : '—';
@@ -4229,15 +4357,28 @@ function renderPowerLevels() {
         <span class="power-detail-stars">${'★'.repeat(c)}</span>
         <span class="power-detail-date">${dateLbl}</span>
       </li>`;
-    }).join('');
+    });
+    const breakdown = pl ? html`<div class="power-breakdown">
+      <span class="pbd-item"><span class="pbd-dot act"></span>Activity <span class="pbd-val">${pl.parts.activityPct}%</span></span>
+      <span class="pbd-item"><span class="pbd-dot mast"></span>Mastery <span class="pbd-val">${pl.parts.masteryPct}%</span></span>
+      <span class="pbd-item"><span class="pbd-dot streak"></span>Streak <span class="pbd-val">×${pl.streakBonus}</span> <span class="pbd-streak-label">${pl.streakLabel}</span></span>
+      <span class="pbd-item" style="margin-left:auto">${arr.length} slain in last 6mo</span>
+    </div>` : '';
     return html`<div class="power-row ${open ? 'open' : ''}" data-diff="${d}" style="--pcol:${cols[d].c};--pcol-dim:${cols[d].dim}">
       <div class="power-head" onclick="togglePower('${d}')">
         <div class="power-icon">${cols[d].icon}</div>
         <div class="power-name">${d}</div>
-        <div class="power-bar"><div class="power-bar-fill" style="width:${pct}%"></div></div>
-        <div class="power-stats">${totals[d]} / ${grand[d]} · ${pct}%</div>
+        <div class="power-bar" style="background:transparent;border:none;padding:0">
+          <div class="power-stack">
+            <div class="power-stack-seg act"    style="width:${actW.toFixed(2)}%"></div>
+            <div class="power-stack-seg mast"   style="width:${mastW.toFixed(2)}%"></div>
+            <div class="power-stack-seg streak" style="width:${streakW.toFixed(2)}%"></div>
+          </div>
+        </div>
+        <div class="power-stats">${power}%</div>
         <div class="power-toggle">▶</div>
       </div>
+      ${breakdown}
       <div class="power-detail">
         ${arr.length ? html`<ul class="power-detail-list">${items}</ul>` : '<div style="padding:12px;color:var(--text-muted);font-family:var(--medieval);letter-spacing:.15em;text-align:center">No conquests yet</div>'}
       </div>

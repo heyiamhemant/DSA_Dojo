@@ -155,6 +155,123 @@ function computeXP() {
   return { totalXP: baseXP, slain };
 }
 
+// ═════════════════════════════════════════════════════════════════════
+// Power Level — multi-factor formula (replaces the old "% solved" count)
+// ═════════════════════════════════════════════════════════════════════
+//
+// The old metric was Power(tier) = solved/total per difficulty. That
+// rewards a long-quit grinder identically to an active learner. The new
+// formula combines three signals so it actually answers the question
+// "how dangerous am I right now in this tier?":
+//
+//   ActivityFactor — recent training frequency (decayed reviews / target)
+//   MasteryFactor  — average confidence of recent reviews (1-5 → 0-1)
+//   StreakBonus    — global streak modifier (0.6 rusty → 1.3 forged)
+//
+//   Power(tier) = clamp(0,100, 100 × Activity × Mastery × StreakBonus)
+//
+// Returned as a breakdown object so the UI can stack-render the parts
+// (Activity / Mastery / Streak) instead of one opaque percentage.
+
+const POWER_HALF_LIFE_DAYS  = 30;     // exponential decay half-life
+const POWER_TARGETS = { Easy: 30, Medium: 20, Hard: 12 }; // saturating count of decayed reviews per 90d
+const POWER_MAX_DAYS  = 180;          // anything older than this contributes effectively zero
+const STREAK_BREAKPOINTS = [
+  { min: 0,  bonus: 0.6,  label: 'Rusty'      },
+  { min: 3,  bonus: 0.8,  label: 'Warming'    },
+  { min: 7,  bonus: 1.0,  label: 'On form'    },
+  { min: 14, bonus: 1.15, label: 'Disciplined'},
+  { min: 30, bonus: 1.3,  label: 'Forged'     },
+];
+
+function _streakBonus(streakDays) {
+  let cur = STREAK_BREAKPOINTS[0];
+  for (const bp of STREAK_BREAKPOINTS) if (streakDays >= bp.min) cur = bp;
+  return cur;
+}
+
+// Convert "days ago" into a [0..1] decay weight. exp(-ln2 × days/halflife)
+// gives a clean half-life; clamp at MAX_DAYS so very old work is dropped.
+function _decayWeight(daysAgo) {
+  if (daysAgo < 0) daysAgo = 0;
+  if (daysAgo > POWER_MAX_DAYS) return 0;
+  return Math.exp(-Math.LN2 * daysAgo / POWER_HALF_LIFE_DAYS);
+}
+
+// Pull the most-recent review timestamp + confidence for a problem.
+// Confidence is the user's latest rating (1-5); 0 means never solved.
+function _problemPowerSample(p) {
+  const ud = userData[p.id];
+  if (!ud) return null;
+  const c = (typeof getConfForXP === 'function') ? getConfForXP(p) : (ud.conf || 0);
+  if (c <= 0) return null;
+  let lastMs = ud.lastReviewedTs || 0;
+  if (!lastMs && ud.lastReviewed) {
+    const t = new Date(ud.lastReviewed).getTime();
+    if (!isNaN(t)) lastMs = t;
+  }
+  if (!lastMs && p.date) {
+    const parts = p.date.split(' ');
+    if (parts.length === 3) {
+      const d = new Date(parts[1] + ' ' + parts[0] + ', ' + parts[2]);
+      if (!isNaN(d)) lastMs = d.getTime();
+    }
+  }
+  if (!lastMs) return null;
+  return { conf: Math.max(1, Math.min(5, c)), lastMs };
+}
+
+// Headline function: returns { activity, mastery, streakBonus, power, ...}
+// for a given difficulty tier ('Easy' | 'Medium' | 'Hard').
+function computePowerLevel(diff) {
+  const target = POWER_TARGETS[diff] || 20;
+  const now = Date.now();
+  const DAY = 86400000;
+
+  let weightedReviews = 0;     // Σ decay
+  let weightedConfSum = 0;     // Σ decay × conf
+
+  RAW_PROBLEMS.forEach(p => {
+    if (p.diff !== diff) return;
+    const sample = _problemPowerSample(p);
+    if (!sample) return;
+    const daysAgo = (now - sample.lastMs) / DAY;
+    const w = _decayWeight(daysAgo);
+    weightedReviews += w;
+    weightedConfSum += w * sample.conf;
+  });
+
+  const activity = Math.min(1, weightedReviews / target);
+  const mastery  = weightedReviews > 0
+    ? Math.min(1, (weightedConfSum / weightedReviews) / 5)
+    : 0;
+
+  const streakDays = (typeof getStreakDays === 'function') ? getStreakDays() : 0;
+  const sb = _streakBonus(streakDays);
+
+  const raw    = activity * mastery * sb.bonus;
+  const power  = Math.max(0, Math.min(1, raw)) * 100;
+
+  return {
+    diff,
+    activity,            // 0..1
+    mastery,             // 0..1
+    streakDays,
+    streakBonus: sb.bonus,
+    streakLabel: sb.label,
+    weightedReviews,
+    power: Math.round(power),
+    // For the stacked UI: each component's contribution to the visible bar.
+    // Multiplicative model means we render factors as fractions of the bar.
+    parts: {
+      activityPct: Math.round(activity * 100),
+      masteryPct:  Math.round(mastery  * 100),
+      streakMult:  sb.bonus,
+    }
+  };
+}
+
+
 function saveState() {
   if (typeof isShowcaseMode === 'function' && isShowcaseMode()) return;
   try {
