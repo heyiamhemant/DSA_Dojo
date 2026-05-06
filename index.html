@@ -938,8 +938,38 @@ a:hover { color: var(--gold-bright); }
 .streak-flame-row { position: relative; display: flex; align-items: baseline; gap: 8px; }
 .streak-flame {
   font-size: clamp(52px, 6.5vw, 80px); line-height: 1;
-  animation: flameFlicker 1.2s ease-in-out infinite;
+  /* Wrapper no longer animates; the SVG layers each handle their own
+     flicker so the result is organic instead of one rigid pulse. The font
+     glow shadows are kept as a soft outer halo. */
   filter: drop-shadow(0 0 14px rgba(255,140,40,0.85)) drop-shadow(0 0 28px rgba(255,90,30,0.45));
+}
+/* Layered SVG flame — replaces the 🔥 emoji.
+   3 stacked flame paths with radial gradients + independent flicker
+   timings, plus a pulsing ember base. Honours prefers-reduced-motion. */
+.flame-svg {
+  width: clamp(54px, 6.8vw, 88px);
+  height: clamp(64px, 8.2vw, 105px);
+  display: inline-block; vertical-align: bottom;
+  filter: drop-shadow(0 0 12px rgba(255,140,40,0.7)) drop-shadow(0 0 28px rgba(255,90,30,0.4));
+  overflow: visible;
+}
+.flame-layer { transform-origin: 50% 92%; transform-box: fill-box; will-change: transform; }
+.flame-outer { animation: flameWobble 1.6s ease-in-out infinite; }
+.flame-mid   { animation: flameWobble 1.15s ease-in-out -0.3s infinite reverse; }
+.flame-core  { animation: flameWobble 0.85s ease-in-out -0.5s infinite; }
+.flame-ember { transform-origin: 50% 100%; transform-box: fill-box; animation: flameEmber 2.4s ease-in-out infinite; }
+@keyframes flameWobble {
+  0%,100% { transform: scaleY(1) scaleX(1) skewX(0deg); }
+  20%     { transform: scaleY(1.06) scaleX(0.94) skewX(2deg); }
+  45%     { transform: scaleY(0.94) scaleX(1.05) skewX(-1.5deg); }
+  70%     { transform: scaleY(1.04) scaleX(0.97) skewX(1.5deg); }
+}
+@keyframes flameEmber {
+  0%,100% { opacity: 0.55; transform: scaleX(1); }
+  50%     { opacity: 0.85; transform: scaleX(1.18); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .flame-layer, .flame-ember { animation: none !important; }
 }
 @keyframes flameFlicker {
   0%,100% { transform: scale(1) rotate(-1deg); filter: drop-shadow(0 0 14px rgba(255,140,40,0.85)) drop-shadow(0 0 28px rgba(255,90,30,0.45)); }
@@ -2969,7 +2999,33 @@ textarea.modal-comment {
         <div class="streak-prime">
           <span class="streak-mult" id="streak-mult">+0% XP</span>
           <div class="streak-flame-row">
-            <span class="streak-flame">🔥</span>
+            <span class="streak-flame" aria-hidden="true">
+              <svg class="flame-svg" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <radialGradient id="flameOuter" cx="50%" cy="85%" r="65%">
+                    <stop offset="0%" stop-color="#ffe089" stop-opacity="0.95"/>
+                    <stop offset="40%" stop-color="#ff8a2a" stop-opacity="0.9"/>
+                    <stop offset="80%" stop-color="#c93f10" stop-opacity="0.7"/>
+                    <stop offset="100%" stop-color="#5a1503" stop-opacity="0"/>
+                  </radialGradient>
+                  <radialGradient id="flameMid" cx="50%" cy="80%" r="55%">
+                    <stop offset="0%" stop-color="#fff8d0" stop-opacity="1"/>
+                    <stop offset="35%" stop-color="#ffd86a" stop-opacity="0.95"/>
+                    <stop offset="75%" stop-color="#ff7a14" stop-opacity="0.6"/>
+                    <stop offset="100%" stop-color="#ff5a14" stop-opacity="0"/>
+                  </radialGradient>
+                  <radialGradient id="flameCore" cx="50%" cy="75%" r="45%">
+                    <stop offset="0%" stop-color="#fffcec" stop-opacity="1"/>
+                    <stop offset="50%" stop-color="#ffe7a0" stop-opacity="0.9"/>
+                    <stop offset="100%" stop-color="#ffb24a" stop-opacity="0"/>
+                  </radialGradient>
+                </defs>
+                <ellipse class="flame-ember" cx="50" cy="115" rx="30" ry="6" fill="#ff6a14" opacity="0.6"/>
+                <path class="flame-layer flame-outer" fill="url(#flameOuter)" d="M50,116 C18,110 6,86 14,62 C18,48 26,40 28,30 C30,42 38,46 42,38 C44,28 38,16 46,6 C48,16 56,14 50,2 C58,16 62,30 56,42 C54,52 64,50 66,38 C72,52 82,54 76,68 C84,82 88,100 50,116 Z"/>
+                <path class="flame-layer flame-mid"   fill="url(#flameMid)"   d="M50,112 C28,106 20,86 26,68 C28,58 34,52 36,44 C38,52 46,52 48,44 C50,30 50,18 50,12 C52,22 56,32 54,44 C56,54 62,54 64,46 C68,58 70,72 70,80 C72,94 70,106 50,112 Z"/>
+                <path class="flame-layer flame-core"  fill="url(#flameCore)"  d="M50,106 C38,102 34,90 36,80 C38,70 44,60 46,50 C48,40 50,28 50,18 C52,30 54,40 54,52 C56,62 60,72 62,82 C64,92 60,102 50,106 Z"/>
+              </svg>
+            </span>
             <span class="streak-num" id="streak-num">0</span>
           </div>
           <div class="streak-label">Day Streak</div>
