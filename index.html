@@ -313,6 +313,44 @@ html:not(.font-tome) .font-toggle .ft-mode::after { content: 'Herald'; }
 .hpb-legend .lg.act::before    { background: rgba(120,180,255,0.7); }
 .hpb-legend .lg.mast::before   { background: rgba(232,200,122,0.7); }
 .hpb-legend .lg.streak::before { background: rgba(255,140,80,0.7); }
+.hpb-help-btn {
+  margin-left: auto;
+  width: 18px; height: 18px; line-height: 16px;
+  border-radius: 50%;
+  border: 1px solid rgba(232,200,122,0.4);
+  background: rgba(232,200,122,0.08);
+  color: var(--gold);
+  font-size: 11px; font-weight: 700;
+  cursor: pointer; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: background .2s, transform .2s;
+}
+.hpb-help-btn:hover { background: rgba(232,200,122,0.2); transform: scale(1.08); }
+.hpb-help-btn.open { background: var(--gold); color: #1a1410; border-color: var(--gold); }
+.hpb-explainer {
+  margin-top: 8px;
+  padding: 12px 14px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(232,200,122,0.18);
+  border-radius: 6px;
+  font-size: 12.5px; line-height: 1.55;
+  color: var(--text-soft);
+  display: flex; flex-direction: column; gap: 8px;
+}
+.hpb-explainer[hidden] { display: none; }
+.hpe-row { display: flex; gap: 10px; align-items: flex-start; }
+.hpe-row b { color: var(--text); }
+.hpe-row i { color: var(--text-dim); font-style: italic; }
+.hpe-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.hpe-dot.act    { background: rgba(120,180,255,0.85); box-shadow: 0 0 6px rgba(120,180,255,0.5); }
+.hpe-dot.mast   { background: rgba(232,200,122,0.85); box-shadow: 0 0 6px rgba(232,200,122,0.5); }
+.hpe-dot.streak { background: rgba(255,140,80,0.85);  box-shadow: 0 0 6px rgba(255,140,80,0.5);  }
+.hpe-formula {
+  margin-top: 4px; padding-top: 8px;
+  border-top: 1px dashed rgba(232,200,122,0.15);
+  font-family: var(--mono, 'JetBrains Mono', monospace);
+  font-size: 11.5px; color: var(--text-dim);
+}
 
 /* ═════════ SHOWCASE MODE (read-only profile view) ═════════ */
 [data-showcase] #settings-btn,
@@ -3689,8 +3727,15 @@ function getStreakDays() {
       if (!isNaN(d)) dates.add(d.toDateString());
     }
   }});
-  let streak = 0;
   let cur = new Date(); cur.setHours(0,0,0,0);
+  // 24-hour grace: don't reset to 0 just because the user hasn't trained yet today.
+  // If today has no activity, start counting from yesterday so the existing streak
+  // is preserved until end-of-day. Logging today still increments naturally because
+  // today is added to `dates` and the loop walks backwards from there.
+  if (!dates.has(cur.toDateString())) {
+    cur.setDate(cur.getDate() - 1);
+  }
+  let streak = 0;
   while (dates.has(cur.toDateString())) { streak++; cur.setDate(cur.getDate() - 1); }
   return streak;
 }
@@ -4063,6 +4108,13 @@ function renderHeroPowerBars() {
     <span class="lg act">Activity</span>
     <span class="lg mast">Mastery</span>
     <span class="lg streak">Streak</span>
+    <button type="button" class="hpb-help-btn" onclick="togglePowerExplainer()" aria-label="How is power calculated?" title="How is power calculated?">?</button>
+  </div>
+  <div class="hpb-explainer" id="hpb-explainer" hidden>
+    <div class="hpe-row"><span class="hpe-dot act"></span><div><b>Activity</b> — how often you've trained this tier in the last 90 days. Recent reviews count more (30-day half-life). <i>Improve by reviewing problems regularly.</i></div></div>
+    <div class="hpe-row"><span class="hpe-dot mast"></span><div><b>Mastery</b> — average confidence on your recent reviews of this tier. <i>Improve by rating Won / Dominated / Mastered instead of Shaky / Fled.</i></div></div>
+    <div class="hpe-row"><span class="hpe-dot streak"></span><div><b>Streak</b> — global multiplier (×0.6 rusty → ×1.3 forged at 30+ days). <i>Improve by training every day; 24-hour grace period applies.</i></div></div>
+    <div class="hpe-formula">Power = clamp(0–100, Activity × Mastery × Streak × 100). Click any tier above to see which problems contribute.</div>
   </div>`;
   const rows = tiers.map(d => {
     const tier = MONSTER_TIER[d];
@@ -4111,6 +4163,24 @@ function renderHeroPowerBars() {
     <div class="pw-detail" id="pw-detail-${d}"></div>`;
   });
   wrap.innerHTML = '' + legend + rows.join('');
+  // Restore previously-toggled explainer state
+  try {
+    if (localStorage.getItem('dojo:powerExplainerOpen') === '1') {
+      const el = document.getElementById('hpb-explainer');
+      if (el) el.hidden = false;
+      const btn = document.querySelector('.hpb-help-btn');
+      if (btn) btn.classList.add('open');
+    }
+  } catch(e) {}
+}
+
+function togglePowerExplainer() {
+  const el = document.getElementById('hpb-explainer'); if (!el) return;
+  const open = !el.hidden ? false : true;
+  el.hidden = !open;
+  try { localStorage.setItem('dojo:powerExplainerOpen', open ? '1' : '0'); } catch(e) {}
+  const btn = document.querySelector('.hpb-help-btn');
+  if (btn) btn.classList.toggle('open', open);
 }
 
 // V1-style click-to-reveal: lists every monster of this tier, slain first
@@ -4158,15 +4228,17 @@ function togglePowerDetail(diff) {
         <span class="pw-detail-conf" style="color:${confColors[c] || confColors[0]};background:${c > 0 ? (confColors[c] || confColors[0]) + '22' : 'rgba(255,255,255,0.04)'}">${confLabels[c] || '?'}</span>
         <span class="pw-detail-xp">${xp > 0 ? '+' + xp : '—'}</span>
       </div>`;
-    let html = '<div class="pw-detail-list">';
-    if (slain.length) html += slain.map(renderItem).join('');
+    // NOTE: do not name this `html` — that shadows the global html`` template tag
+    // and silently breaks the function (TypeError when html`...` is invoked).
+    let out = '<div class="pw-detail-list">';
+    if (slain.length) out += slain.map(renderItem).join('');
     if (unslain.length) {
-      html += html`<div class="pw-detail-section">Unslain (${unslain.length})</div>`;
-      html += unslain.slice(0, 12).map(renderItem).join('');
-      if (unslain.length > 12) html += html`<div class="pw-detail-more">+${unslain.length - 12} more</div>`;
+      out += `<div class="pw-detail-section">Unslain (${unslain.length})</div>`;
+      out += unslain.slice(0, 12).map(renderItem).join('');
+      if (unslain.length > 12) out += `<div class="pw-detail-more">+${unslain.length - 12} more</div>`;
     }
-    html += '</div>';
-    el.innerHTML = html;
+    out += '</div>';
+    el.innerHTML = out;
   }
   el.classList.add('pw-detail-open');
   if (row) row.classList.add('pw-open');
