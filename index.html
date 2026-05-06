@@ -4153,9 +4153,9 @@ function renderHeroPowerBars() {
       <div class="hpb-label"><span class="hpb-ico">${tier.icon}</span>${tier.plural}</div>
       <div class="hpb-track" style="background:transparent;border:none;padding:0">
         <div class="hpb-stack">
-          <div class="hpb-stack-seg act"    style="width:${a}%"></div>
-          <div class="hpb-stack-seg mast"   style="width:${m}%"></div>
-          <div class="hpb-stack-seg streak" style="width:${s}%"></div>
+          <div class="hpb-stack-seg act"    style="width:${a}%" title="Activity ${pl.parts.activityPct}% — recent training frequency in this tier"></div>
+          <div class="hpb-stack-seg mast"   style="width:${m}%" title="Mastery ${pl.parts.masteryPct}% — average confidence on recent reviews"></div>
+          <div class="hpb-stack-seg streak" style="width:${s}%" title="Streak ×${pl.streakBonus} (${pl.streakLabel}) — global multiplier from your daily streak"></div>
         </div>
       </div>
       <div class="hpb-stats">${pl.power}% <span class="pw-chevron">▾</span></div>
@@ -4442,9 +4442,9 @@ function renderPowerLevels() {
         <div class="power-name">${d}</div>
         <div class="power-bar" style="background:transparent;border:none;padding:0">
           <div class="power-stack">
-            <div class="power-stack-seg act"    style="width:${actW.toFixed(2)}%"></div>
-            <div class="power-stack-seg mast"   style="width:${mastW.toFixed(2)}%"></div>
-            <div class="power-stack-seg streak" style="width:${streakW.toFixed(2)}%"></div>
+            <div class="power-stack-seg act"    style="width:${actW.toFixed(2)}%" title="Activity ${pl.parts.activityPct}% — recent training frequency"></div>
+            <div class="power-stack-seg mast"   style="width:${mastW.toFixed(2)}%" title="Mastery ${pl.parts.masteryPct}% — average confidence on recent reviews"></div>
+            <div class="power-stack-seg streak" style="width:${streakW.toFixed(2)}%" title="Streak ×${pl.streakBonus} (${pl.streakLabel}) — global multiplier"></div>
           </div>
         </div>
         <div class="power-stats">${power}%</div>
@@ -4683,6 +4683,7 @@ function renderQuests() {
           <span class="quest-tag">${visualOf(p.topic).icon} ${p.topic}</span>
           ${isOverdue ? html`<span class="quest-tag hard">⏰ ${overdueDays}d overdue</span>` : ''}
           ${p.lc_url ? html`<a class="quest-tag" href="${p.lc_url}" target="_blank" onclick="event.stopPropagation()" style="text-decoration:none">🔗 LeetCode ↗</a>` : ''}
+          ${p.alt_url ? html`<a class="quest-tag" href="${p.alt_url}" target="_blank" onclick="event.stopPropagation()" style="text-decoration:none">📖 ${p.alt_label || 'Reference'} ↗</a>` : ''}
         </div>
         <div class="quest-reason ${isOverdue ? 'overdue' : ''}">${reason}</div>
         ${rateRow}
@@ -5005,6 +5006,7 @@ function renderBestiary() {
         <span class="mc-stars">${'★'.repeat(conf)}${'☆'.repeat(5 - conf)}</span>
       </div>
       ${p.lc_url ? html`<a class="mc-quicklink" href="${p.lc_url}" target="_blank" onclick="event.stopPropagation()" title="Open in LeetCode">🔗</a>` : ''}
+      ${p.alt_url ? html`<a class="mc-quicklink" href="${p.alt_url}" target="_blank" onclick="event.stopPropagation()" title="Open in ${p.alt_label || 'reference'}">📖</a>` : ''}
       <div class="mc-tooltip">
         <div class="mc-tooltip-row"><span>Status</span><span>${di.label}</span></div>
         <div class="mc-tooltip-row"><span>Last reviewed</span><span>${lastLbl}</span></div>
@@ -5101,6 +5103,7 @@ function openModal(id) {
   document.getElementById('modal-hint').textContent = p.hint || 'No intel available.';
   let links = '';
   if (p.lc_url) links += html`<a class="modal-link" target="_blank" href="${p.lc_url}">🔗 LeetCode</a>`;
+  if (p.alt_url) links += html`<a class="modal-link" target="_blank" href="${p.alt_url}">📖 ${p.alt_label || 'Reference'}</a>`;
   if (p.repo_url) links += html`<a class="modal-link" target="_blank" href="${p.repo_url}">📁 Solution Repo</a>`;
   document.getElementById('modal-links').innerHTML = links || '<span style="color:var(--text-muted);font-size:12px">No external intel</span>';
 
