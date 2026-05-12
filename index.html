@@ -5160,7 +5160,16 @@ function openModal(id) {
   let links = '';
   if (p.lc_url) links += html`<a class="modal-link" target="_blank" href="${p.lc_url}">🔗 LeetCode</a>`;
   if (p.alt_url) links += html`<a class="modal-link" target="_blank" href="${p.alt_url}">📖 ${p.alt_label || 'Reference'}</a>`;
-  if (p.repo_url) links += html`<a class="modal-link" target="_blank" href="${p.repo_url}">📁 Solution Repo</a>`;
+  if (p.repo_url) {
+    const primaryLabel = p.lang ? `Solution (${p.lang})` : 'Solution Repo';
+    links += html`<a class="modal-link" target="_blank" href="${p.repo_url}">📁 ${primaryLabel}</a>`;
+  }
+  if (Array.isArray(p.extra_solutions)) {
+    p.extra_solutions.forEach(es => {
+      const lbl = es.label || es.lang || 'variant';
+      links += html`<a class="modal-link" target="_blank" href="${es.url}">📁 Solution (${lbl})</a>`;
+    });
+  }
   document.getElementById('modal-links').innerHTML = links || '<span style="color:var(--text-muted);font-size:12px">No external intel</span>';
 
   // SR info
