@@ -5158,6 +5158,15 @@ function openModal(id) {
     ${p.num ? html`<span class="badge">#${p.num}</span>` : ''}`;
   document.getElementById('modal-hint').textContent = p.hint || 'No intel available.';
   let links = '';
+  if (p.prereq_id) {
+    const base = RAW_PROBLEMS.find(x => x.id === p.prereq_id);
+    if (base) {
+      const baseSolved = typeof getConf === 'function' && getConf(base) > 0;
+      const icon = baseSolved ? '🔓' : '🔒';
+      const label = baseSolved ? `Builds on ${base.name}` : `Prerequisite (not yet slain): ${base.name}`;
+      links += html`<a class="modal-link" href="javascript:void(0)" onclick="closeModal();openModal(${base.id})" title="Open the prerequisite problem">${icon} ${label}</a>`;
+    }
+  }
   if (p.lc_url) links += html`<a class="modal-link" target="_blank" href="${p.lc_url}">🔗 LeetCode</a>`;
   if (p.alt_url) links += html`<a class="modal-link" target="_blank" href="${p.alt_url}">📖 ${p.alt_label || 'Reference'}</a>`;
   if (p.repo_url) {
