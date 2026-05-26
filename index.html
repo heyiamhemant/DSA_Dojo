@@ -1491,6 +1491,23 @@ a:hover { color: var(--gold-bright); }
 }
 .quest-card:hover { border-color: rgba(232,200,122,0.4); transform: translateX(2px); }
 .quest-card > * { position: relative; z-index: 1; }
+.plan-stale-banner {
+  margin-bottom: 14px;
+  padding: 10px 16px;
+  border: 1px dashed rgba(232,200,122,0.35);
+  border-radius: 6px;
+  background: rgba(232,200,122,0.06);
+  color: var(--text-soft);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.plan-stale-banner a {
+  color: var(--gold);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.plan-stale-banner a:hover { color: #ffd28a; }
 .quest-card.done { opacity: .85; border-color: rgba(111,168,107,0.4); background: linear-gradient(180deg, rgba(74,103,65,0.15), rgba(11,8,7,0.9)); }
 .quest-card.done .quest-name { text-decoration: line-through; color: var(--text-dim); }
 .quest-card.done::after {
@@ -4711,11 +4728,21 @@ window.savePlan = function() {
 
 function renderQuests() {
   const wrap = document.getElementById('quest-list');
+  // Auto-mark plan items done if the user rated them elsewhere (modal /
+  // bestiary / another device via Gist). Self-healing — no user action.
+  if (typeof reconcileTodayPlan === 'function') {
+    try { reconcileTodayPlan(); } catch(e) {}
+  }
   if (!todayPlan.length) {
     wrap.innerHTML = html`<div class="empty-state"><div class="empty-icon">📜</div><h3>No quest assigned</h3><p>Generate today's hunt from the parchment above</p></div>`;
     return;
   }
-  wrap.innerHTML = todayPlan.map(q => {
+  // Soft staleness banner: nudge regenerate if plan is more than a day old.
+  const age = (typeof planAgeDays === 'function') ? planAgeDays() : null;
+  const ageBanner = (age != null && age >= 1)
+    ? html`<div class="plan-stale-banner">📜 Plan generated ${age} day${age !== 1 ? 's' : ''} ago — <a href="javascript:void(0)" onclick="generatePlan()">regenerate today's hunt</a> for fresh recommendations.</div>`
+    : '';
+  wrap.innerHTML = ageBanner + todayPlan.map(q => {
     const p = RAW_PROBLEMS.find(x => x.id === q.id); if (!p) return '';
     const v = visualOf(p.topic);
     const xp = q.done ? `+${q.xpAwarded || 0}` : `~${(q.xpEstimate || 10)} XP`;

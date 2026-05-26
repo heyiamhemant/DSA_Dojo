@@ -321,6 +321,8 @@ function loadState() {
     if (saved) userData = JSON.parse(saved);
     const plan = localStorage.getItem('dsa_dojo_plan');
     if (plan) todayPlan = JSON.parse(plan);
+    const meta = localStorage.getItem('dsa_dojo_plan_meta');
+    if (meta) todayPlanMeta = JSON.parse(meta) || {};
   } catch(e) {
     console.warn('Failed to load saved state:', e);
   }
@@ -568,6 +570,38 @@ async function initProgressSync() {
   }
 }
 
+function reconcileTodayPlan() {
+  if (!Array.isArray(todayPlan) || todayPlan.length === 0) return 0;
+  const today0 = new Date(); today0.setHours(0,0,0,0);
+  const todayMs = today0.getTime();
+  const genAt = (todayPlanMeta && todayPlanMeta.generatedAt) || 0;
+  let changed = 0;
+  for (const q of todayPlan) {
+    if (q.done) continue;
+    const ud = userData[q.id];
+    if (!ud) continue;
+    const ts = ud.lastReviewedTs || (ud.lastReviewed ? new Date(ud.lastReviewed).getTime() : 0);
+    if (!ts) continue;
+    // Auto-complete if rated since the plan was generated, or any time today.
+    if (ts >= todayMs || (genAt && ts > genAt)) {
+      q.done = true;
+      q.rating = ud.conf || 0;
+      q.xpAwarded = Math.max(0, (q.rating || 0) * 5);
+      changed++;
+    }
+  }
+  if (changed > 0) {
+    try { localStorage.setItem('dsa_dojo_plan', JSON.stringify(todayPlan)); } catch(e) {}
+  }
+  return changed;
+}
+
+function planAgeDays() {
+  const genAt = (todayPlanMeta && todayPlanMeta.generatedAt) || 0;
+  if (!genAt) return null;
+  return Math.floor((Date.now() - genAt) / 86400000);
+}
+
 function generatePlan() {
   if (typeof isShowcaseMode === 'function' && isShowcaseMode()) {
     if (typeof showcaseBlock === 'function') showcaseBlock('quest generation disabled');
@@ -735,6 +769,9 @@ function generatePlan() {
     }
   });
   if (updatedPins) saveState();
+  // Sidecar timestamp so reconciliation / staleness checks can run later.
+  todayPlanMeta = { generatedAt: Date.now() };
+  try { localStorage.setItem('dsa_dojo_plan_meta', JSON.stringify(todayPlanMeta)); } catch(e) {}
   savePlan();
   renderToday();
   const rc = picked.filter(x => x._type === 'review').length;
@@ -747,6 +784,7 @@ function generatePlan() {
 let userData = {};
 
 let todayPlan = [];
+let todayPlanMeta = {};
 
 let activePage = "dashboard";
 
