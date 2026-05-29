@@ -936,6 +936,64 @@ a:hover { color: var(--gold-bright); }
   pointer-events: none; animation: heroEmberPulse 3.4s ease-in-out infinite;
 }
 .streak-flame-row { position: relative; display: flex; align-items: baseline; gap: 8px; }
+.streak-recovery-banner {
+  display: flex; gap: 14px;
+  margin: 8px 0 14px; padding: 14px 16px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(255,90,30,0.10), rgba(232,200,122,0.06));
+  border: 1px solid rgba(255,140,40,0.35);
+  box-shadow: 0 0 24px rgba(255,90,30,0.08) inset;
+  animation: srbPulse 3.4s ease-in-out infinite;
+}
+.streak-recovery-banner.success {
+  background: linear-gradient(135deg, rgba(111,168,107,0.10), rgba(232,200,122,0.06));
+  border-color: rgba(111,168,107,0.45);
+  box-shadow: 0 0 24px rgba(111,168,107,0.10) inset;
+  animation: none;
+}
+.streak-recovery-banner .srb-flame {
+  font-size: 28px; line-height: 1;
+  filter: drop-shadow(0 0 8px rgba(255,140,40,0.7));
+  align-self: center;
+}
+.streak-recovery-banner.success .srb-flame {
+  filter: drop-shadow(0 0 8px rgba(111,168,107,0.7));
+}
+.srb-body { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.srb-title {
+  font-family: var(--medieval, 'MedievalSharp', serif);
+  font-size: 14px; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--gold);
+}
+.streak-recovery-banner.success .srb-title { color: #9fd699; }
+.srb-desc { font-size: 13px; line-height: 1.55; color: var(--text-soft); }
+.srb-desc b { color: var(--gold); font-weight: 600; }
+.streak-recovery-banner.success .srb-desc b { color: #b8e0b0; }
+.srb-progress {
+  margin-top: 6px;
+  height: 6px; border-radius: 99px;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(232,200,122,0.18);
+  overflow: hidden;
+}
+.srb-bar {
+  height: 100%; border-radius: 99px;
+  background: linear-gradient(90deg, #ff8a2a, #ffd28a);
+  box-shadow: 0 0 8px rgba(255,140,40,0.5);
+  transition: width .4s ease;
+}
+.srb-meta {
+  font-family: var(--mono, 'JetBrains Mono', monospace);
+  font-size: 11px; color: var(--text-dim);
+  letter-spacing: .12em;
+}
+@keyframes srbPulse {
+  0%,100% { box-shadow: 0 0 24px rgba(255,90,30,0.08) inset, 0 0 0 rgba(255,90,30,0); }
+  50%     { box-shadow: 0 0 24px rgba(255,90,30,0.18) inset, 0 0 18px rgba(255,90,30,0.20); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .streak-recovery-banner { animation: none; }
+}
 .streak-flame {
   font-size: clamp(52px, 6.5vw, 80px); line-height: 1;
   /* Wrapper no longer animates; the SVG layers each handle their own
@@ -3015,6 +3073,7 @@ textarea.modal-comment {
         <!-- LEFT: streak as primary focal point -->
         <div class="streak-prime">
           <span class="streak-mult" id="streak-mult">+0% XP</span>
+          <div id="streak-recovery-banner-slot"></div>
           <div class="streak-flame-row">
             <span class="streak-flame" aria-hidden="true">
               <svg class="flame-svg" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
@@ -3787,19 +3846,183 @@ function safe(s) { return new SafeHTML(s == null ? '' : s); }
 const raw = safe;
 
 
-function getStreakDays() {
+/* ═════════ STREAK RECOVERY ═════════ */
+const STREAK_RECOVERY_MIN_STREAK = 3;
+const STREAK_RECOVERY_WINDOW_MS  = 24 * 60 * 60 * 1000;
+const STREAK_RECOVERY_REQUIRED   = 2;
+
+function _recMeta() {
+  if (!userData._meta || typeof userData._meta !== 'object') userData._meta = {};
+  return userData._meta;
+}
+
+function _allActivityDates() {
   const dates = new Set();
-  Object.values(userData).forEach(ud => {
-    const ms = ud && (ud.lastReviewedTs || ud.firstSolvedTs);
+  Object.entries(userData).forEach(([k, ud]) => {
+    if (k === '_meta' || !ud || typeof ud !== 'object') return;
+    const ms = ud.lastReviewedTs || ud.firstSolvedTs;
     if (ms) dates.add(new Date(ms).toDateString());
   });
-  RAW_PROBLEMS.forEach(p => { if (p.date) {
-    const parts = p.date.split(' ');
-    if (parts.length === 3) {
-      const d = new Date(parts[1]+' '+parts[0]+', '+parts[2]);
-      if (!isNaN(d)) dates.add(d.toDateString());
+  RAW_PROBLEMS.forEach(p => {
+    if (p.date) {
+      const parts = p.date.split(' ');
+      if (parts.length === 3) {
+        const d = new Date(parts[1] + ' ' + parts[0] + ', ' + parts[2]);
+        if (!isNaN(d)) dates.add(d.toDateString());
+      }
     }
-  }});
+  });
+  const meta = userData._meta;
+  if (meta && Array.isArray(meta.streakFills)) {
+    meta.streakFills.forEach(s => dates.add(s));
+  }
+  return dates;
+}
+
+function _streakBackFrom(dates, dayStr) {
+  let n = 0;
+  let cur = new Date(dayStr);
+  while (dates.has(cur.toDateString())) {
+    n++;
+    cur.setDate(cur.getDate() - 1);
+  }
+  return n;
+}
+
+function detectStreakBreak() {
+  const meta = _recMeta();
+  if (meta.recovery && meta.recovery.expiresAt > Date.now()) return null;
+  const dates = _allActivityDates();
+  if (dates.size === 0) return null;
+  const today0 = new Date(); today0.setHours(0,0,0,0);
+  const yest0  = new Date(today0.getTime() - 86400000);
+  const day20  = new Date(today0.getTime() - 2 * 86400000);
+  const hasToday = dates.has(today0.toDateString());
+  const hasYest  = dates.has(yest0.toDateString());
+  const hasDay2  = dates.has(day20.toDateString());
+  if (hasYest) return null;     // no gap to recover
+  if (!hasDay2) return null;    // gap is 2+ days, too far gone
+  const previousStreak = _streakBackFrom(dates, day20.toDateString());
+  if (previousStreak < STREAK_RECOVERY_MIN_STREAK) return null;
+  return {
+    lostStreak: previousStreak,
+    missedDay: yest0.toDateString(),
+    alreadyRatedToday: hasToday,
+  };
+}
+
+function initStreakRecovery() {
+  try {
+    if (typeof isShowcaseMode === 'function' && isShowcaseMode()) return;
+    const meta = _recMeta();
+    // Clean up expired recovery state
+    if (meta.recovery && meta.recovery.expiresAt <= Date.now() && !meta.recovery.recovered) {
+      delete meta.recovery;
+      saveState();
+    }
+    // Suppress detection if recovery is already active
+    if (meta.recovery && meta.recovery.expiresAt > Date.now()) {
+      if (typeof renderDashboard === 'function' && activePage === 'dashboard') renderDashboard();
+      return;
+    }
+    const detected = detectStreakBreak();
+    if (!detected) return;
+    meta.recovery = {
+      detectedAt: Date.now(),
+      expiresAt:  Date.now() + STREAK_RECOVERY_WINDOW_MS,
+      lostStreak: detected.lostStreak,
+      missedDay:  detected.missedDay,
+      progress:   detected.alreadyRatedToday ? 1 : 0,
+      required:   STREAK_RECOVERY_REQUIRED,
+      recovered:  false,
+    };
+    saveState();
+    if (typeof toast === 'function') {
+      const need = meta.recovery.required - meta.recovery.progress;
+      toast(`🔥 ${detected.lostStreak}-day streak in jeopardy — rate ${need} problem${need !== 1 ? 's' : ''} in 24h to restore it`, 'warn', 9000);
+    }
+    if (typeof renderDashboard === 'function' && activePage === 'dashboard') renderDashboard();
+  } catch (e) { console.warn('streak recovery init failed:', e); }
+}
+
+function noteRecoveryRate() {
+  const meta = _recMeta();
+  if (!meta.recovery || meta.recovery.recovered || meta.recovery.expiresAt < Date.now()) return false;
+  meta.recovery.progress = (meta.recovery.progress || 0) + 1;
+  if (meta.recovery.progress >= meta.recovery.required) {
+    meta.recovery.recovered = true;
+    meta.recovery.recoveredAt = Date.now();
+    meta.streakFills = meta.streakFills || [];
+    if (!meta.streakFills.includes(meta.recovery.missedDay)) {
+      meta.streakFills.push(meta.recovery.missedDay);
+    }
+    saveState();
+    if (typeof toast === 'function') {
+      toast(`🔥 Streak recovered — ${meta.recovery.lostStreak}-day streak restored!`, 'success', 8000);
+    }
+    if (typeof shakeScreen === 'function') shakeScreen();
+    if (typeof renderDashboard === 'function' && activePage === 'dashboard') renderDashboard();
+    return true;
+  }
+  saveState();
+  if (typeof toast === 'function') {
+    const need = meta.recovery.required - meta.recovery.progress;
+    toast(`🔥 Recovery progress ${meta.recovery.progress}/${meta.recovery.required} — ${need} more to restore the streak`, 'info', 5000);
+  }
+  if (typeof renderDashboard === 'function' && activePage === 'dashboard') renderDashboard();
+  return false;
+}
+
+function getStreakRecovery() {
+  const meta = userData._meta;
+  if (!meta || !meta.recovery) return null;
+  const r = meta.recovery;
+  if (r.recovered) {
+    // Stop showing the success banner after 24h
+    if (r.recoveredAt && (Date.now() - r.recoveredAt) > STREAK_RECOVERY_WINDOW_MS) return null;
+    return r;
+  }
+  if (r.expiresAt < Date.now()) return null;
+  return r;
+}
+
+function renderStreakRecoveryBanner() {
+  const r = getStreakRecovery();
+  if (!r) return '';
+  if (r.recovered) {
+    return html`<div class="streak-recovery-banner success">
+      <div class="srb-flame">🔥</div>
+      <div class="srb-body">
+        <div class="srb-title">Streak recovered</div>
+        <div class="srb-desc">Your <b>${r.lostStreak}-day</b> streak is back. Keep the chain burning.</div>
+      </div>
+    </div>`;
+  }
+  const msLeft = Math.max(0, r.expiresAt - Date.now());
+  const hours  = Math.floor(msLeft / 3600000);
+  const mins   = Math.floor((msLeft % 3600000) / 60000);
+  const timeStr = hours >= 1 ? `${hours}h ${mins}m` : `${mins}m`;
+  const need   = r.required - (r.progress || 0);
+  const pct    = Math.max(0, Math.min(100, (r.progress || 0) / r.required * 100));
+  return html`<div class="streak-recovery-banner active">
+    <div class="srb-flame">🔥</div>
+    <div class="srb-body">
+      <div class="srb-title">Streak recovery — ${r.lostStreak} days at stake</div>
+      <div class="srb-desc">Rate <b>${need}</b> more problem${need !== 1 ? 's' : ''} in <b>${timeStr}</b> to restore the broken chain.</div>
+      <div class="srb-progress"><div class="srb-bar" style="width:${pct.toFixed(0)}%"></div></div>
+      <div class="srb-meta">${r.progress || 0} / ${r.required} complete</div>
+    </div>
+  </div>`;
+}
+
+function getStreakDays() {
+  // Delegates to _allActivityDates so we transparently pick up:
+  //   - per-problem userData.lastReviewedTs / firstSolvedTs
+  //   - p.date catalog metadata
+  //   - userData._meta.streakFills entries (filled by streak recovery)
+  // Guarded against the previous .forEach treating _meta as a record by
+  // skipping non-record keys explicitly.
+  const dates = _allActivityDates();
   let cur = new Date(); cur.setHours(0,0,0,0);
   // 24-hour grace: don't reset to 0 just because the user hasn't trained yet today.
   // If today has no activity, start counting from yesterday so the existing streak
@@ -4058,7 +4281,15 @@ document.getElementById('dungeon-grid').innerHTML = rows.map(r => {
 }).join('');
 }
 
+function _paintRecoveryBannerSlot() {
+  const slot = document.getElementById('streak-recovery-banner-slot');
+  if (!slot) return;
+  slot.innerHTML = (typeof renderStreakRecoveryBanner === 'function') ? renderStreakRecoveryBanner() : '';
+}
+
 function renderDashboard() {
+  setTimeout(_paintRecoveryBannerSlot, 0);
+
   renderUtilityStrip();
   // computeXP() returns {totalXP, slain}; we want the number for level math.
   const _xpData = computeXP();
@@ -5143,6 +5374,7 @@ function quickRate(id, conf) {
   userData[id].reviewed = (userData[id].reviewed || 0) + 1;
   userData[id].reviewCount = (userData[id].reviewCount || 0) + 1;
   saveState();
+  if (typeof noteRecoveryRate === 'function') noteRecoveryRate();
   const planItem = (todayPlan || []).find(x => x.id === id);
   if (planItem) {
     planItem.done = true;
@@ -5279,6 +5511,7 @@ function saveModal() {
   userData[id].reviewed = (userData[id].reviewed || 0) + 1;
   userData[id].reviewCount = (userData[id].reviewCount || 0) + 1;
   saveState();
+  if (typeof noteRecoveryRate === 'function') noteRecoveryRate();
   // Mark today's plan if matching
   const planItem = (todayPlan || []).find(x => x.id === id);
   if (planItem) {
@@ -5572,6 +5805,7 @@ document.addEventListener('keydown', e => {
 /* ═════════ INIT ═════════ */
 function init() {
   loadState();
+  if (typeof initStreakRecovery === 'function') initStreakRecovery();
   if (typeof initProgressSync === 'function') initProgressSync();
   if (typeof initGistSync === 'function') {
     // Pull-merge in the background. If the remote has newer data,
