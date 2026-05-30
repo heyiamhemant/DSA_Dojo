@@ -936,9 +936,16 @@ a:hover { color: var(--gold-bright); }
   pointer-events: none; animation: heroEmberPulse 3.4s ease-in-out infinite;
 }
 .streak-flame-row { position: relative; display: flex; align-items: baseline; gap: 8px; }
+#streak-recovery-banner-slot:empty { display: none; }
+#streak-recovery-banner-slot {
+  margin: 0 0 14px;
+  /* The slot itself spans the dashboard container width so the banner
+     reads as a top-of-page system message rather than something nested
+     inside the hero card. */
+}
 .streak-recovery-banner {
   display: flex; gap: 16px;
-  margin: 10px 0 16px; padding: 16px 20px;
+  margin: 0; padding: 16px 20px;
   border-radius: 12px;
   background:
     linear-gradient(135deg, rgba(255,90,30,0.14), rgba(232,200,122,0.07)),
@@ -3113,6 +3120,11 @@ textarea.modal-comment {
         </div>
       </div>
 
+      <!-- Streak recovery banner — promoted ABOVE the hero card so it can never be
+           clipped by .streak-prime's overflow:hidden and is the first thing the
+           user sees on dashboard. Stays empty when there is no active recovery. -->
+      <div id="streak-recovery-banner-slot" data-tab="overview"></div>
+
       <div class="hero fcorners" data-tab="overview">
         <svg class="fc tl" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
         <svg class="fc tr" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
@@ -3122,7 +3134,6 @@ textarea.modal-comment {
         <!-- LEFT: streak as primary focal point -->
         <div class="streak-prime">
           <span class="streak-mult" id="streak-mult">+0% XP</span>
-          <div id="streak-recovery-banner-slot"></div>
           <div class="streak-flame-row">
             <span class="streak-flame" aria-hidden="true">
               <svg class="flame-svg" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
