@@ -994,11 +994,12 @@ a:hover { color: var(--gold-bright); }
   animation: none;
 }
 .streak-recovery-banner.info .srb-title {
-  color: #c8d4e0; font-size: 12px; letter-spacing: .18em;
-  text-shadow: none;
+  color: #c8d4e0; font-size: 14px; letter-spacing: .22em;
+  text-shadow: none; font-family: var(--medieval); font-weight: 700;
 }
 .streak-recovery-banner.info .srb-desc {
-  font-size: 12px; color: #98a4b8; line-height: 1.5;
+  font-family: var(--serif-body, 'Crimson Pro', serif);
+  font-size: 13.5px; color: #98a4b8; line-height: 1.6; font-weight: 500;
 }
 .streak-recovery-banner .srb-flame {
   font-size: 36px; line-height: 1;
@@ -1014,17 +1015,24 @@ a:hover { color: var(--gold-bright); }
   0%   { transform: translateY(0)    scale(1);    filter: drop-shadow(0 0 10px rgba(255,140,40,0.75)); }
   100% { transform: translateY(-1px) scale(1.05); filter: drop-shadow(0 0 16px rgba(255,180,60,0.95)); }
 }
-.srb-body { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.srb-body { flex: 1; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 .srb-title {
-  font-family: var(--medieval, 'MedievalSharp', serif);
-  font-size: 17px; letter-spacing: .22em; text-transform: uppercase;
+  font-family: var(--serif-display);
+  font-size: 19px; letter-spacing: .26em; text-transform: uppercase;
   color: var(--gold);
-  text-shadow: 0 0 12px rgba(255,180,60,0.35);
-  font-weight: 700;
+  text-shadow: 0 0 14px rgba(255,180,60,0.4), 0 1px 0 rgba(0,0,0,0.6);
+  font-weight: 900;
 }
 .streak-recovery-banner.success .srb-title { color: #b8e0b0; text-shadow: 0 0 12px rgba(140,200,130,0.3); }
 .srb-projection {
-  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  font-family: var(--serif-display);
+  font-size: 13px; color: var(--text-soft);
+  padding: 10px 14px; margin: 2px 0;
+  background: rgba(0,0,0,0.32); border-radius: 8px;
+  border: 1px solid rgba(232,200,122,0.22);
+  box-shadow: 0 0 12px rgba(0,0,0,0.4) inset;
+}
   font-family: var(--mono, 'JetBrains Mono', monospace);
   font-size: 13px; color: var(--text-soft);
   padding: 8px 12px; margin: 2px 0;
@@ -1041,20 +1049,31 @@ a:hover { color: var(--gold-bright); }
 .srb-projection .srb-to { color: var(--gold); font-weight: 700; }
 .streak-recovery-banner.success .srb-projection .srb-to { color: #b8e0b0; }
 .srb-projection .srb-num {
-  font-size: 18px; font-weight: 700; padding: 0 2px;
+  font-size: 22px; font-weight: 900; padding: 0 3px;
+  font-family: var(--serif-display);
+  text-shadow: 0 0 10px rgba(255,180,60,0.35);
 }
-.srb-projection .srb-label { letter-spacing: .08em; text-transform: uppercase; font-size: 11px; opacity: .8; }
-.srb-desc { font-size: 13px; line-height: 1.55; color: var(--text-soft); }
-.srb-desc b { color: var(--gold); font-weight: 600; }
+.srb-projection .srb-label { font-family: var(--medieval); letter-spacing: .14em; text-transform: uppercase; font-size: 11px; opacity: .9; }
+.srb-desc {
+  font-family: var(--serif-body, 'Crimson Pro', 'Cinzel', serif);
+  font-size: 14.5px; line-height: 1.65; color: var(--text-soft);
+  font-weight: 500; letter-spacing: .015em;
+}
+.srb-desc b { color: var(--gold); font-weight: 700; font-style: italic; letter-spacing: .02em; }
 .streak-recovery-banner.success .srb-desc b { color: #b8e0b0; }
 .srb-steps {
-  margin: 4px 0 2px; padding-left: 22px;
-  font-size: 13px; line-height: 1.6; color: var(--text-soft);
-  display: flex; flex-direction: column; gap: 2px;
+  margin: 4px 0 2px; padding-left: 26px;
+  font-family: var(--serif-body, 'Crimson Pro', 'Cinzel', serif);
+  font-size: 14px; line-height: 1.7; color: var(--text-soft);
+  display: flex; flex-direction: column; gap: 4px;
+  font-weight: 500;
 }
-.srb-steps li { list-style: decimal; }
-.srb-steps li::marker { color: var(--gold); font-weight: 700; }
-.srb-steps b { color: var(--gold); font-weight: 600; }
+.srb-steps li { list-style: decimal; padding-left: 4px; }
+.srb-steps li::marker {
+  color: var(--gold); font-weight: 800;
+  font-family: var(--serif-display);
+}
+.srb-steps b { color: var(--gold); font-weight: 700; font-style: italic; }
 .srb-progress {
   margin-top: 4px;
   height: 8px; border-radius: 99px;
@@ -1070,9 +1089,10 @@ a:hover { color: var(--gold-bright); }
 }
 .srb-meta {
   display: flex; justify-content: space-between; align-items: center; gap: 12px;
-  font-family: var(--mono, 'JetBrains Mono', monospace);
-  font-size: 11px; color: var(--text-dim);
-  letter-spacing: .12em; text-transform: uppercase;
+  font-family: var(--medieval);
+  font-size: 12px; color: var(--text-dim);
+  letter-spacing: .2em; text-transform: uppercase;
+  font-weight: 700;
 }
 .srb-meta .srb-meta-time { color: rgba(255,180,60,0.85); }
 @keyframes srbPulse {
@@ -1086,10 +1106,12 @@ a:hover { color: var(--gold-bright); }
 @media (max-width: 640px) {
   .streak-recovery-banner { padding: 14px 14px; gap: 12px; }
   .streak-recovery-banner .srb-flame { font-size: 30px; }
-  .srb-title { font-size: 14px; letter-spacing: .18em; }
-  .srb-projection { font-size: 12px; padding: 6px 10px; }
-  .srb-projection .srb-num { font-size: 16px; }
-  .srb-meta { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .srb-title { font-size: 15px; letter-spacing: .2em; }
+  .srb-projection { font-size: 12px; padding: 8px 12px; gap: 10px; }
+  .srb-projection .srb-num { font-size: 18px; }
+  .srb-desc { font-size: 13.5px; }
+  .srb-steps { font-size: 13px; padding-left: 22px; }
+  .srb-meta { flex-direction: column; align-items: flex-start; gap: 4px; font-size: 11px; }
 }
 .streak-flame {
   font-size: clamp(52px, 6.5vw, 80px); line-height: 1;
@@ -1162,12 +1184,14 @@ a:hover { color: var(--gold-bright); }
 .streak-best span { color: var(--gold-bright); font-weight: 700; }
 .streak-prime-recovery:empty { display: none; }
 .streak-prime-recovery {
-  margin-top: 8px; padding: 6px 10px;
+  margin-top: 8px; padding: 7px 11px;
   border-radius: 8px;
-  display: flex; align-items: center; gap: 6px;
-  font-family: var(--mono); font-size: 10px;
-  letter-spacing: .08em; text-transform: uppercase;
-  line-height: 1.35; text-align: left;
+  display: flex; align-items: center; gap: 7px;
+  font-family: var(--medieval);
+  font-size: 11px;
+  letter-spacing: .14em; text-transform: uppercase;
+  line-height: 1.4; text-align: left;
+  font-weight: 700;
   background: linear-gradient(180deg, rgba(255,140,40,0.18), rgba(122,31,31,0.22));
   border: 1px solid rgba(255,140,40,0.5);
   color: #ffd28a;
@@ -1175,9 +1199,13 @@ a:hover { color: var(--gold-bright); }
   animation: sprPulse 2.6s ease-in-out infinite;
   cursor: default;
 }
-.streak-prime-recovery .spr-icon { font-size: 13px; }
+.streak-prime-recovery .spr-icon { font-size: 14px; }
 .streak-prime-recovery .spr-text { flex: 1; }
-.streak-prime-recovery b { color: #fff1c2; font-weight: 700; }
+.streak-prime-recovery b {
+  color: #fff1c2; font-weight: 900;
+  font-family: var(--serif-display);
+  letter-spacing: .04em;
+}
 .streak-prime-recovery.success {
   background: linear-gradient(180deg, rgba(111,168,107,0.18), rgba(40,80,40,0.22));
   border-color: rgba(140,200,130,0.55);
@@ -3646,7 +3674,7 @@ textarea.modal-comment {
 </div>
 
 <a href="https://heyiamhemant.github.io/DSA_Dojo_legacy/" class="back-classic">← BACK TO V1 (CLASSIC)</a>
-<div class="build-tag">v2 · cinematic build · r20260531-4</div>
+<div class="build-tag">v2 · cinematic build · r20260601-1</div>
 
 <!-- ═════════ CORE LOGIC (extracted from v1) ═════════ -->
 <script src="./showcase.js?v=20260531-2"></script>
