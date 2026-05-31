@@ -78,8 +78,20 @@ start index.html       # Windows
 - `index.html` — UI shell, all styles, panel rendering, inline app script
 - `dojo-core.js` — game logic (XP, spaced repetition, level thresholds, prerequisite gating, power-level formulas, problem dataset)
 - `assets/` — Dark Souls scene art (for personal/educational use only — not redistributed)
+- `test/` — Playwright harness that boots the page, drives recovery scenarios, and asserts on every visible surface (banner, pill, CTA). Run before pushing UI changes.
 
 No frameworks, no dependencies, no server. Persists to `localStorage` locally and (optionally) syncs to a private GitHub Gist for cross-device use.
+
+### Validating UI changes
+
+```
+cd test
+npm install              # one-time: installs Playwright + serve-handler
+npx playwright install   # one-time: downloads headless Chromium
+npm test                 # runs validate.mjs end-to-end
+```
+
+The harness covers: empty state, streak-recovery detection, dashboard banner, quest-board banner, sticky scroll behavior, pill paint, CTA transformation, progress increment, and success transition. Screenshots land in `test/screenshots/`.
 
 ### Dev console helpers
 

@@ -1,0 +1,13 @@
+{
+  "name": "dsa-dojo-tests",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Headless validation harness for DSA Dojo. Boots index.html via a static server, drives it with Playwright, asserts on the recovery surfaces.",
+  "scripts": {
+    "test": "node validate.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.49.0",
+    "serve-handler": "^6.1.6"
+  }
+}
