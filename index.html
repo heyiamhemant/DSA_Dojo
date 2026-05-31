@@ -3982,10 +3982,10 @@ function detectStreakBreak() {
   }
   const gap = Math.round((todayMs - mraDate.getTime()) / 86400000);
   // gap == 1 would mean MRA was yesterday (caught by hasYest above); gap
-  // here is always >= 2. Allow recovery for gaps of 2 or 3 (means 1 or
-  // 2 missed days). 4+ day gap is a real break.
-  if (gap < 2 || gap > 3) {
-    console.info('[recovery] skip: gap is ' + gap + ' days (only 2-3 day gaps qualify)');
+  // here is always >= 2. Allow recovery for gaps of 2, 3, or 4 (means 1,
+  // 2, or 3 missed days). 5+ day gap is a real break.
+  if (gap < 2 || gap > 4) {
+    console.info('[recovery] skip: gap is ' + gap + ' days (only 2-4 day gaps qualify)');
     return null;
   }
   const previousStreak = _streakBackFrom(dates, mraDate.toDateString());
