@@ -1127,6 +1127,54 @@ a:hover { color: var(--gold-bright); }
   width: 100%; text-align: center;
 }
 .streak-best span { color: var(--gold-bright); font-weight: 700; }
+.streak-prime-recovery:empty { display: none; }
+.streak-prime-recovery {
+  margin-top: 8px; padding: 6px 10px;
+  border-radius: 8px;
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: .08em; text-transform: uppercase;
+  line-height: 1.35; text-align: left;
+  background: linear-gradient(180deg, rgba(255,140,40,0.18), rgba(122,31,31,0.22));
+  border: 1px solid rgba(255,140,40,0.5);
+  color: #ffd28a;
+  box-shadow: 0 0 12px rgba(255,90,30,0.25) inset;
+  animation: sprPulse 2.6s ease-in-out infinite;
+  cursor: default;
+}
+.streak-prime-recovery .spr-icon { font-size: 13px; }
+.streak-prime-recovery .spr-text { flex: 1; }
+.streak-prime-recovery b { color: #fff1c2; font-weight: 700; }
+.streak-prime-recovery.success {
+  background: linear-gradient(180deg, rgba(111,168,107,0.18), rgba(40,80,40,0.22));
+  border-color: rgba(140,200,130,0.55);
+  box-shadow: 0 0 12px rgba(111,168,107,0.25) inset;
+  color: #b8e0b0;
+  animation: none;
+}
+.streak-prime-recovery.success b { color: #d8f0d0; }
+@keyframes sprPulse {
+  0%,100% { box-shadow: 0 0 10px rgba(255,90,30,0.15) inset; }
+  50%     { box-shadow: 0 0 18px rgba(255,90,30,0.35) inset; }
+}
+/* CTA recovery mode — repaint the eyebrow tint + main-line color so the
+   "Forge Today's Hunt" button visibly transforms into a recovery prompt. */
+.cta-enter.recovery-mode .cta-eyebrow {
+  color: #ffd28a; text-shadow: 0 0 10px rgba(255,140,40,0.6);
+}
+.cta-enter.recovery-mode .cta-eyebrow b { color: #fff1c2; }
+.cta-enter.recovery-mode .cta-line.cta-main {
+  background: linear-gradient(180deg, #fff5d4, #ffb24a);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 12px rgba(255,140,40,0.4));
+}
+.cta-enter.recovery-mode .cta-mile-fill {
+  background: linear-gradient(90deg, #ff8a2a, #ffd28a) !important;
+  box-shadow: 0 0 10px rgba(255,140,40,0.6);
+}
+.cta-enter.recovery-success .cta-eyebrow { color: #b8e0b0; }
+.cta-enter.recovery-success .cta-eyebrow b { color: #d8f0d0; }
 .streak-mult {
   position: absolute; top: 8px; right: 10px;
   font-family: var(--mono); font-size: 10px; letter-spacing: .14em;
@@ -3174,6 +3222,9 @@ textarea.modal-comment {
           </div>
           <div class="streak-label">Day Streak</div>
           <div class="streak-best">Best: <span id="streak-best">0</span></div>
+          <!-- Recovery pill — populated by renderStreakCTA() when an active
+               recovery exists. Empty otherwise (CSS hides it via :empty). -->
+          <div class="streak-prime-recovery" id="streak-prime-recovery"></div>
         </div>
 
         <!-- RIGHT: level / rank / XP / powerbars (now secondary) -->
@@ -4449,8 +4500,12 @@ document.getElementById('dungeon-grid').innerHTML = rows.map(r => {
 
 function _paintRecoveryBannerSlot() {
   const slot = document.getElementById('streak-recovery-banner-slot');
-  if (!slot) return;
-  slot.innerHTML = (typeof renderStreakRecoveryBanner === 'function') ? renderStreakRecoveryBanner() : '';
+  if (slot) slot.innerHTML = (typeof renderStreakRecoveryBanner === 'function') ? renderStreakRecoveryBanner() : '';
+  // Also refresh the CTA + streak-prime pill so the always-visible
+  // recovery indicators stay in lock-step with the detailed banner.
+  if (typeof renderStreakCTA === 'function') {
+    try { renderStreakCTA(); } catch (e) {}
+  }
 }
 
 function renderDashboard() {
@@ -4530,6 +4585,11 @@ function renderDashboard() {
 // Compute and render the streak-themed CTA copy: current XP multiplier
 // from streak milestones, days remaining to the next milestone, plus a
 // progress bar measuring progress within the current segment.
+//
+// When an active streak recovery exists, the CTA and the streak-prime pill
+// are repurposed to surface recovery — they're always-visible elements, so
+// the user never has to hunt for the (potentially scrolled-past) detailed
+// banner to know recovery is in progress.
 function renderStreakCTA() {
   try {
     const cur = (typeof getStreakDays === 'function') ? getStreakDays() : 0;
@@ -4540,15 +4600,59 @@ function renderStreakCTA() {
       else if (!nextMilestone) { nextMilestone = m; }
     }
     const multPct = Math.round(curBonus * 100);
-    // Update multiplier chips (hero card + CTA eyebrow)
     const mEl = document.getElementById('streak-mult');
     if (mEl) mEl.textContent = (multPct > 0 ? '+' : '±') + multPct + '% XP';
     const ctaMultEl = document.getElementById('cta-streak-mult');
-    if (ctaMultEl) ctaMultEl.textContent = (multPct > 0 ? '+' : '±') + multPct + '% XP';
-    // Progress to next milestone
+    const eyebrowEl = ctaMultEl ? ctaMultEl.parentElement : null;
+    const ctaMainEl = document.querySelector('.cta-enter .cta-line.cta-main');
+    const ctaBtn   = document.querySelector('.cta-enter');
     const txt = document.getElementById('cta-mile-text');
     const tgt = document.getElementById('cta-mile-target');
     const bar = document.getElementById('cta-mile-fill');
+    const pillEl = document.getElementById('streak-prime-recovery');
+
+    const rec = (typeof getStreakRecovery === 'function') ? getStreakRecovery() : null;
+
+    // ── Recovery mode ─────────────────────────────────────────────────
+    if (rec) {
+      const missedCount = Array.isArray(rec.missedDays) ? rec.missedDays.length : (rec.missedDay ? 1 : 1);
+      const recoveredDays = rec.lostStreak + (rec.daysSince != null ? rec.daysSince : (missedCount + 1));
+      if (rec.recovered) {
+        if (pillEl) pillEl.innerHTML = `<span class="spr-icon">✓</span><span class="spr-text">Recovered to <b>${recoveredDays}</b> days</span>`;
+        if (pillEl) pillEl.className = 'streak-prime-recovery success';
+        if (ctaBtn) ctaBtn.classList.remove('recovery-mode');
+        if (ctaBtn) ctaBtn.classList.add('recovery-success');
+        if (eyebrowEl) eyebrowEl.innerHTML = `— Streak Recovered <span class="cta-mult" id="cta-streak-mult">+${multPct}% XP</span> —`;
+      } else {
+        const msLeft  = Math.max(0, rec.expiresAt - Date.now());
+        const hours   = Math.floor(msLeft / 3600000);
+        const mins    = Math.floor((msLeft % 3600000) / 60000);
+        const timeStr = hours >= 1 ? `${hours}h ${mins}m` : `${mins}m`;
+        const progress = rec.progress || 0;
+        const need     = Math.max(0, rec.required - progress);
+        const pct      = Math.max(0, Math.min(100, progress / rec.required * 100));
+        if (pillEl) {
+          pillEl.className = 'streak-prime-recovery active';
+          pillEl.innerHTML = `<span class="spr-icon">↩</span><span class="spr-text">Recover to <b>${recoveredDays}</b> · rate <b>${need}</b> more · <b>${timeStr}</b> left</span>`;
+        }
+        if (ctaBtn) ctaBtn.classList.add('recovery-mode');
+        if (ctaBtn) ctaBtn.classList.remove('recovery-success');
+        if (eyebrowEl) eyebrowEl.innerHTML = `— 🔥 Streak Recovery · <b>${timeStr}</b> left —`;
+        if (ctaMainEl) ctaMainEl.textContent = `Recover ${rec.lostStreak}-Day Streak`;
+        if (txt) txt.textContent = `${progress} of ${rec.required} rated · ${need} more to restore to ${recoveredDays} days`;
+        if (tgt) tgt.textContent = `${recoveredDays}d`;
+        if (bar) bar.style.width = pct.toFixed(1) + '%';
+        return;
+      }
+    } else {
+      if (pillEl) { pillEl.className = 'streak-prime-recovery'; pillEl.innerHTML = ''; }
+      if (ctaBtn) ctaBtn.classList.remove('recovery-mode', 'recovery-success');
+      if (ctaMainEl) ctaMainEl.textContent = 'Forge Today’s Hunt';
+      if (eyebrowEl) eyebrowEl.innerHTML = `— Continue your streak <span class="cta-mult" id="cta-streak-mult">${(multPct > 0 ? '+' : '±') + multPct}% XP</span> —`;
+    }
+
+    // ── Normal milestone mode ─────────────────────────────────────────
+    if (ctaMultEl) ctaMultEl.textContent = (multPct > 0 ? '+' : '±') + multPct + '% XP';
     if (nextMilestone) {
       const span = nextMilestone.days - prevDays;
       const into = cur - prevDays;
