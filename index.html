@@ -3949,6 +3949,26 @@ function _streakBackFrom(dates, dayStr) {
   return n;
 }
 
+// Scan a `lookbackDays`-day window ending at yesterday and return the longest
+// consecutive activity run found, plus the timestamp of its last day. Lets
+// recovery anchor on a solid older streak even when stray solo days sit
+// between it and today's gap.
+function _findBestRecentRun(dates, todayMs, lookbackDays) {
+  let best = { length: 0, endMs: 0 };
+  let curLen = 0, curEndMs = 0;
+  for (let i = lookbackDays; i >= 1; i--) {
+    const d = new Date(todayMs - i * 86400000);
+    if (dates.has(d.toDateString())) {
+      curLen++;
+      curEndMs = d.getTime();
+      if (curLen > best.length) best = { length: curLen, endMs: curEndMs };
+    } else {
+      curLen = 0;
+    }
+  }
+  return best;
+}
+
 function detectStreakBreak() {
   const meta = _recMeta();
   if (meta.recovery && meta.recovery.expiresAt > Date.now()) {
@@ -3969,40 +3989,33 @@ function detectStreakBreak() {
     console.info('[recovery] skip: yesterday has activity, no gap to recover');
     return null;
   }
-  // Find most recent activity date by walking backwards from yesterday.
-  // Cap at 7 days back so we never recover from week-long absences.
-  let mraDate = null;
-  for (let i = 1; i <= 7; i++) {
-    const d = new Date(todayMs - i * 86400000);
-    if (dates.has(d.toDateString())) { mraDate = d; break; }
-  }
-  if (!mraDate) {
-    console.info('[recovery] skip: no activity in last 7 days');
+  // Find the longest consecutive activity run ending in the last 14 days
+  // (excluding today). This is the streak we attempt to restore — anchoring
+  // here instead of MRA lets us honor an older solid streak even when stray
+  // solo days sit between it and the current gap.
+  const best = _findBestRecentRun(dates, todayMs, 14);
+  if (best.length < STREAK_RECOVERY_MIN_STREAK) {
+    console.info('[recovery] skip: best recent streak was ' + best.length + ' days, need >= ' + STREAK_RECOVERY_MIN_STREAK);
     return null;
   }
-  const gap = Math.round((todayMs - mraDate.getTime()) / 86400000);
-  // gap == 1 would mean MRA was yesterday (caught by hasYest above); gap
-  // here is always >= 2. Allow recovery for gaps of 2, 3, or 4 (means 1,
-  // 2, or 3 missed days). 5+ day gap is a real break.
-  if (gap < 2 || gap > 4) {
-    console.info('[recovery] skip: gap is ' + gap + ' days (only 2-4 day gaps qualify)');
-    return null;
-  }
-  const previousStreak = _streakBackFrom(dates, mraDate.toDateString());
-  if (previousStreak < STREAK_RECOVERY_MIN_STREAK) {
-    console.info('[recovery] skip: previous streak was ' + previousStreak + ' days, need >= ' + STREAK_RECOVERY_MIN_STREAK);
-    return null;
-  }
-  // Collect every missed day (MRA+1 ... yesterday inclusive)
+  // Collect every empty day between best-run-end and today (exclusive both
+  // ends). Bridging these restores the broken chain; stray solo days inside
+  // the window are already in `dates` and contribute to the resulting streak.
+  const totalDaysSince = Math.round((todayMs - best.endMs) / 86400000);
   const missedDays = [];
-  for (let i = 1; i < gap; i++) {
-    const d = new Date(mraDate.getTime() + i * 86400000);
-    missedDays.push(d.toDateString());
+  for (let i = 1; i < totalDaysSince; i++) {
+    const d = new Date(best.endMs + i * 86400000);
+    if (!dates.has(d.toDateString())) missedDays.push(d.toDateString());
   }
-  console.info('[recovery] DETECTED — lost', previousStreak, 'day streak, missed days:', missedDays, 'today rated already?', hasToday);
+  if (missedDays.length < 1 || missedDays.length > 3) {
+    console.info('[recovery] skip: ' + missedDays.length + ' missed days (only 1-3 missed days qualify)');
+    return null;
+  }
+  console.info('[recovery] DETECTED — lost', best.length, 'day streak, missed days:', missedDays, 'days since best run:', totalDaysSince, 'today rated already?', hasToday);
   return {
-    lostStreak: previousStreak,
+    lostStreak: best.length,
     missedDays: missedDays,
+    daysSince:  totalDaysSince,
     alreadyRatedToday: hasToday,
   };
 }
@@ -4031,6 +4044,7 @@ function initStreakRecovery() {
       expiresAt:  Date.now() + STREAK_RECOVERY_WINDOW_MS,
       lostStreak: detected.lostStreak,
       missedDays: detected.missedDays,
+      daysSince:  detected.daysSince,
       // legacy single-day field kept for backwards compat in case any older
       // banner code reads it; first missed day is the most recently broken.
       missedDay:  detected.missedDays[detected.missedDays.length - 1],
@@ -4041,8 +4055,7 @@ function initStreakRecovery() {
     saveState();
     if (typeof toast === 'function') {
       const need = meta.recovery.required - meta.recovery.progress;
-      const missedCount = Array.isArray(detected.missedDays) ? detected.missedDays.length : 1;
-      const recoverTo   = detected.lostStreak + missedCount + 1;
+      const recoverTo = detected.lostStreak + detected.daysSince;
       toast(`🔥 STREAK RECOVERY available — rate ${need} problem${need !== 1 ? 's' : ''} in 24h to restore your ${detected.lostStreak}-day streak (→ ${recoverTo} days). Open Dashboard for details.`, 'warn', 11000);
     }
     if (typeof renderDashboard === 'function' && activePage === 'dashboard') renderDashboard();
@@ -4095,11 +4108,12 @@ function renderStreakRecoveryBanner() {
   const r = getStreakRecovery();
   if (!r) return '';
   // Compute projected streak after successful recovery. We restore:
-  //   - the pre-break streak (lostStreak days, ending on MRA)
-  //   - all missed days between MRA and today (streakFills)
+  //   - the pre-break streak (lostStreak days, ending on best-run-end)
+  //   - all missed empty days between best-run-end and today (streakFills)
+  //   - any stray solo days in that window (already in activity dates)
   //   - today (the user must rate problems during recovery, which counts as today's activity)
   const missedDays    = Array.isArray(r.missedDays) ? r.missedDays.length : (r.missedDay ? 1 : 1);
-  const recoveredDays = r.lostStreak + missedDays + 1;
+  const recoveredDays = r.lostStreak + (r.daysSince != null ? r.daysSince : (missedDays + 1));
   // Current visible streak right now (before recovery completes).
   // While recovery is active, getStreakDays() already includes filled days
   // only after success, so this naturally shows pre-recovery value.
