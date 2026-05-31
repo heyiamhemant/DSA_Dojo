@@ -936,8 +936,10 @@ a:hover { color: var(--gold-bright); }
   pointer-events: none; animation: heroEmberPulse 3.4s ease-in-out infinite;
 }
 .streak-flame-row { position: relative; display: flex; align-items: baseline; gap: 8px; }
-#streak-recovery-banner-slot:empty { display: none; }
-#streak-recovery-banner-slot {
+#streak-recovery-banner-slot:empty,
+.recovery-banner-slot:empty { display: none; }
+#streak-recovery-banner-slot,
+.recovery-banner-slot {
   margin: 0 0 14px;
   /* The slot itself spans the dashboard container width so the banner
      reads as a top-of-page system message rather than something nested
@@ -3178,7 +3180,7 @@ textarea.modal-comment {
       <!-- Streak recovery banner — promoted ABOVE the hero card so it can never be
            clipped by .streak-prime's overflow:hidden and is the first thing the
            user sees on dashboard. Stays empty when there is no active recovery. -->
-      <div id="streak-recovery-banner-slot" data-tab="overview"></div>
+      <div class="recovery-banner-slot" id="streak-recovery-banner-slot" data-tab="overview"></div>
 
       <div class="hero fcorners" data-tab="overview">
         <svg class="fc tl" viewBox="0 0 36 36"><use href="#i-filigree"/></svg>
@@ -3353,6 +3355,11 @@ textarea.modal-comment {
 
     <!-- ═════════ QUEST BOARD ═════════ -->
     <section class="page" id="page-quest">
+      <!-- Streak recovery banner duplicated at top of quest board so the
+           "rate N problems to recover" guidance is visible right where the
+           user does the rating. Paint logic in _paintRecoveryBannerSlot
+           targets every element with class .recovery-banner-slot. -->
+      <div class="recovery-banner-slot" data-tab="quest"></div>
       <div class="page-header">
         <div>
           <h1 class="page-title">Quest Board</h1>
@@ -3781,6 +3788,12 @@ function navigate(page) {
   else if (page === 'bestiary') renderBestiary();
   else if (page === 'boss') renderBoss();
   else if (page === 'topic') renderTopicDeepDive();
+  // Recovery banner / pill / CTA may have been freshly added or the user
+  // may have just landed on a page with a new banner slot. Repaint so the
+  // recovery guidance is always visible right where the user is.
+  if (typeof _paintRecoveryBannerSlot === 'function') {
+    try { _paintRecoveryBannerSlot(); } catch (e) {}
+  }
   toggleDrawer(false);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -4519,8 +4532,8 @@ document.getElementById('dungeon-grid').innerHTML = rows.map(r => {
 }
 
 function _paintRecoveryBannerSlot() {
-  const slot = document.getElementById('streak-recovery-banner-slot');
-  if (slot) slot.innerHTML = (typeof renderStreakRecoveryBanner === 'function') ? renderStreakRecoveryBanner() : '';
+  const html = (typeof renderStreakRecoveryBanner === 'function') ? renderStreakRecoveryBanner() : '';
+  document.querySelectorAll('.recovery-banner-slot').forEach(slot => { slot.innerHTML = html; });
   // Also refresh the CTA + streak-prime pill so the always-visible
   // recovery indicators stay in lock-step with the detailed banner.
   if (typeof renderStreakCTA === 'function') {
