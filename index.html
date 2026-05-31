@@ -3793,9 +3793,10 @@ document.addEventListener('click', e => {
 function toggleDrawer(open) {
   const d = document.getElementById('mobile-drawer');
   const o = document.getElementById('drawer-overlay');
+  if (!d) return;
   if (open === undefined) open = !d.classList.contains('open');
   d.classList.toggle('open', open);
-  o.classList.toggle('open', open);
+  if (o) o.classList.toggle('open', open);
 }
 (function(){var h=document.getElementById('hamburger'); if(h) h.addEventListener('click', function(){ toggleDrawer(); });})();
 (function(){var o=document.getElementById('drawer-overlay'); if(o) o.addEventListener('click', function(){ toggleDrawer(false); });})();
@@ -3969,12 +3970,13 @@ const STREAK_RECOVERY_MIN_STREAK = 3;
 const STREAK_RECOVERY_WINDOW_MS  = 24 * 60 * 60 * 1000;
 const STREAK_RECOVERY_REQUIRED   = 2;
 // How far back we'll look for a "broken streak worth recovering" and the
-// largest empty-day gap we'll still bridge. Bumped to 30 days so a user
-// returning after a meaningful absence can still restore their best recent
-// streak — paired with a per-day cost on `required` problems so longer gaps
-// remain meaningfully harder to recover from.
+// largest empty-day gap we'll still bridge. The lookback and missed-day
+// caps are intentionally generous (matched at 30 days) so a user returning
+// after a meaningful absence can still restore their best recent streak —
+// paired with a per-day cost on `required` problems so longer gaps remain
+// meaningfully harder to recover from.
 const STREAK_RECOVERY_LOOKBACK_DAYS = 30;
-const STREAK_RECOVERY_MAX_MISSED    = 14;
+const STREAK_RECOVERY_MAX_MISSED    = 30;
 const STREAK_RECOVERY_REQUIRED_CAP  = 8;
 
 function _recMeta() {

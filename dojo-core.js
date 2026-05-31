@@ -559,11 +559,11 @@ async function initProgressSync() {
     updateSyncUI();
     const loaded = await loadFromSyncFile();
     if (!loaded) return;
-    applyFilters();
-    renderDashboard();
-    renderToday();
-    updateHeroStats();
-    updateBadges();
+    if (typeof applyFilters === 'function') applyFilters();
+    if (typeof renderDashboard === 'function') renderDashboard();
+    if (typeof renderToday === 'function') renderToday();
+    if (typeof updateHeroStats === 'function') updateHeroStats();
+    if (typeof updateBadges === 'function') updateBadges();
   } catch (e) {
     console.warn('Init sync failed:', e);
     setSyncStatus('Sync: Reconnect needed');
