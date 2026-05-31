@@ -4152,6 +4152,25 @@ function initStreakRecovery() {
     }
     // Suppress detection if recovery is already active
     if (meta.recovery && meta.recovery.expiresAt > Date.now()) {
+      // Self-heal stored records that pre-date the lostStreak/recentRunLength
+      // split. Promote the displayed lostStreak to the user's all-time best
+      // when it's larger, and backfill recentRunLength so post-recovery math
+      // keeps using the actual recent run length.
+      let patched = false;
+      if (meta.recovery.recentRunLength == null) {
+        meta.recovery.recentRunLength = meta.recovery.lostStreak;
+        patched = true;
+      }
+      const allTime = (typeof getBestStreak === 'function') ? (parseInt(getBestStreak()) || 0) : 0;
+      if (allTime > meta.recovery.lostStreak) {
+        meta.recovery.lostStreak = allTime;
+        patched = true;
+      }
+      if (patched) {
+        meta.lastModified = new Date().toISOString();
+        saveState();
+        console.info('[recovery] patched stored record:', { lostStreak: meta.recovery.lostStreak, recentRunLength: meta.recovery.recentRunLength });
+      }
       if (typeof renderDashboard === 'function' && activePage === 'dashboard') renderDashboard();
       if (typeof renderStreakCTA === 'function') { try { renderStreakCTA(); } catch(e){} }
       if (typeof _paintRecoveryPill === 'function') { try { _paintRecoveryPill(); } catch(e){} }
