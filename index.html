@@ -4124,9 +4124,17 @@ function detectStreakBreak() {
     return { ok: false, reason, missedDayCount: missedDays.length };
   }
   console.info('[recovery] DETECTED — lost', best.length, 'day streak, missed days:', missedDays, 'days since best run:', totalDaysSince, 'today rated already?', hasToday);
+  // Prefer the user's all-time best streak as the displayed "lost" anchor
+  // when it exceeds what we found within the lookback window. The
+  // mathematical recovery effect is unchanged — daysSince still drives
+  // the projected post-recovery streak — but the label feels right when
+  // the user remembers a longer streak that's older than the lookback.
+  const allTime = (typeof getBestStreak === 'function') ? (parseInt(getBestStreak()) || 0) : 0;
+  const displayLostStreak = Math.max(best.length, allTime);
   return {
     ok: true,
-    lostStreak: best.length,
+    lostStreak: displayLostStreak,
+    recentRunLength: best.length,
     missedDays: missedDays,
     daysSince:  totalDaysSince,
     alreadyRatedToday: hasToday,
@@ -4175,6 +4183,10 @@ function initStreakRecovery() {
       detectedAt: Date.now(),
       expiresAt:  Date.now() + STREAK_RECOVERY_WINDOW_MS,
       lostStreak: detected.lostStreak,
+      // recentRunLength drives the math (post-recovery streak length).
+      // lostStreak is the label shown in the UI — may be longer if the
+      // user's all-time best exceeds the recent window's longest run.
+      recentRunLength: detected.recentRunLength != null ? detected.recentRunLength : detected.lostStreak,
       missedDays: detected.missedDays,
       daysSince:  detected.daysSince,
       // legacy single-day field kept for backwards compat in case any older
@@ -4268,13 +4280,14 @@ function renderStreakRecoveryBanner() {
       </div>
     </div>`;
   }
-  // Compute projected streak after successful recovery. We restore:
-  //   - the pre-break streak (lostStreak days, ending on best-run-end)
-  //   - all missed empty days between best-run-end and today (streakFills)
-  //   - any stray solo days in that window (already in activity dates)
-  //   - today (the user must rate problems during recovery, which counts as today's activity)
+  // Compute projected streak after successful recovery. The math is driven
+  // by the length of the recent best run (the actual unbroken stretch
+  // within the lookback window) plus daysSince. r.lostStreak is just a
+  // label and may be larger when the user's all-time best exceeds the
+  // recent window's longest run.
   const missedDays    = Array.isArray(r.missedDays) ? r.missedDays.length : (r.missedDay ? 1 : 1);
-  const recoveredDays = r.lostStreak + (r.daysSince != null ? r.daysSince : (missedDays + 1));
+  const baseRunLen    = (r.recentRunLength != null) ? r.recentRunLength : r.lostStreak;
+  const recoveredDays = baseRunLen + (r.daysSince != null ? r.daysSince : (missedDays + 1));
   // Current visible streak right now (before recovery completes).
   // While recovery is active, getStreakDays() already includes filled days
   // only after success, so this naturally shows pre-recovery value.
@@ -4620,7 +4633,8 @@ function _paintRecoveryPill() {
     return;
   }
   const missedCount   = Array.isArray(r.missedDays) ? r.missedDays.length : (r.missedDay ? 1 : 1);
-  const recoveredDays = r.lostStreak + (r.daysSince != null ? r.daysSince : (missedCount + 1));
+  const baseRunLen    = (r.recentRunLength != null) ? r.recentRunLength : r.lostStreak;
+  const recoveredDays = baseRunLen + (r.daysSince != null ? r.daysSince : (missedCount + 1));
   if (r.recovered) {
     pill.className = 'streak-prime-recovery success';
     pill.innerHTML = `<span class="spr-icon">✓</span><span class="spr-text">Recovered to <b>${recoveredDays}</b> days</span>`;
@@ -4756,7 +4770,8 @@ function renderStreakCTA() {
     // ── Recovery mode ─────────────────────────────────────────────────
     if (rec) {
       const missedCount = Array.isArray(rec.missedDays) ? rec.missedDays.length : (rec.missedDay ? 1 : 1);
-      const recoveredDays = rec.lostStreak + (rec.daysSince != null ? rec.daysSince : (missedCount + 1));
+      const baseRunLen  = (rec.recentRunLength != null) ? rec.recentRunLength : rec.lostStreak;
+      const recoveredDays = baseRunLen + (rec.daysSince != null ? rec.daysSince : (missedCount + 1));
       if (rec.recovered) {
         console.info('[recovery] CTA paint: recovered state, projected', recoveredDays, 'days');
         if (ctaBtn) { ctaBtn.classList.remove('recovery-mode'); ctaBtn.classList.add('recovery-success'); }
