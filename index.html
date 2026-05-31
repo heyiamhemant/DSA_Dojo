@@ -3646,7 +3646,7 @@ textarea.modal-comment {
 </div>
 
 <a href="https://heyiamhemant.github.io/DSA_Dojo_legacy/" class="back-classic">← BACK TO V1 (CLASSIC)</a>
-<div class="build-tag">v2 · cinematic build · r20260531-2</div>
+<div class="build-tag">v2 · cinematic build · r20260531-3</div>
 
 <!-- ═════════ CORE LOGIC (extracted from v1) ═════════ -->
 <script src="./showcase.js?v=20260531-2"></script>
@@ -4336,7 +4336,12 @@ function renderStreakRecoveryBanner() {
   const timeStr = hours >= 1 ? `${hours}h ${mins}m` : `${mins}m`;
   const need    = r.required - (r.progress || 0);
   const pct     = Math.max(0, Math.min(100, (r.progress || 0) / r.required * 100));
-  const dayWord = missedDays === 1 ? 'day' : 'days';
+  // The accurate count of EMPTY days that need bridging — not the full gap span.
+  // r.missedDays already excludes the best-run-end day, today, and any solo
+  // days in between with activity, so it represents only the empties.
+  const emptyDays = missedDays;
+  const gapWord   = (r.daysSince === 1) ? 'day' : 'days';
+  const emptyWord = emptyDays === 1 ? 'day' : 'days';
 
   return html`<div class="streak-recovery-banner active">
     <div class="srb-flame">🔥</div>
@@ -4347,11 +4352,11 @@ function renderStreakRecoveryBanner() {
         <span class="srb-arrow">▶</span>
         <span class="srb-to"><span class="srb-label">Recover to</span> <span class="srb-num">${recoveredDays}</span> days</span>
       </div>
-      <div class="srb-desc">You broke a <b>${r.lostStreak}-day</b> streak by missing <b>${missedDays}</b> ${dayWord}. Complete the steps below within <b>${timeStr}</b> to bridge the gap and restore the chain to <b>${recoveredDays} days</b>.</div>
+      <div class="srb-desc">Your last <b>${r.lostStreak}-day</b> streak ended <b>${r.daysSince}</b> ${gapWord} ago, with <b>${emptyDays}</b> empty ${emptyWord} in between. Complete the steps below within <b>${timeStr}</b> to bridge those gaps and restore the chain to <b>${recoveredDays} days</b>.</div>
       <ol class="srb-steps">
         <li>Open the <b>Quest Board</b> (or any problem page).</li>
         <li>Solve and rate <b>${need}</b> more problem${need !== 1 ? 's' : ''} (any confidence 1–5 counts).</li>
-        <li>The missed ${dayWord} bridge automatically; the banner turns green on success.</li>
+        <li>The empty ${emptyWord} bridge automatically; the banner turns green on success.</li>
       </ol>
       <div class="srb-progress"><div class="srb-bar" style="width:${pct.toFixed(0)}%"></div></div>
       <div class="srb-meta">
