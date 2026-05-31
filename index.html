@@ -3646,7 +3646,7 @@ textarea.modal-comment {
 </div>
 
 <a href="https://heyiamhemant.github.io/DSA_Dojo_legacy/" class="back-classic">← BACK TO V1 (CLASSIC)</a>
-<div class="build-tag">v2 · cinematic build · r20260531-3</div>
+<div class="build-tag">v2 · cinematic build · r20260531-4</div>
 
 <!-- ═════════ CORE LOGIC (extracted from v1) ═════════ -->
 <script src="./showcase.js?v=20260531-2"></script>
@@ -4061,24 +4061,39 @@ function _streakBackFrom(dates, dayStr) {
   return n;
 }
 
-// Scan a `lookbackDays`-day window ending at yesterday and return the longest
-// consecutive activity run found, plus the timestamp of its last day. Lets
-// recovery anchor on a solid older streak even when stray solo days sit
-// between it and today's gap.
-function _findBestRecentRun(dates, todayMs, lookbackDays) {
-  let best = { length: 0, endMs: 0 };
+// Scan a `lookbackDays`-day window ending at yesterday and return the
+// MOST RECENT consecutive activity run that meets `minLength`, plus the
+// timestamp of its last day. If no run in the window meets `minLength`,
+// returns the longest run found (still useful for diagnostics).
+//
+// Why "most recent" instead of "longest": the user's mental model of
+// "the streak I just broke" is anchored on what just ended, not on the
+// best run from weeks ago. A 4-day streak that ended 3 days ago is what
+// they want to recover, even if a 5-day streak ended 30 days ago.
+function _findBestRecentRun(dates, todayMs, lookbackDays, minLength) {
+  const minLen = (typeof minLength === 'number' && minLength > 0) ? minLength : 1;
+  // Pass 1: walk backwards day-by-day from yesterday. Collect each
+  // contiguous run as (length, endMs). Empty days separate runs.
+  const runs = [];
   let curLen = 0, curEndMs = 0;
-  for (let i = lookbackDays; i >= 1; i--) {
+  for (let i = 1; i <= lookbackDays; i++) {
     const d = new Date(todayMs - i * 86400000);
     if (dates.has(d.toDateString())) {
+      if (curLen === 0) curEndMs = d.getTime(); // most recent day of this run
       curLen++;
-      curEndMs = d.getTime();
-      if (curLen > best.length) best = { length: curLen, endMs: curEndMs };
-    } else {
+    } else if (curLen > 0) {
+      runs.push({ length: curLen, endMs: curEndMs });
       curLen = 0;
     }
   }
-  return best;
+  if (curLen > 0) runs.push({ length: curLen, endMs: curEndMs });
+  if (runs.length === 0) return { length: 0, endMs: 0 };
+  // Most recent run that meets the minimum length. runs[] is already
+  // ordered most-recent-first because we walked backwards from today.
+  const recent = runs.find(r => r.length >= minLen);
+  if (recent) return recent;
+  // No qualifying run — return the longest for diagnostic purposes.
+  return runs.reduce((a, b) => (b.length > a.length ? b : a), runs[0]);
 }
 
 function detectStreakBreak() {
@@ -4104,7 +4119,7 @@ function detectStreakBreak() {
     console.info('[recovery] skip: ' + reason);
     return { ok: false, reason };
   }
-  const best = _findBestRecentRun(dates, todayMs, STREAK_RECOVERY_LOOKBACK_DAYS);
+  const best = _findBestRecentRun(dates, todayMs, STREAK_RECOVERY_LOOKBACK_DAYS, STREAK_RECOVERY_MIN_STREAK);
   if (best.length < STREAK_RECOVERY_MIN_STREAK) {
     const reason = `best recent streak was ${best.length} day${best.length === 1 ? '' : 's'} — need at least ${STREAK_RECOVERY_MIN_STREAK} consecutive days within the last ${STREAK_RECOVERY_LOOKBACK_DAYS} days to qualify`;
     console.info('[recovery] skip: ' + reason);
@@ -4127,16 +4142,14 @@ function detectStreakBreak() {
     return { ok: false, reason, missedDayCount: missedDays.length };
   }
   console.info('[recovery] DETECTED — lost', best.length, 'day streak, missed days:', missedDays, 'days since best run:', totalDaysSince, 'today rated already?', hasToday);
-  // Prefer the user's all-time best streak as the displayed "lost" anchor
-  // when it exceeds what we found within the lookback window. The
-  // mathematical recovery effect is unchanged — daysSince still drives
-  // the projected post-recovery streak — but the label feels right when
-  // the user remembers a longer streak that's older than the lookback.
-  const allTime = (typeof getBestStreak === 'function') ? (parseInt(getBestStreak()) || 0) : 0;
-  const displayLostStreak = Math.max(best.length, allTime);
+  // Anchor display + math on the same number: the most recent qualifying
+  // consecutive run. This is the streak the user actually just lost.
+  // (Earlier we promoted lostStreak to max(recent, allTimeBest) but that
+  // caused confusion when an older longer streak existed — users want to
+  // recover what they just broke, not their all-time peak.)
   return {
     ok: true,
-    lostStreak: displayLostStreak,
+    lostStreak: best.length,
     recentRunLength: best.length,
     missedDays: missedDays,
     daysSince:  totalDaysSince,
@@ -4155,29 +4168,23 @@ function initStreakRecovery() {
     }
     // Suppress detection if recovery is already active
     if (meta.recovery && meta.recovery.expiresAt > Date.now()) {
-      // Self-heal stored records that pre-date the lostStreak/recentRunLength
-      // split. Promote the displayed lostStreak to the user's all-time best
-      // when it's larger, and backfill recentRunLength so post-recovery math
-      // keeps using the actual recent run length.
-      let patched = false;
-      if (meta.recovery.recentRunLength == null) {
-        meta.recovery.recentRunLength = meta.recovery.lostStreak;
-        patched = true;
-      }
-      const allTime = (typeof getBestStreak === 'function') ? (parseInt(getBestStreak()) || 0) : 0;
-      if (allTime > meta.recovery.lostStreak) {
-        meta.recovery.lostStreak = allTime;
-        patched = true;
-      }
-      if (patched) {
+      // Old records (pre-schema-v2) anchored on the longest run within
+      // lookback, which often surfaced a stale older streak instead of
+      // the one the user just lost. Force re-detection so they get the
+      // correct most-recent-qualifying-run anchor.
+      const STALE = !meta.recovery.schema || meta.recovery.schema < 2;
+      if (STALE) {
+        console.info('[recovery] migrating stale record to schema v2 — re-detecting');
+        delete meta.recovery;
         meta.lastModified = new Date().toISOString();
         saveState();
-        console.info('[recovery] patched stored record:', { lostStreak: meta.recovery.lostStreak, recentRunLength: meta.recovery.recentRunLength });
+        // Fall through to detection below.
+      } else {
+        if (typeof renderDashboard === 'function' && activePage === 'dashboard') renderDashboard();
+        if (typeof renderStreakCTA === 'function') { try { renderStreakCTA(); } catch(e){} }
+        if (typeof _paintRecoveryPill === 'function') { try { _paintRecoveryPill(); } catch(e){} }
+        return;
       }
-      if (typeof renderDashboard === 'function' && activePage === 'dashboard') renderDashboard();
-      if (typeof renderStreakCTA === 'function') { try { renderStreakCTA(); } catch(e){} }
-      if (typeof _paintRecoveryPill === 'function') { try { _paintRecoveryPill(); } catch(e){} }
-      return;
     }
     const detected = detectStreakBreak();
     if (!detected || !detected.ok) {
@@ -4202,12 +4209,13 @@ function initStreakRecovery() {
       STREAK_RECOVERY_REQUIRED + Math.max(0, detected.missedDays.length - 1)
     );
     meta.recovery = {
+      schema:     2,
       detectedAt: Date.now(),
       expiresAt:  Date.now() + STREAK_RECOVERY_WINDOW_MS,
       lostStreak: detected.lostStreak,
-      // recentRunLength drives the math (post-recovery streak length).
-      // lostStreak is the label shown in the UI — may be longer if the
-      // user's all-time best exceeds the recent window's longest run.
+      // recentRunLength == lostStreak in schema v2: both anchor on the
+      // most recent qualifying consecutive run. Kept as a separate field
+      // for forward compatibility in case the two ever diverge again.
       recentRunLength: detected.recentRunLength != null ? detected.recentRunLength : detected.lostStreak,
       missedDays: detected.missedDays,
       daysSince:  detected.daysSince,
