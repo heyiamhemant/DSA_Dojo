@@ -1014,6 +1014,14 @@ a:hover { color: var(--gold-bright); }
 .srb-desc { font-size: 13px; line-height: 1.55; color: var(--text-soft); }
 .srb-desc b { color: var(--gold); font-weight: 600; }
 .streak-recovery-banner.success .srb-desc b { color: #b8e0b0; }
+.srb-steps {
+  margin: 4px 0 2px; padding-left: 22px;
+  font-size: 13px; line-height: 1.6; color: var(--text-soft);
+  display: flex; flex-direction: column; gap: 2px;
+}
+.srb-steps li { list-style: decimal; }
+.srb-steps li::marker { color: var(--gold); font-weight: 700; }
+.srb-steps b { color: var(--gold); font-weight: 600; }
 .srb-progress {
   margin-top: 4px;
   height: 8px; border-radius: 99px;
@@ -4052,6 +4060,10 @@ function initStreakRecovery() {
       required:   baseRequired,
       recovered:  false,
     };
+    // Stamp _meta.lastModified so gist-sync's last-write-wins merge keeps the
+    // freshly-created recovery state instead of clobbering it with a stale
+    // remote _meta that pre-dates the break.
+    meta.lastModified = new Date().toISOString();
     saveState();
     if (typeof toast === 'function') {
       const need = meta.recovery.required - meta.recovery.progress;
@@ -4066,6 +4078,9 @@ function noteRecoveryRate() {
   const meta = _recMeta();
   if (!meta.recovery || meta.recovery.recovered || meta.recovery.expiresAt < Date.now()) return false;
   meta.recovery.progress = (meta.recovery.progress || 0) + 1;
+  // Refresh the merge timestamp so sync keeps the latest progress + recovered
+  // flag instead of clobbering with stale remote _meta.
+  meta.lastModified = new Date().toISOString();
   if (meta.recovery.progress >= meta.recovery.required) {
     meta.recovery.recovered = true;
     meta.recovery.recoveredAt = Date.now();
@@ -4151,7 +4166,12 @@ function renderStreakRecoveryBanner() {
         <span class="srb-arrow">▶</span>
         <span class="srb-to"><span class="srb-label">Recover to</span> <span class="srb-num">${recoveredDays}</span> days</span>
       </div>
-      <div class="srb-desc">You missed <b>${missedDays}</b> ${dayWord}. Rate <b>${need}</b> more problem${need !== 1 ? 's' : ''} to bridge the gap and restore your <b>${r.lostStreak}-day</b> streak (plus the ${missedDays === 1 ? 'missed day' : 'missed days'} + today = <b>${recoveredDays} days</b>).</div>
+      <div class="srb-desc">You broke a <b>${r.lostStreak}-day</b> streak by missing <b>${missedDays}</b> ${dayWord}. Complete the steps below within <b>${timeStr}</b> to bridge the gap and restore the chain to <b>${recoveredDays} days</b>.</div>
+      <ol class="srb-steps">
+        <li>Open the <b>Quest Board</b> (or any problem page).</li>
+        <li>Solve and rate <b>${need}</b> more problem${need !== 1 ? 's' : ''} (any confidence 1–5 counts).</li>
+        <li>The missed ${dayWord} bridge automatically; the banner turns green on success.</li>
+      </ol>
       <div class="srb-progress"><div class="srb-bar" style="width:${pct.toFixed(0)}%"></div></div>
       <div class="srb-meta">
         <span>${r.progress || 0} / ${r.required} problems rated</span>

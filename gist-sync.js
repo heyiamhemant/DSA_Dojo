@@ -241,6 +241,10 @@ function _safeRerender() {
     if (typeof renderToday === 'function') renderToday();
     if (typeof updateHeroStats === 'function') updateHeroStats();
     if (typeof updateBadges === 'function') updateBadges();
+    // Recovery banner lives in a static slot that renderDashboard alone
+    // does not always touch (e.g. when activePage isn't 'dashboard').
+    // Force a paint so a sync-pulled state can't leave the slot stale.
+    if (typeof _paintRecoveryBannerSlot === 'function') _paintRecoveryBannerSlot();
   } catch(e) { console.warn('Re-render after sync pull failed:', e); }
 }
 
