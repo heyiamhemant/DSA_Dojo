@@ -3147,7 +3147,6 @@ textarea.modal-comment {
       <button class="util-btn" onclick="document.getElementById('import-file').click()" title="Import progress">📂<span class="util-label" style="margin-left:6px">Import</span></button>
       <button class="util-btn" id="settings-btn" onclick="openSettingsModal()" title="Settings &amp; sync"><span id="settings-btn-icon">⚙</span><span class="util-label" style="margin-left:6px">Settings</span></button>
       <button class="util-btn" onclick="toggleTheme()" title="Toggle theme">☾</button>
-      <button class="font-toggle" onclick="toggleFontMode()" title="Switch typeface mode (Herald = ornate, Tome = Crimson Pro book-feel)"><span class="ft-icon">📜</span><span class="ft-mode"></span></button>
       <a class="util-btn" href="https://heyiamhemant.github.io/DSA_Dojo_legacy/" title="Back to V1">← V1</a>
       <input type="file" id="import-file" accept=".json" style="display:none" onchange="importProgress(event)">
     </div>
@@ -5862,18 +5861,14 @@ function toast(msg) {
 }
 
 /* ═════════ THEME ═════════ */
-// ─── Font-mode toggle: 'Herald' (default, ornate) | 'Tome' (Crimson Pro)
-//   Persisted to localStorage. Restore runs on script eval (before DOM
-//   ready) so we avoid a flash of Herald before Tome paints. */
-function toggleFontMode() {
-  const isTome = document.documentElement.classList.toggle('font-tome');
-  try { localStorage.setItem('dojo_font_mode', isTome ? 'tome' : 'herald'); } catch(e){}
-}
-(function restoreFontMode() {
+// ─── Font mode: Herald (ornate) is now the only mode. The Tome variant
+//     and its toggle button were retired; we proactively strip any stale
+//     `font-tome` class persisted from earlier builds so returning users
+//     see Herald immediately.
+(function enforceHeraldFont() {
   try {
-    if (localStorage.getItem('dojo_font_mode') === 'tome') {
-      document.documentElement.classList.add('font-tome');
-    }
+    document.documentElement.classList.remove('font-tome');
+    localStorage.removeItem('dojo_font_mode');
   } catch(e){}
 })();
 
