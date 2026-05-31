@@ -941,9 +941,18 @@ a:hover { color: var(--gold-bright); }
 #streak-recovery-banner-slot,
 .recovery-banner-slot {
   margin: 0 0 14px;
-  /* The slot itself spans the dashboard container width so the banner
-     reads as a top-of-page system message rather than something nested
-     inside the hero card. */
+  /* Sticky so the recovery guidance stays visible as the user scrolls
+     through the bento grid / quest list. The slot becomes a transparent
+     shell while empty (display:none above), so it costs nothing for
+     non-recovery sessions. */
+  position: sticky; top: 0; z-index: 50;
+  /* Subtle backdrop so the banner reads cleanly against scrolled-under
+     content without darkening the page when the slot is empty. */
+}
+#streak-recovery-banner-slot:not(:empty),
+.recovery-banner-slot:not(:empty) {
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 .streak-recovery-banner {
   display: flex; gap: 16px;
@@ -4143,11 +4152,10 @@ function initStreakRecovery() {
     // remote _meta that pre-dates the break.
     meta.lastModified = new Date().toISOString();
     saveState();
-    if (typeof toast === 'function') {
-      const need = meta.recovery.required - meta.recovery.progress;
-      const recoverTo = detected.lostStreak + detected.daysSince;
-      toast(`🔥 STREAK RECOVERY available — rate ${need} problem${need !== 1 ? 's' : ''} in 24h to restore your ${detected.lostStreak}-day streak (→ ${recoverTo} days). Open Dashboard for details.`, 'warn', 11000);
-    }
+    // No toast — recovery guidance is now communicated via the persistent
+    // banner (top of dashboard + quest), the streak-prime pill, and the
+    // transformed Forge CTA. A fire-and-forget toast added noise without
+    // adding information that those three surfaces don't already carry.
     if (typeof renderDashboard === 'function' && activePage === 'dashboard') renderDashboard();
     if (typeof renderStreakCTA === 'function') { try { renderStreakCTA(); } catch(e){} }
     if (typeof _paintRecoveryPill === 'function') { try { _paintRecoveryPill(); } catch(e){} }

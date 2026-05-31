@@ -204,17 +204,55 @@ async function gistPullAndMerge({ skipRender = false } = {}) {
 // Merge two userData objects. For every key present in either side, choose
 // the value with the newer lastModified timestamp. Records without a
 // timestamp are treated as 'epoch' (always lose to a stamped version).
+//
+// Special-case `_meta`: it carries per-device transient state (active
+// streak recovery progress, streakFills bridging the gap, sync prefs)
+// that must not be wiped by a stale remote. We deep-merge it field by
+// field with local-wins precedence on volatile keys instead of doing a
+// last-write-wins on the whole record.
 function _mergeUserData(local, remote) {
   const out = {};
   const keys = new Set([...Object.keys(local), ...Object.keys(remote)]);
   for (const k of keys) {
     const l = local[k], r = remote[k];
+    if (k === '_meta') { out[k] = _mergeMeta(l, r); continue; }
     if (!l) { out[k] = r; continue; }
     if (!r) { out[k] = l; continue; }
     const lt = +new Date(l.lastModified || 0) || 0;
     const rt = +new Date(r.lastModified || 0) || 0;
     out[k] = (rt > lt) ? r : l;
   }
+  return out;
+}
+
+// Merge `_meta` field-by-field. Volatile recovery/streakFills state
+// always prefers the side that has it — so a fresh local detection
+// can never be erased by an older remote pull, and a remote that
+// completed recovery on another device is honored if local hasn't.
+function _mergeMeta(local, remote) {
+  const l = local && typeof local === 'object' ? local : {};
+  const r = remote && typeof remote === 'object' ? remote : {};
+  const out = { ...l, ...r };
+  // recovery: prefer the most-recently-detected side; if only one
+  // side has it, use that; if both, pick by detectedAt.
+  const lRec = l.recovery, rRec = r.recovery;
+  if (lRec || rRec) {
+    if (lRec && rRec) {
+      out.recovery = (rRec.detectedAt || 0) > (lRec.detectedAt || 0) ? rRec : lRec;
+    } else {
+      out.recovery = lRec || rRec;
+    }
+  }
+  // streakFills: union — both devices bridging missed days should
+  // stack rather than overwriting.
+  const lFills = Array.isArray(l.streakFills) ? l.streakFills : [];
+  const rFills = Array.isArray(r.streakFills) ? r.streakFills : [];
+  out.streakFills = Array.from(new Set([...lFills, ...rFills]));
+  // lastModified: max of both so future record-level merges see a
+  // monotonically increasing timestamp.
+  const lt = +new Date(l.lastModified || 0) || 0;
+  const rt = +new Date(r.lastModified || 0) || 0;
+  out.lastModified = new Date(Math.max(lt, rt) || Date.now()).toISOString();
   return out;
 }
 
