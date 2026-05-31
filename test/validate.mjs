@@ -92,7 +92,12 @@ async function main() {
     return { exists: !!el, html: el && el.innerHTML.trim(), display: el && getComputedStyle(el).display };
   });
   check('dashboard banner slot exists', emptyBanner.exists);
-  check('dashboard banner is hidden when empty', emptyBanner.display === 'none', JSON.stringify(emptyBanner));
+  // On first boot, the banner is either empty (no skip reason) or shows the
+  // info-variant diagnostic ("Streak Recovery — Not Available" + reason).
+  // What we never want is the active recovery banner without a real
+  // recovery state.
+  const startsActive = /streak-recovery-banner active|streak-recovery-banner success/.test(emptyBanner.html || '');
+  check('dashboard banner is not stuck on active recovery on fresh load', !startsActive, JSON.stringify(emptyBanner).slice(0, 160));
 
   await shoot(page, '01-fresh-no-recovery');
 
@@ -208,10 +213,43 @@ async function main() {
     };
   });
   check('pill cleared on reset',         cleared.pillHtml === '', cleared.pillHtml);
-  check('banner cleared on reset',       cleared.bannerHtml === '', cleared.bannerHtml);
+  // After reset we accept either an empty banner (no skip reason) or the
+  // info-variant diagnostic banner (skip reason re-detected). What we never
+  // want is the active recovery banner sticking around.
+  check('banner is not stuck on active recovery',
+        !/streak-recovery-banner active|streak-recovery-banner success/.test(cleared.bannerHtml || ''),
+        cleared.bannerHtml && cleared.bannerHtml.slice(0, 120));
   check('CTA recovery class removed',    !/recovery-mode|recovery-success/.test(cleared.ctaClasses || ''), cleared.ctaClasses);
 
   await shoot(page, '06-cleared');
+
+  console.log('\n▶ scenario: diagnostic empty-state when detection skips');
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.waitForTimeout(100);
+  // Use the test-only escape hatch to set a skip reason without touching
+  // module-scoped userData directly. The painter then renders the info
+  // variant of the banner.
+  await page.evaluate(() => {
+    window.dojoSetSkipReason('best recent streak was 1 day — need at least 3 consecutive days within the last 30 days to qualify');
+  });
+  await page.waitForTimeout(150);
+  const diag = await page.evaluate(() => {
+    const banner = document.getElementById('streak-recovery-banner-slot');
+    const r = banner && banner.getBoundingClientRect();
+    return {
+      html: banner && banner.innerHTML,
+      display: banner && getComputedStyle(banner).display,
+      visibleTop: r && r.top,
+      visibleHeight: r && r.height,
+    };
+  });
+  check('diagnostic banner renders when no recovery + skip reason set', /Streak Recovery — Not Available/.test(diag.html || ''), diag.html && diag.html.slice(0, 120));
+  check('diagnostic banner explains the reason',                       /best recent streak was/.test(diag.html || ''), diag.html);
+  check('diagnostic banner is visible',                                diag.display !== 'none', diag.display);
+  check('diagnostic banner has non-zero height',                       (diag.visibleHeight || 0) > 20, JSON.stringify(diag));
+  check('diagnostic banner is in viewport',                            diag.visibleTop !== undefined && diag.visibleTop < 600, JSON.stringify(diag));
+
+  await shoot(page, '07-diagnostic');
 
   await browser.close();
   server.close();

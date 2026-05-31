@@ -978,6 +978,25 @@ a:hover { color: var(--gold-bright); }
   animation: none;
 }
 .streak-recovery-banner.success::before { display: none; }
+.streak-recovery-banner.info {
+  background: linear-gradient(135deg, rgba(120,140,180,0.10), rgba(80,100,140,0.05));
+  border-color: rgba(150,170,200,0.30);
+  box-shadow: 0 0 18px rgba(120,140,180,0.10) inset, 0 4px 14px rgba(0,0,0,0.2);
+  animation: none;
+  padding: 12px 16px; gap: 12px;
+}
+.streak-recovery-banner.info::before { display: none; }
+.streak-recovery-banner.info .srb-flame {
+  font-size: 24px; color: #aab6cc; filter: none;
+  animation: none;
+}
+.streak-recovery-banner.info .srb-title {
+  color: #c8d4e0; font-size: 12px; letter-spacing: .18em;
+  text-shadow: none;
+}
+.streak-recovery-banner.info .srb-desc {
+  font-size: 12px; color: #98a4b8; line-height: 1.5;
+}
 .streak-recovery-banner .srb-flame {
   font-size: 36px; line-height: 1;
   filter: drop-shadow(0 0 12px rgba(255,140,40,0.85));
@@ -4062,13 +4081,15 @@ function _findBestRecentRun(dates, todayMs, lookbackDays) {
 function detectStreakBreak() {
   const meta = _recMeta();
   if (meta.recovery && meta.recovery.expiresAt > Date.now()) {
-    console.info('[recovery] skip: active recovery in progress');
-    return null;
+    const reason = 'active recovery in progress';
+    console.info('[recovery] skip: ' + reason);
+    return { ok: false, reason };
   }
   const dates = _allActivityDates();
   if (dates.size === 0) {
-    console.info('[recovery] skip: no activity history yet');
-    return null;
+    const reason = 'no activity history yet — solve a few problems first';
+    console.info('[recovery] skip: ' + reason);
+    return { ok: false, reason };
   }
   const today0 = new Date(); today0.setHours(0,0,0,0);
   const todayMs = today0.getTime();
@@ -4076,32 +4097,35 @@ function detectStreakBreak() {
   const yest0 = new Date(todayMs - 86400000);
   const hasYest = dates.has(yest0.toDateString());
   if (hasYest) {
-    console.info('[recovery] skip: yesterday has activity, no gap to recover');
-    return null;
+    const reason = 'yesterday has activity — no gap to recover';
+    console.info('[recovery] skip: ' + reason);
+    return { ok: false, reason };
   }
-  // Find the longest consecutive activity run ending in the lookback window
-  // (excluding today). Anchoring here instead of MRA lets us honor an older
-  // solid streak even when stray solo days sit between it and the current gap.
   const best = _findBestRecentRun(dates, todayMs, STREAK_RECOVERY_LOOKBACK_DAYS);
   if (best.length < STREAK_RECOVERY_MIN_STREAK) {
-    console.info('[recovery] skip: best recent streak was ' + best.length + ' days, need >= ' + STREAK_RECOVERY_MIN_STREAK);
-    return null;
+    const reason = `best recent streak was ${best.length} day${best.length === 1 ? '' : 's'} — need at least ${STREAK_RECOVERY_MIN_STREAK} consecutive days within the last ${STREAK_RECOVERY_LOOKBACK_DAYS} days to qualify`;
+    console.info('[recovery] skip: ' + reason);
+    return { ok: false, reason, bestRun: best.length };
   }
-  // Collect every empty day between best-run-end and today (exclusive both
-  // ends). Bridging these restores the broken chain; stray solo days inside
-  // the window are already in `dates` and contribute to the resulting streak.
   const totalDaysSince = Math.round((todayMs - best.endMs) / 86400000);
   const missedDays = [];
   for (let i = 1; i < totalDaysSince; i++) {
     const d = new Date(best.endMs + i * 86400000);
     if (!dates.has(d.toDateString())) missedDays.push(d.toDateString());
   }
-  if (missedDays.length < 1 || missedDays.length > STREAK_RECOVERY_MAX_MISSED) {
-    console.info('[recovery] skip: ' + missedDays.length + ' missed days (only 1-' + STREAK_RECOVERY_MAX_MISSED + ' missed days qualify)');
-    return null;
+  if (missedDays.length < 1) {
+    const reason = 'no missed days between best run and today — nothing to bridge';
+    console.info('[recovery] skip: ' + reason);
+    return { ok: false, reason };
+  }
+  if (missedDays.length > STREAK_RECOVERY_MAX_MISSED) {
+    const reason = `${missedDays.length} missed days — recovery is capped at ${STREAK_RECOVERY_MAX_MISSED} day${STREAK_RECOVERY_MAX_MISSED === 1 ? '' : 's'}; this absence is too long to bridge`;
+    console.info('[recovery] skip: ' + reason);
+    return { ok: false, reason, missedDayCount: missedDays.length };
   }
   console.info('[recovery] DETECTED — lost', best.length, 'day streak, missed days:', missedDays, 'days since best run:', totalDaysSince, 'today rated already?', hasToday);
   return {
+    ok: true,
     lostStreak: best.length,
     missedDays: missedDays,
     daysSince:  totalDaysSince,
@@ -4126,7 +4150,20 @@ function initStreakRecovery() {
       return;
     }
     const detected = detectStreakBreak();
-    if (!detected) return;
+    if (!detected || !detected.ok) {
+      // Stash skip reason so the user can see why no recovery is offered.
+      // Cleared next time a real recovery state is created.
+      meta.lastSkipReason = (detected && detected.reason) ? detected.reason : null;
+      saveState();
+      // Repaint surfaces so a stale banner from an expired/cleared recovery
+      // is replaced by the diagnostic empty-state card if applicable.
+      if (typeof renderStreakCTA === 'function') { try { renderStreakCTA(); } catch(e){} }
+      if (typeof _paintRecoveryPill === 'function') { try { _paintRecoveryPill(); } catch(e){} }
+      if (typeof _paintRecoveryBannerSlot === 'function') { try { _paintRecoveryBannerSlot(); } catch(e){} }
+      return;
+    }
+    // Real detection — clear any prior skip reason.
+    meta.lastSkipReason = null;
     // Recovery is harder when more days were missed — scale required problems
     // linearly (1 missed -> 2, 2 missed -> 3, …) but cap so a long absence
     // doesn't demand an impossible 24h grind.
@@ -4213,7 +4250,24 @@ function getStreakRecovery() {
 
 function renderStreakRecoveryBanner() {
   const r = getStreakRecovery();
-  if (!r) return '';
+  if (!r) {
+    // No active recovery — surface the skip reason inline so the user
+    // sees *why* no banner is offered, instead of staring at an empty
+    // dashboard wondering if the feature is broken. Suppressed when the
+    // skip reason is "yesterday has activity" (the normal happy path)
+    // or "no activity history yet" (cold start; not a problem).
+    const meta = userData._meta || {};
+    const reason = meta.lastSkipReason;
+    if (!reason) return '';
+    if (/yesterday has activity|no activity history|active recovery in progress|no missed days between/i.test(reason)) return '';
+    return html`<div class="streak-recovery-banner info">
+      <div class="srb-flame">ⓘ</div>
+      <div class="srb-body">
+        <div class="srb-title">Streak Recovery — Not Available</div>
+        <div class="srb-desc">${reason}.</div>
+      </div>
+    </div>`;
+  }
   // Compute projected streak after successful recovery. We restore:
   //   - the pre-break streak (lostStreak days, ending on best-run-end)
   //   - all missed empty days between best-run-end and today (streakFills)
@@ -6176,12 +6230,21 @@ window.dojoResetRecovery = function() {
   if (userData._meta) {
     delete userData._meta.recovery;
     userData._meta.streakFills = [];
+    userData._meta.lastSkipReason = null;
   }
   saveState();
   if (typeof renderDashboard === 'function') renderDashboard();
   if (typeof renderStreakCTA === 'function') { try { renderStreakCTA(); } catch(e){} }
   if (typeof _paintRecoveryPill === 'function') { try { _paintRecoveryPill(); } catch(e){} }
+  if (typeof _paintRecoveryBannerSlot === 'function') { try { _paintRecoveryBannerSlot(); } catch(e){} }
   console.info('[recovery] cleared recovery state + streakFills');
+};
+// Test-only escape hatch so the validation harness can write into the
+// module-scoped userData without going through saveState / sync.
+window.dojoSetSkipReason = function(reason) {
+  if (!userData._meta) userData._meta = {};
+  userData._meta.lastSkipReason = reason || null;
+  if (typeof _paintRecoveryBannerSlot === 'function') _paintRecoveryBannerSlot();
 };
 window.dojoExplainStreak = function() {
   const dates = _allActivityDates();
