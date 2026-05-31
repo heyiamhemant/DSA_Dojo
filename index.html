@@ -3674,7 +3674,7 @@ textarea.modal-comment {
 </div>
 
 <a href="https://heyiamhemant.github.io/DSA_Dojo_legacy/" class="back-classic">← BACK TO V1 (CLASSIC)</a>
-<div class="build-tag">v2 · cinematic build · r20260601-1</div>
+<div class="build-tag">v2 · cinematic build · r20260601-2</div>
 
 <!-- ═════════ CORE LOGIC (extracted from v1) ═════════ -->
 <script src="./showcase.js?v=20260531-2"></script>
@@ -4038,7 +4038,7 @@ const raw = safe;
 
 
 /* ═════════ STREAK RECOVERY ═════════ */
-const STREAK_RECOVERY_MIN_STREAK = 3;
+const STREAK_RECOVERY_MIN_STREAK = 2;
 const STREAK_RECOVERY_WINDOW_MS  = 24 * 60 * 60 * 1000;
 const STREAK_RECOVERY_REQUIRED   = 2;
 // How far back we'll look for a "broken streak worth recovering" and the
@@ -4196,13 +4196,13 @@ function initStreakRecovery() {
     }
     // Suppress detection if recovery is already active
     if (meta.recovery && meta.recovery.expiresAt > Date.now()) {
-      // Old records (pre-schema-v2) anchored on the longest run within
-      // lookback, which often surfaced a stale older streak instead of
-      // the one the user just lost. Force re-detection so they get the
-      // correct most-recent-qualifying-run anchor.
-      const STALE = !meta.recovery.schema || meta.recovery.schema < 2;
+      // Old records (pre-schema-v3) anchored on either the longest run
+      // or used a stricter min-streak threshold. Force re-detection so
+      // they get the current most-recent-qualifying-run anchor with the
+      // current minimum streak length.
+      const STALE = !meta.recovery.schema || meta.recovery.schema < 3;
       if (STALE) {
-        console.info('[recovery] migrating stale record to schema v2 — re-detecting');
+        console.info('[recovery] migrating stale record to schema v3 — re-detecting');
         delete meta.recovery;
         meta.lastModified = new Date().toISOString();
         saveState();
@@ -4237,7 +4237,7 @@ function initStreakRecovery() {
       STREAK_RECOVERY_REQUIRED + Math.max(0, detected.missedDays.length - 1)
     );
     meta.recovery = {
-      schema:     2,
+      schema:     3,
       detectedAt: Date.now(),
       expiresAt:  Date.now() + STREAK_RECOVERY_WINDOW_MS,
       lostStreak: detected.lostStreak,
