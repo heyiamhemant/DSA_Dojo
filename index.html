@@ -4099,6 +4099,8 @@ function initStreakRecovery() {
     // Suppress detection if recovery is already active
     if (meta.recovery && meta.recovery.expiresAt > Date.now()) {
       if (typeof renderDashboard === 'function' && activePage === 'dashboard') renderDashboard();
+      if (typeof renderStreakCTA === 'function') { try { renderStreakCTA(); } catch(e){} }
+      if (typeof _paintRecoveryPill === 'function') { try { _paintRecoveryPill(); } catch(e){} }
       return;
     }
     const detected = detectStreakBreak();
@@ -4135,6 +4137,7 @@ function initStreakRecovery() {
     }
     if (typeof renderDashboard === 'function' && activePage === 'dashboard') renderDashboard();
     if (typeof renderStreakCTA === 'function') { try { renderStreakCTA(); } catch(e){} }
+    if (typeof _paintRecoveryPill === 'function') { try { _paintRecoveryPill(); } catch(e){} }
   } catch (e) { console.warn('streak recovery init failed:', e); }
 }
 
@@ -4160,6 +4163,7 @@ function noteRecoveryRate() {
     if (typeof shakeScreen === 'function') shakeScreen();
     if (typeof renderDashboard === 'function' && activePage === 'dashboard') renderDashboard();
     if (typeof renderStreakCTA === 'function') { try { renderStreakCTA(); } catch(e){} }
+    if (typeof _paintRecoveryPill === 'function') { try { _paintRecoveryPill(); } catch(e){} }
     return true;
   }
   saveState();
@@ -4169,6 +4173,7 @@ function noteRecoveryRate() {
   }
   if (typeof renderDashboard === 'function' && activePage === 'dashboard') renderDashboard();
   if (typeof renderStreakCTA === 'function') { try { renderStreakCTA(); } catch(e){} }
+  if (typeof _paintRecoveryPill === 'function') { try { _paintRecoveryPill(); } catch(e){} }
   return false;
 }
 
@@ -4521,6 +4526,41 @@ function _paintRecoveryBannerSlot() {
   if (typeof renderStreakCTA === 'function') {
     try { renderStreakCTA(); } catch (e) {}
   }
+  if (typeof _paintRecoveryPill === 'function') {
+    try { _paintRecoveryPill(); } catch (e) {}
+  }
+}
+
+// Dedicated, idempotent painter for the streak-prime recovery pill.
+// Decoupled from renderStreakCTA so a regression in CTA painting can't
+// also wipe the pill — and vice versa. Logs every paint so future "pill
+// missing" reports are debuggable from one console line.
+function _paintRecoveryPill() {
+  const pill = document.getElementById('streak-prime-recovery');
+  if (!pill) { console.info('[recovery] pill paint: slot not in DOM'); return; }
+  const r = (typeof getStreakRecovery === 'function') ? getStreakRecovery() : null;
+  if (!r) {
+    pill.className = 'streak-prime-recovery';
+    pill.innerHTML = '';
+    return;
+  }
+  const missedCount   = Array.isArray(r.missedDays) ? r.missedDays.length : (r.missedDay ? 1 : 1);
+  const recoveredDays = r.lostStreak + (r.daysSince != null ? r.daysSince : (missedCount + 1));
+  if (r.recovered) {
+    pill.className = 'streak-prime-recovery success';
+    pill.innerHTML = `<span class="spr-icon">✓</span><span class="spr-text">Recovered to <b>${recoveredDays}</b> days</span>`;
+    console.info('[recovery] pill paint: recovered →', recoveredDays, 'days');
+    return;
+  }
+  const msLeft   = Math.max(0, r.expiresAt - Date.now());
+  const hours    = Math.floor(msLeft / 3600000);
+  const mins     = Math.floor((msLeft % 3600000) / 60000);
+  const timeStr  = hours >= 1 ? `${hours}h ${mins}m` : `${mins}m`;
+  const progress = r.progress || 0;
+  const need     = Math.max(0, r.required - progress);
+  pill.className = 'streak-prime-recovery active';
+  pill.innerHTML = `<span class="spr-icon">↩</span><span class="spr-text">Recover to <b>${recoveredDays}</b> · rate <b>${need}</b> more · <b>${timeStr}</b> left</span>`;
+  console.info('[recovery] pill paint: active', { progress, required: r.required, recoveredDays, timeStr });
 }
 
 function renderDashboard() {
@@ -4559,6 +4599,7 @@ function renderDashboard() {
   const bestEl = document.getElementById('streak-best');
   if (bestEl) bestEl.textContent = best;
   try { renderStreakCTA(); } catch (e) {}
+  try { if (typeof _paintRecoveryPill === 'function') _paintRecoveryPill(); } catch (e) {}
 
   // KPIs
   const total = RAW_PROBLEMS.length;
@@ -4624,9 +4665,13 @@ function renderStreakCTA() {
     const txt = document.getElementById('cta-mile-text');
     const tgt = document.getElementById('cta-mile-target');
     const bar = document.getElementById('cta-mile-fill');
-    const pillEl = document.getElementById('streak-prime-recovery');
 
     const rec = (typeof getStreakRecovery === 'function') ? getStreakRecovery() : null;
+    // Pill is owned by _paintRecoveryPill — never write streak-prime-recovery
+    // from this function, otherwise CTA bugs can also wipe the pill.
+    if (typeof _paintRecoveryPill === 'function') {
+      try { _paintRecoveryPill(); } catch(e){}
+    }
     // Build the multiplier chip span once. Every eyebrow rewrite re-embeds
     // it verbatim so subsequent renderStreakCTA calls can still find it via
     // getElementById('cta-streak-mult'). The chip's text is then updated by
@@ -4639,10 +4684,6 @@ function renderStreakCTA() {
       const recoveredDays = rec.lostStreak + (rec.daysSince != null ? rec.daysSince : (missedCount + 1));
       if (rec.recovered) {
         console.info('[recovery] CTA paint: recovered state, projected', recoveredDays, 'days');
-        if (pillEl) {
-          pillEl.className = 'streak-prime-recovery success';
-          pillEl.innerHTML = `<span class="spr-icon">✓</span><span class="spr-text">Recovered to <b>${recoveredDays}</b> days</span>`;
-        }
         if (ctaBtn) { ctaBtn.classList.remove('recovery-mode'); ctaBtn.classList.add('recovery-success'); }
         if (eyebrowEl) eyebrowEl.innerHTML = `— Streak Recovered ${multSpan} —`;
         if (ctaMainEl) ctaMainEl.textContent = `Streak Recovered`;
@@ -4659,10 +4700,6 @@ function renderStreakCTA() {
       const need     = Math.max(0, rec.required - progress);
       const pctR     = Math.max(0, Math.min(100, progress / rec.required * 100));
       console.info('[recovery] CTA paint: active', { progress, required: rec.required, recoveredDays, timeStr });
-      if (pillEl) {
-        pillEl.className = 'streak-prime-recovery active';
-        pillEl.innerHTML = `<span class="spr-icon">↩</span><span class="spr-text">Recover to <b>${recoveredDays}</b> · rate <b>${need}</b> more · <b>${timeStr}</b> left</span>`;
-      }
       if (ctaBtn) { ctaBtn.classList.add('recovery-mode'); ctaBtn.classList.remove('recovery-success'); }
       if (eyebrowEl) eyebrowEl.innerHTML = `— 🔥 Streak Recovery · <b>${timeStr}</b> left — ${multSpan}`;
       if (ctaMainEl) ctaMainEl.textContent = `Recover ${rec.lostStreak}-Day Streak`;
@@ -4673,7 +4710,6 @@ function renderStreakCTA() {
     }
 
     // ── Normal milestone mode ─────────────────────────────────────────
-    if (pillEl) { pillEl.className = 'streak-prime-recovery'; pillEl.innerHTML = ''; }
     if (ctaBtn) ctaBtn.classList.remove('recovery-mode', 'recovery-success');
     if (ctaMainEl) ctaMainEl.textContent = 'Forge Today\u2019s Hunt';
     if (eyebrowEl) eyebrowEl.innerHTML = `— Continue your streak ${multSpan} —`;
@@ -6110,6 +6146,8 @@ window.dojoTestRecovery = function() {
   saveState();
   if (typeof toast === 'function') toast('🔥 (test) STREAK RECOVERY available — rate 2 problems in 24h to restore your 4-day streak (→ 6 days). Open Dashboard for details.', 'warn', 11000);
   if (typeof renderDashboard === 'function') renderDashboard();
+  if (typeof renderStreakCTA === 'function') { try { renderStreakCTA(); } catch(e){} }
+  if (typeof _paintRecoveryPill === 'function') { try { _paintRecoveryPill(); } catch(e){} }
   console.info('[recovery] test state injected; navigate to dashboard to see the banner');
   return userData._meta.recovery;
 };
@@ -6120,6 +6158,8 @@ window.dojoResetRecovery = function() {
   }
   saveState();
   if (typeof renderDashboard === 'function') renderDashboard();
+  if (typeof renderStreakCTA === 'function') { try { renderStreakCTA(); } catch(e){} }
+  if (typeof _paintRecoveryPill === 'function') { try { _paintRecoveryPill(); } catch(e){} }
   console.info('[recovery] cleared recovery state + streakFills');
 };
 window.dojoExplainStreak = function() {
