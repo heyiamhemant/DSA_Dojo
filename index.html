@@ -4011,12 +4011,12 @@ const STREAK_RECOVERY_MIN_STREAK = 3;
 const STREAK_RECOVERY_WINDOW_MS  = 24 * 60 * 60 * 1000;
 const STREAK_RECOVERY_REQUIRED   = 2;
 // How far back we'll look for a "broken streak worth recovering" and the
-// largest empty-day gap we'll still bridge. The lookback and missed-day
-// caps are intentionally generous (matched at 30 days) so a user returning
-// after a meaningful absence can still restore their best recent streak —
-// paired with a per-day cost on `required` problems so longer gaps remain
-// meaningfully harder to recover from.
-const STREAK_RECOVERY_LOOKBACK_DAYS = 30;
+// largest empty-day gap we'll still bridge. Lookback is 90 days so a
+// genuinely good streak from 1-3 months ago can still be the anchor —
+// MAX_MISSED stays at 30 so we never bridge more than a month of empty
+// days regardless of how old the anchor streak is. Required-problems
+// scaling caps at 8 so a long absence remains meaningful but doable.
+const STREAK_RECOVERY_LOOKBACK_DAYS = 90;
 const STREAK_RECOVERY_MAX_MISSED    = 30;
 const STREAK_RECOVERY_REQUIRED_CAP  = 8;
 

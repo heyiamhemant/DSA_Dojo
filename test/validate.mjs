@@ -44,7 +44,14 @@ function check(label, cond, detail) {
 
 async function shoot(page, name) {
   await fs.mkdir(SHOTS_DIR, { recursive: true });
-  await page.screenshot({ path: path.join(SHOTS_DIR, name + '.png'), fullPage: false });
+  // Screenshots are nice-to-have for eyeball review; never fail the harness
+  // if rendering is mid-animation. Pulse animations on the recovery banner
+  // mean Playwright's "stable rendering" wait can spin forever.
+  try {
+    await page.screenshot({ path: path.join(SHOTS_DIR, name + '.png'), fullPage: false, animations: 'disabled', timeout: 8000 });
+  } catch (e) {
+    console.log('  (screenshot skipped: ' + e.message.split('\n')[0] + ')');
+  }
 }
 
 async function main() {
