@@ -3674,7 +3674,7 @@ textarea.modal-comment {
 </div>
 
 <a href="https://heyiamhemant.github.io/DSA_Dojo_legacy/" class="back-classic">← BACK TO V1 (CLASSIC)</a>
-<div class="build-tag">v2 · cinematic build · r20260603-1</div>
+<div class="build-tag">v2 · cinematic build · r20260603-2</div>
 
 <!-- ═════════ CORE LOGIC (extracted from v1) ═════════ -->
 <script src="./showcase.js?v=20260531-2"></script>
@@ -4218,78 +4218,83 @@ function initStreakRecovery() {
   try {
     if (typeof isShowcaseMode === 'function' && isShowcaseMode()) return;
     const meta = _recMeta();
-    // Clean up expired recovery state
-    if (meta.recovery && meta.recovery.expiresAt <= Date.now() && !meta.recovery.recovered) {
+    // Two-phase recovery model:
+    //   status === 'offered' → eligibility detected, banner shown, but no
+    //     timer running. State is "lightweight" — gets refreshed every
+    //     page load to reflect current missed days and required count.
+    //   status === 'active'  → user has rated their first problem; timer
+    //     is now ticking. Existing schema-v4 fields (expiresAt, progress)
+    //     are populated.
+    //   status === 'recovered' → success state, banner is green for 7 days.
+    // Schema-v5 records carry the explicit `status` field. Earlier
+    // schemas had implicit "active immediately" semantics — those get
+    // migrated to the new offered/active split.
+
+    // Clean up expired ACTIVE recoveries that the user didn't complete.
+    if (meta.recovery && meta.recovery.status === 'active'
+        && meta.recovery.expiresAt && meta.recovery.expiresAt <= Date.now()
+        && !meta.recovery.recovered) {
       delete meta.recovery;
       saveState();
     }
-    // Suppress detection if recovery is already active
-    if (meta.recovery && meta.recovery.expiresAt > Date.now()) {
-      // Old records anchored on different rules (longest run, stricter
-      // min-streak, 24h window, linear penalty). Force re-detection so
-      // they get the current most-recent-qualifying-run anchor with the
-      // current min-streak, 7-day window, and √missedDays penalty curve.
-      const STALE = !meta.recovery.schema || meta.recovery.schema < 4;
-      if (STALE) {
-        console.info('[recovery] migrating stale record to schema v4 — re-detecting');
-        delete meta.recovery;
-        meta.lastModified = new Date().toISOString();
-        saveState();
-        // Fall through to detection below.
-      } else {
-        if (typeof renderDashboard === 'function' && activePage === 'dashboard') renderDashboard();
-        if (typeof renderStreakCTA === 'function') { try { renderStreakCTA(); } catch(e){} }
-        if (typeof _paintRecoveryPill === 'function') { try { _paintRecoveryPill(); } catch(e){} }
-        return;
-      }
+    // Migrate legacy records (no status, schema < 5) — wipe so the new
+    // detection below builds them in the right offered/active shape.
+    if (meta.recovery && (!meta.recovery.schema || meta.recovery.schema < 5)) {
+      console.info('[recovery] migrating stale record to schema v5 — re-detecting');
+      delete meta.recovery;
+      meta.lastModified = new Date().toISOString();
+      saveState();
     }
+    // ACTIVE recovery in progress — leave it untouched (incl. its locked
+    // requirements) and just repaint surfaces.
+    if (meta.recovery && meta.recovery.status === 'active' && meta.recovery.expiresAt > Date.now()) {
+      if (typeof renderDashboard === 'function' && activePage === 'dashboard') renderDashboard();
+      if (typeof renderStreakCTA === 'function') { try { renderStreakCTA(); } catch(e){} }
+      if (typeof _paintRecoveryPill === 'function') { try { _paintRecoveryPill(); } catch(e){} }
+      return;
+    }
+    // RECOVERED — success banner sticks for 7 days post-completion.
+    if (meta.recovery && meta.recovery.status === 'recovered') {
+      if (typeof renderDashboard === 'function' && activePage === 'dashboard') renderDashboard();
+      if (typeof renderStreakCTA === 'function') { try { renderStreakCTA(); } catch(e){} }
+      if (typeof _paintRecoveryPill === 'function') { try { _paintRecoveryPill(); } catch(e){} }
+      return;
+    }
+    // Fall through: either no recovery state, or status === 'offered'
+    // (which gets re-evaluated on every load to update missed-day count
+    // and required-problem count as days roll forward).
     const detected = detectStreakBreak();
     if (!detected || !detected.ok) {
-      // Stash skip reason so the user can see why no recovery is offered.
-      // Cleared next time a real recovery state is created.
+      // Eligibility lost (or never existed). Drop any stale offer.
+      if (meta.recovery && meta.recovery.status === 'offered') {
+        delete meta.recovery;
+      }
       meta.lastSkipReason = (detected && detected.reason) ? detected.reason : null;
       saveState();
-      // Repaint surfaces so a stale banner from an expired/cleared recovery
-      // is replaced by the diagnostic empty-state card if applicable.
       if (typeof renderStreakCTA === 'function') { try { renderStreakCTA(); } catch(e){} }
       if (typeof _paintRecoveryPill === 'function') { try { _paintRecoveryPill(); } catch(e){} }
       if (typeof _paintRecoveryBannerSlot === 'function') { try { _paintRecoveryBannerSlot(); } catch(e){} }
       return;
     }
-    // Real detection — clear any prior skip reason.
     meta.lastSkipReason = null;
-    // Penalty scales with √missedDays — each extra empty day costs less
-    // than the previous, so longer absences stay recoverable without
-    // becoming linear (or worse, quadratic) grinds. See
-    // _computeRecoveryRequired for the curve.
     const baseRequired = _computeRecoveryRequired(detected.missedDays.length);
+    // Build/refresh the OFFERED state. No timer yet — user must rate their
+    // first problem to flip to ACTIVE and start the 7-day countdown.
     meta.recovery = {
-      schema:     4,
+      schema:     5,
+      status:     'offered',
       detectedAt: Date.now(),
-      expiresAt:  Date.now() + STREAK_RECOVERY_WINDOW_MS,
       lostStreak: detected.lostStreak,
-      // recentRunLength == lostStreak in schema v2: both anchor on the
-      // most recent qualifying consecutive run. Kept as a separate field
-      // for forward compatibility in case the two ever diverge again.
       recentRunLength: detected.recentRunLength != null ? detected.recentRunLength : detected.lostStreak,
       missedDays: detected.missedDays,
       daysSince:  detected.daysSince,
-      // legacy single-day field kept for backwards compat in case any older
-      // banner code reads it; first missed day is the most recently broken.
       missedDay:  detected.missedDays[detected.missedDays.length - 1],
-      progress:   detected.alreadyRatedToday ? 1 : 0,
       required:   baseRequired,
+      progress:   0,
       recovered:  false,
     };
-    // Stamp _meta.lastModified so gist-sync's last-write-wins merge keeps the
-    // freshly-created recovery state instead of clobbering it with a stale
-    // remote _meta that pre-dates the break.
     meta.lastModified = new Date().toISOString();
     saveState();
-    // No toast — recovery guidance is now communicated via the persistent
-    // banner (top of dashboard + quest), the streak-prime pill, and the
-    // transformed Forge CTA. A fire-and-forget toast added noise without
-    // adding information that those three surfaces don't already carry.
     if (typeof renderDashboard === 'function' && activePage === 'dashboard') renderDashboard();
     if (typeof renderStreakCTA === 'function') { try { renderStreakCTA(); } catch(e){} }
     if (typeof _paintRecoveryPill === 'function') { try { _paintRecoveryPill(); } catch(e){} }
@@ -4298,13 +4303,41 @@ function initStreakRecovery() {
 
 function noteRecoveryRate() {
   const meta = _recMeta();
-  if (!meta.recovery || meta.recovery.recovered || meta.recovery.expiresAt < Date.now()) return false;
+  if (!meta.recovery || meta.recovery.recovered) return false;
+  // OFFERED → ACTIVE: first rated problem starts the 7-day countdown.
+  // Required count is locked in based on missed days at THIS moment, so
+  // it reflects how long the user actually waited before committing.
+  if (meta.recovery.status === 'offered') {
+    const detected = detectStreakBreak();
+    // If eligibility evaporated (e.g. gap exceeded cap), drop the offer
+    // and bail. Caller's normal rate-flow continues.
+    if (!detected || !detected.ok) {
+      delete meta.recovery;
+      meta.lastSkipReason = (detected && detected.reason) ? detected.reason : null;
+      meta.lastModified = new Date().toISOString();
+      saveState();
+      return false;
+    }
+    meta.recovery.missedDays = detected.missedDays;
+    meta.recovery.missedDay  = detected.missedDays[detected.missedDays.length - 1];
+    meta.recovery.daysSince  = detected.daysSince;
+    meta.recovery.required   = _computeRecoveryRequired(detected.missedDays.length);
+    meta.recovery.status     = 'active';
+    meta.recovery.startedAt  = Date.now();
+    meta.recovery.expiresAt  = Date.now() + STREAK_RECOVERY_WINDOW_MS;
+    meta.recovery.progress   = 0;
+    console.info('[recovery] activated: 7-day countdown starts now', {
+      missedDays: detected.missedDays.length,
+      required:   meta.recovery.required,
+    });
+  }
+  // Drop late rates against an expired active recovery.
+  if (meta.recovery.expiresAt && meta.recovery.expiresAt < Date.now()) return false;
   meta.recovery.progress = (meta.recovery.progress || 0) + 1;
-  // Refresh the merge timestamp so sync keeps the latest progress + recovered
-  // flag instead of clobbering with stale remote _meta.
   meta.lastModified = new Date().toISOString();
   if (meta.recovery.progress >= meta.recovery.required) {
-    meta.recovery.recovered = true;
+    meta.recovery.status      = 'recovered';
+    meta.recovery.recovered   = true;
     meta.recovery.recoveredAt = Date.now();
     meta.streakFills = meta.streakFills || [];
     const fillList = meta.recovery.missedDays || (meta.recovery.missedDay ? [meta.recovery.missedDay] : []);
@@ -4336,12 +4369,13 @@ function getStreakRecovery() {
   const meta = userData._meta;
   if (!meta || !meta.recovery) return null;
   const r = meta.recovery;
-  if (r.recovered) {
-    // Stop showing the success banner after 24h
+  if (r.status === 'recovered' || r.recovered) {
+    // Stop showing the success banner 7 days after completion.
     if (r.recoveredAt && (Date.now() - r.recoveredAt) > STREAK_RECOVERY_WINDOW_MS) return null;
     return r;
   }
-  if (r.expiresAt < Date.now()) return null;
+  if (r.status === 'offered') return r;          // no expiry — refreshed every load
+  if (r.expiresAt && r.expiresAt < Date.now()) return null;  // active but timer ran out
   return r;
 }
 
@@ -4393,8 +4427,6 @@ function renderStreakRecoveryBanner() {
     </div>`;
   }
 
-  const msLeft  = Math.max(0, r.expiresAt - Date.now());
-  const timeStr = _formatRecoveryTime(msLeft);
   const need    = r.required - (r.progress || 0);
   const pct     = Math.max(0, Math.min(100, (r.progress || 0) / r.required * 100));
   // The accurate count of EMPTY days that need bridging — not the full gap span.
@@ -4404,19 +4436,49 @@ function renderStreakRecoveryBanner() {
   const gapWord   = (r.daysSince === 1) ? 'day' : 'days';
   const emptyWord = emptyDays === 1 ? 'day' : 'days';
 
+  // OFFERED phase — no countdown yet. Banner explains the deal and asks
+  // the user to commit by rating their first problem.
+  if (r.status === 'offered') {
+    return html`<div class="streak-recovery-banner active offered">
+      <div class="srb-flame">🔥</div>
+      <div class="srb-body">
+        <div class="srb-title">🔥 Streak Recovery Available</div>
+        <div class="srb-projection">
+          <span class="srb-from"><span class="srb-label">Current</span> <span class="srb-num">${currentDays}</span> days</span>
+          <span class="srb-arrow">▶</span>
+          <span class="srb-to"><span class="srb-label">Recover to</span> <span class="srb-num">${recoveredDays}</span> days</span>
+        </div>
+        <div class="srb-desc">Your last <b>${r.lostStreak}-day</b> streak ended <b>${r.daysSince}</b> ${gapWord} ago, with <b>${emptyDays}</b> empty ${emptyWord} in between. Rate <b>${r.required}</b> problem${r.required !== 1 ? 's' : ''} within <b>7 days</b> to bridge the gap and restore the chain to <b>${recoveredDays} days</b>.</div>
+        <ol class="srb-steps">
+          <li>Open the <b>Quest Board</b> (or any problem page).</li>
+          <li>Rate your <b>first problem</b> — this starts the 7-day recovery window.</li>
+          <li>Rate <b>${r.required - 1}</b> more problem${(r.required - 1) !== 1 ? 's' : ''} before the window closes; the missed days bridge automatically.</li>
+        </ol>
+        <div class="srb-meta">
+          <span>0 / ${r.required} problems rated</span>
+          <span class="srb-meta-time">⏳ 7-day window starts on first rate</span>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // ACTIVE phase — timer is running.
+  const msLeft  = Math.max(0, r.expiresAt - Date.now());
+  const timeStr = _formatRecoveryTime(msLeft);
+
   return html`<div class="streak-recovery-banner active">
     <div class="srb-flame">🔥</div>
     <div class="srb-body">
-      <div class="srb-title">🔥 Streak Recovery Available</div>
+      <div class="srb-title">🔥 Streak Recovery In Progress</div>
       <div class="srb-projection">
         <span class="srb-from"><span class="srb-label">Current</span> <span class="srb-num">${currentDays}</span> days</span>
         <span class="srb-arrow">▶</span>
         <span class="srb-to"><span class="srb-label">Recover to</span> <span class="srb-num">${recoveredDays}</span> days</span>
       </div>
-      <div class="srb-desc">Your last <b>${r.lostStreak}-day</b> streak ended <b>${r.daysSince}</b> ${gapWord} ago, with <b>${emptyDays}</b> empty ${emptyWord} in between. Complete the steps below within <b>${timeStr}</b> to bridge those gaps and restore the chain to <b>${recoveredDays} days</b>.</div>
+      <div class="srb-desc">Your last <b>${r.lostStreak}-day</b> streak ended <b>${r.daysSince}</b> ${gapWord} ago, with <b>${emptyDays}</b> empty ${emptyWord} in between. Rate <b>${need}</b> more problem${need !== 1 ? 's' : ''} within <b>${timeStr}</b> to restore the chain to <b>${recoveredDays} days</b>.</div>
       <ol class="srb-steps">
         <li>Open the <b>Quest Board</b> (or any problem page).</li>
-        <li>Solve and rate <b>${need}</b> more problem${need !== 1 ? 's' : ''} (any confidence 1–5 counts).</li>
+        <li>Rate <b>${need}</b> more problem${need !== 1 ? 's' : ''} (any confidence 1–5 counts).</li>
         <li>The empty ${emptyWord} bridge automatically; the banner turns green on success.</li>
       </ol>
       <div class="srb-progress"><div class="srb-bar" style="width:${pct.toFixed(0)}%"></div></div>
@@ -4729,6 +4791,12 @@ function _paintRecoveryPill() {
     console.info('[recovery] pill paint: recovered →', recoveredDays, 'days');
     return;
   }
+  if (r.status === 'offered') {
+    pill.className = 'streak-prime-recovery active offered';
+    pill.innerHTML = `<span class="spr-icon">↩</span><span class="spr-text">Recover to <b>${recoveredDays}</b> · rate <b>${r.required}</b> in 7 days · <b>tap to start</b></span>`;
+    console.info('[recovery] pill paint: offered', { required: r.required, recoveredDays });
+    return;
+  }
   const msLeft   = Math.max(0, r.expiresAt - Date.now());
   const timeStr  = _formatRecoveryTime(msLeft);
   const progress = r.progress || 0;
@@ -4866,6 +4934,18 @@ function renderStreakCTA() {
         if (txt) txt.textContent = `Restored ${recoveredDays}-day streak — keep the flame alive`;
         if (tgt) tgt.textContent = `${recoveredDays}d`;
         if (bar) bar.style.width = '100%';
+        return;
+      }
+      // OFFERED phase — 7-day clock hasn't started. Invite the user to
+      // commit by rating their first problem.
+      if (rec.status === 'offered') {
+        console.info('[recovery] CTA paint: offered', { required: rec.required, recoveredDays });
+        if (ctaBtn) { ctaBtn.classList.add('recovery-mode'); ctaBtn.classList.remove('recovery-success'); }
+        if (eyebrowEl) eyebrowEl.innerHTML = `— 🔥 Streak Recovery Available — ${multSpan}`;
+        if (ctaMainEl) ctaMainEl.textContent = `Recover ${rec.lostStreak}-Day Streak`;
+        if (txt) txt.textContent = `Rate ${rec.required} problems in 7 days · first rating starts the timer`;
+        if (tgt) tgt.textContent = `${recoveredDays}d`;
+        if (bar) bar.style.width = '0%';
         return;
       }
       const msLeft  = Math.max(0, rec.expiresAt - Date.now());
