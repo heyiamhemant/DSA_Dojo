@@ -3674,7 +3674,7 @@ textarea.modal-comment {
 </div>
 
 <a href="https://heyiamhemant.github.io/DSA_Dojo_legacy/" class="back-classic">← BACK TO V1 (CLASSIC)</a>
-<div class="build-tag">v2 · cinematic build · r20260601-2</div>
+<div class="build-tag">v2 · cinematic build · r20260603-1</div>
 
 <!-- ═════════ CORE LOGIC (extracted from v1) ═════════ -->
 <script src="./showcase.js?v=20260531-2"></script>
@@ -4039,17 +4039,46 @@ const raw = safe;
 
 /* ═════════ STREAK RECOVERY ═════════ */
 const STREAK_RECOVERY_MIN_STREAK = 2;
-const STREAK_RECOVERY_WINDOW_MS  = 24 * 60 * 60 * 1000;
+// Window to complete recovery once detected. 7 days gives breathing room
+// to anyone with a non-trivial gap to bridge — the 24h sprint was too
+// punishing for a 5-7 day absence.
+const STREAK_RECOVERY_WINDOW_MS  = 7 * 24 * 60 * 60 * 1000;
 const STREAK_RECOVERY_REQUIRED   = 2;
 // How far back we'll look for a "broken streak worth recovering" and the
 // largest empty-day gap we'll still bridge. Lookback is 90 days so a
 // genuinely good streak from 1-3 months ago can still be the anchor —
 // MAX_MISSED stays at 30 so we never bridge more than a month of empty
-// days regardless of how old the anchor streak is. Required-problems
-// scaling caps at 8 so a long absence remains meaningful but doable.
+// days regardless of how old the anchor streak is.
 const STREAK_RECOVERY_LOOKBACK_DAYS = 90;
 const STREAK_RECOVERY_MAX_MISSED    = 30;
-const STREAK_RECOVERY_REQUIRED_CAP  = 8;
+// Hard ceiling on required problems regardless of how big the gap is —
+// keeps recovery achievable even after a 30-day absence. The decay curve
+// rarely hits this for typical gaps (7-day gap = 7 problems, well under).
+const STREAK_RECOVERY_REQUIRED_CAP  = 15;
+
+// Decaying-increment penalty curve. Each additional empty day costs less
+// than the previous on average — a √missedDays scaling that "stretches"
+// gracefully as gaps grow. Returns the number of problems the user must
+// rate within STREAK_RECOVERY_WINDOW_MS to bridge `missedDays` empties.
+//   1 day  → 3,  2 → 4,  3 → 5,  4 → 5,  5 → 6,  6 → 6,  7 → 7
+//   14 → 9,  21 → 11, 30 → 12 (capped at REQUIRED_CAP)
+function _computeRecoveryRequired(missedDays) {
+  const n = Math.max(1, missedDays | 0);
+  const raw = Math.ceil(2 * Math.sqrt(n) + 1);
+  return Math.max(STREAK_RECOVERY_REQUIRED, Math.min(STREAK_RECOVERY_REQUIRED_CAP, raw));
+}
+
+// Render an ms duration as a humane "Nd Hh", "Hh Mm", or "Mm" string.
+// Used everywhere the recovery countdown surfaces (banner, pill, CTA).
+function _formatRecoveryTime(msLeft) {
+  if (msLeft <= 0) return '0m';
+  const days  = Math.floor(msLeft / 86400000);
+  const hours = Math.floor((msLeft % 86400000) / 3600000);
+  const mins  = Math.floor((msLeft % 3600000) / 60000);
+  if (days >= 1)  return `${days}d ${hours}h`;
+  if (hours >= 1) return `${hours}h ${mins}m`;
+  return `${mins}m`;
+}
 
 function _recMeta() {
   if (!userData._meta || typeof userData._meta !== 'object') userData._meta = {};
@@ -4196,13 +4225,13 @@ function initStreakRecovery() {
     }
     // Suppress detection if recovery is already active
     if (meta.recovery && meta.recovery.expiresAt > Date.now()) {
-      // Old records (pre-schema-v3) anchored on either the longest run
-      // or used a stricter min-streak threshold. Force re-detection so
+      // Old records anchored on different rules (longest run, stricter
+      // min-streak, 24h window, linear penalty). Force re-detection so
       // they get the current most-recent-qualifying-run anchor with the
-      // current minimum streak length.
-      const STALE = !meta.recovery.schema || meta.recovery.schema < 3;
+      // current min-streak, 7-day window, and √missedDays penalty curve.
+      const STALE = !meta.recovery.schema || meta.recovery.schema < 4;
       if (STALE) {
-        console.info('[recovery] migrating stale record to schema v3 — re-detecting');
+        console.info('[recovery] migrating stale record to schema v4 — re-detecting');
         delete meta.recovery;
         meta.lastModified = new Date().toISOString();
         saveState();
@@ -4229,15 +4258,13 @@ function initStreakRecovery() {
     }
     // Real detection — clear any prior skip reason.
     meta.lastSkipReason = null;
-    // Recovery is harder when more days were missed — scale required problems
-    // linearly (1 missed -> 2, 2 missed -> 3, …) but cap so a long absence
-    // doesn't demand an impossible 24h grind.
-    const baseRequired = Math.min(
-      STREAK_RECOVERY_REQUIRED_CAP,
-      STREAK_RECOVERY_REQUIRED + Math.max(0, detected.missedDays.length - 1)
-    );
+    // Penalty scales with √missedDays — each extra empty day costs less
+    // than the previous, so longer absences stay recoverable without
+    // becoming linear (or worse, quadratic) grinds. See
+    // _computeRecoveryRequired for the curve.
+    const baseRequired = _computeRecoveryRequired(detected.missedDays.length);
     meta.recovery = {
-      schema:     3,
+      schema:     4,
       detectedAt: Date.now(),
       expiresAt:  Date.now() + STREAK_RECOVERY_WINDOW_MS,
       lostStreak: detected.lostStreak,
@@ -4367,9 +4394,7 @@ function renderStreakRecoveryBanner() {
   }
 
   const msLeft  = Math.max(0, r.expiresAt - Date.now());
-  const hours   = Math.floor(msLeft / 3600000);
-  const mins    = Math.floor((msLeft % 3600000) / 60000);
-  const timeStr = hours >= 1 ? `${hours}h ${mins}m` : `${mins}m`;
+  const timeStr = _formatRecoveryTime(msLeft);
   const need    = r.required - (r.progress || 0);
   const pct     = Math.max(0, Math.min(100, (r.progress || 0) / r.required * 100));
   // The accurate count of EMPTY days that need bridging — not the full gap span.
@@ -4705,9 +4730,7 @@ function _paintRecoveryPill() {
     return;
   }
   const msLeft   = Math.max(0, r.expiresAt - Date.now());
-  const hours    = Math.floor(msLeft / 3600000);
-  const mins     = Math.floor((msLeft % 3600000) / 60000);
-  const timeStr  = hours >= 1 ? `${hours}h ${mins}m` : `${mins}m`;
+  const timeStr  = _formatRecoveryTime(msLeft);
   const progress = r.progress || 0;
   const need     = Math.max(0, r.required - progress);
   pill.className = 'streak-prime-recovery active';
@@ -4846,9 +4869,7 @@ function renderStreakCTA() {
         return;
       }
       const msLeft  = Math.max(0, rec.expiresAt - Date.now());
-      const hours   = Math.floor(msLeft / 3600000);
-      const mins    = Math.floor((msLeft % 3600000) / 60000);
-      const timeStr = hours >= 1 ? `${hours}h ${mins}m` : `${mins}m`;
+      const timeStr = _formatRecoveryTime(msLeft);
       const progress = rec.progress || 0;
       const need     = Math.max(0, rec.required - progress);
       const pctR     = Math.max(0, Math.min(100, progress / rec.required * 100));
