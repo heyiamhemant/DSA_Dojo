@@ -5581,7 +5581,7 @@ function renderQuests() {
           <span class="quest-tag ${p.diff.toLowerCase()}">${tierNameOf(p)} · ${p.diff}</span>
           <span class="quest-tag">${visualOf(p.topic).icon} ${p.topic}</span>
           ${isOverdue ? html`<span class="quest-tag hard">⏰ ${overdueDays}d overdue</span>` : ''}
-          ${p.lc_url ? html`<a class="quest-tag" href="${p.lc_url}" target="_blank" onclick="event.stopPropagation()" style="text-decoration:none">🔗 LeetCode ↗</a>` : ''}
+          ${p.lc_url ? html`<a class="quest-tag" href="${p.lc_url}" target="_blank" onclick="event.stopPropagation()" style="text-decoration:none">${p.lc_url.includes('leetcode.com') ? '🔗 LeetCode' : '📖 Read'} ↗</a>` : ''}
           ${p.alt_url ? html`<a class="quest-tag" href="${p.alt_url}" target="_blank" onclick="event.stopPropagation()" style="text-decoration:none">📖 ${p.alt_label || 'Reference'} ↗</a>` : ''}
         </div>
         <div class="quest-reason ${isOverdue ? 'overdue' : ''}">${reason}</div>
@@ -5904,7 +5904,7 @@ function renderBestiary() {
         <span class="mc-tag" style="color:${v.color}">${v.icon} ${p.topic}</span>
         <span class="mc-stars">${'★'.repeat(conf)}${'☆'.repeat(5 - conf)}</span>
       </div>
-      ${p.lc_url ? html`<a class="mc-quicklink" href="${p.lc_url}" target="_blank" onclick="event.stopPropagation()" title="Open in LeetCode">🔗</a>` : ''}
+      ${p.lc_url ? html`<a class="mc-quicklink" href="${p.lc_url}" target="_blank" onclick="event.stopPropagation()" title="${p.lc_url.includes('leetcode.com') ? 'Open in LeetCode' : 'Open reference'}">${p.lc_url.includes('leetcode.com') ? '🔗' : '📖'}</a>` : ''}
       ${p.alt_url ? html`<a class="mc-quicklink" href="${p.alt_url}" target="_blank" onclick="event.stopPropagation()" title="Open in ${p.alt_label || 'reference'}">📖</a>` : ''}
       <div class="mc-tooltip">
         <div class="mc-tooltip-row"><span>Status</span><span>${di.label}</span></div>
@@ -6011,7 +6011,7 @@ function openModal(id) {
       links += html`<a class="modal-link" href="javascript:void(0)" onclick="closeModal();openModal(${base.id})" title="Open the prerequisite problem">${icon} ${label}</a>`;
     }
   }
-  if (p.lc_url) links += html`<a class="modal-link" target="_blank" href="${p.lc_url}">🔗 LeetCode</a>`;
+  if (p.lc_url) links += html`<a class="modal-link" target="_blank" href="${p.lc_url}">${p.lc_url.includes('leetcode.com') ? '🔗 LeetCode' : '📖 Read'}</a>`;
   if (p.alt_url) links += html`<a class="modal-link" target="_blank" href="${p.alt_url}">📖 ${p.alt_label || 'Reference'}</a>`;
   if (p.repo_url) {
     const primaryLabel = p.lang ? `Solution (${p.lang})` : 'Solution Repo';
